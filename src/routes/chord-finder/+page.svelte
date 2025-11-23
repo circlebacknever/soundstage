@@ -429,6 +429,7 @@
 </script>
 
 <div class="chord-finder-container">
+  <a href="/" class="home-link">← Home</a>
   <h1>Chord Finder</h1>
   <p class="subtitle">Discover what chord you're playing</p>
 
@@ -535,6 +536,27 @@
     text-align: center;
     position: relative;
     z-index: 3;
+  }
+
+  .home-link {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    color: var(--neon-cyan);
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--neon-cyan);
+    background: rgba(0, 245, 255, 0.05);
+    transition: all 0.3s ease;
+    text-shadow: 0 0 10px var(--neon-cyan);
+    letter-spacing: 0.05em;
+  }
+
+  .home-link:hover {
+    background: rgba(0, 245, 255, 0.15);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+    transform: translateX(-4px);
   }
 
   .subtitle {
