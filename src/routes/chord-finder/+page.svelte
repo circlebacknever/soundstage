@@ -428,12 +428,12 @@
   });
 </script>
 
-<div class="chord-finder-container">
+<div class="page-container">
   <a href="/" class="home-link">← Home</a>
   <h1>Chord Finder</h1>
-  <p class="subtitle">Discover what chord you're playing</p>
+  <p class="page-subtitle">Discover what chord you're playing</p>
 
-  <div class="chord-panel panel">
+  <div class="tool-panel panel">
     <!-- Main Chord Display -->
     <div class="chord-display">
       <div class="chord-name" class:active={detectedChord !== '--'}>
@@ -484,19 +484,19 @@
 
     <!-- Instructions -->
     {#if !isListening}
-      <div class="instructions">
+      <div class="info-box instructions">
         <p>Click START to begin chord detection</p>
         <p class="hint">Allow microphone access when prompted</p>
       </div>
     {:else}
-      <div class="instructions active">
+      <div class="info-box cyan instructions active">
         <p>Play a chord on your instrument</p>
         <p class="hint">The chord will be identified in real-time</p>
       </div>
     {/if}
 
     <!-- Common Chords Reference -->
-    <div class="chords-reference">
+    <div class="info-box green chords-reference">
       <div class="reference-title">Common Chord Types</div>
       <div class="reference-grid">
         <div class="reference-row">
@@ -529,51 +529,6 @@
 </div>
 
 <style>
-  .chord-finder-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 2rem;
-    text-align: center;
-    position: relative;
-    z-index: 3;
-  }
-
-  .home-link {
-    position: absolute;
-    top: 2rem;
-    left: 2rem;
-    color: var(--neon-cyan);
-    text-decoration: none;
-    font-size: 1rem;
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--neon-cyan);
-    background: rgba(0, 245, 255, 0.05);
-    transition: all 0.3s ease;
-    text-shadow: 0 0 10px var(--neon-cyan);
-    letter-spacing: 0.05em;
-  }
-
-  .home-link:hover {
-    background: rgba(0, 245, 255, 0.15);
-    box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
-    transform: translateX(-4px);
-  }
-
-  .subtitle {
-    color: var(--text-dim);
-    margin-bottom: 2rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-  }
-
-  .chord-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2.5rem;
-    margin-top: 2rem;
-  }
 
   /* Main Chord Display - HUGE and centered */
   .chord-display {
@@ -791,14 +746,9 @@
 
   /* Instructions */
   .instructions {
+    max-width: 600px;
     text-align: center;
     color: var(--text-dim);
-    padding: 1.5rem;
-    border: 1px solid var(--neon-purple);
-    background: rgba(157, 78, 221, 0.05);
-    box-shadow: 0 0 10px rgba(157, 78, 221, 0.2);
-    max-width: 600px;
-    width: 100%;
   }
 
   .instructions p {
@@ -813,12 +763,6 @@
     text-shadow: 0 0 10px var(--neon-purple);
   }
 
-  .instructions.active {
-    border-color: var(--neon-cyan);
-    background: rgba(0, 245, 255, 0.05);
-    box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
-  }
-
   .instructions.active p:first-child {
     color: var(--neon-cyan);
     text-shadow: 0 0 10px var(--neon-cyan);
@@ -831,12 +775,7 @@
 
   /* Chords Reference */
   .chords-reference {
-    width: 100%;
     max-width: 700px;
-    padding: 1.5rem;
-    border: 1px solid var(--neon-green);
-    background: rgba(57, 255, 20, 0.03);
-    box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
   }
 
   .reference-title {
@@ -886,7 +825,7 @@
   }
 
   @media (max-width: 768px) {
-    .chord-finder-container {
+    .page-container {
       padding: 1rem;
     }
 

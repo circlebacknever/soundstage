@@ -262,6 +262,87 @@ input[type="range"]::-moz-range-thumb:hover {
   z-index: 3;
 }
 
+/* Page Layout - Consistent spacing across all pages */
+.page-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  z-index: 3;
+}
+
+/* Home Link - Consistent across all tool pages */
+.home-link {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  color: var(--neon-cyan);
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--neon-cyan);
+  background: rgba(0, 245, 255, 0.05);
+  transition: all 0.3s ease;
+  text-shadow: 0 0 10px var(--neon-cyan);
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+  z-index: 10;
+}
+
+.home-link:hover {
+  background: rgba(0, 245, 255, 0.15);
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+  transform: translateX(-4px);
+}
+
+/* Page Subtitle - Consistent style */
+.page-subtitle {
+  color: var(--text-dim);
+  margin-bottom: 2rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+/* Info Box - For reference sections and instructions */
+.info-box {
+  width: 100%;
+  padding: 1.5rem;
+  border: 2px solid var(--neon-purple);
+  background: rgba(157, 78, 221, 0.05);
+  box-shadow: 0 0 15px rgba(157, 78, 221, 0.2);
+  position: relative;
+  z-index: 3;
+}
+
+.info-box.cyan {
+  border-color: var(--neon-cyan);
+  background: rgba(0, 245, 255, 0.05);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+}
+
+.info-box.green {
+  border-color: var(--neon-green);
+  background: rgba(57, 255, 20, 0.03);
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+}
+
+.info-box.pink {
+  border-color: var(--neon-pink);
+  background: rgba(255, 0, 110, 0.05);
+  box-shadow: 0 0 15px rgba(255, 0, 110, 0.2);
+}
+
+/* Tool Panel - Consistent gap for all tool pages */
+.tool-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  margin-top: 2rem;
+}
+
 /* Utility Classes */
 .text-center {
   text-align: center;
@@ -283,4 +364,10 @@ input[type="range"]::-moz-range-thumb:hover {
   text-shadow:
     0 0 10px var(--neon-green),
     0 0 20px var(--neon-green);
+}
+
+.glow-purple {
+  text-shadow:
+    0 0 10px var(--neon-purple),
+    0 0 20px var(--neon-purple);
 }

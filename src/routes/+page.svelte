@@ -36,7 +36,7 @@
 		align-items: center;
 		justify-content: center;
 		padding: 2rem;
-		gap: 4rem;
+		gap: 3rem;
 	}
 
 	header {
@@ -207,7 +207,8 @@
 		}
 
 		.container {
-			gap: 3rem;
+			gap: 2rem;
+			padding: 1rem;
 		}
 	}
 

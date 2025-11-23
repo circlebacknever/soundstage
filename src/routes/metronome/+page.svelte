@@ -122,12 +122,12 @@
   });
 </script>
 
-<div class="metronome-container">
+<div class="page-container">
   <a href="/" class="home-link">← Home</a>
   <h1>Metronome</h1>
-  <p class="subtitle">Keep time with precision</p>
+  <p class="page-subtitle">Keep time with precision</p>
 
-  <div class="metronome-panel panel">
+  <div class="tool-panel panel">
     <!-- Visual Beat Indicator -->
     <div class="beat-indicator" class:beating={isBeating}>
       <div class="beat-ring"></div>
@@ -182,7 +182,7 @@
     </button>
 
     <!-- Tempo Reference -->
-    <div class="tempo-reference">
+    <div class="info-box green tempo-reference">
       <div class="tempo-label">
         {#if bpm < 60}
           Largo
@@ -205,51 +205,6 @@
 </div>
 
 <style>
-  .metronome-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    text-align: center;
-    position: relative;
-    z-index: 3;
-  }
-
-  .home-link {
-    position: absolute;
-    top: 2rem;
-    left: 2rem;
-    color: var(--neon-cyan);
-    text-decoration: none;
-    font-size: 1rem;
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--neon-cyan);
-    background: rgba(0, 245, 255, 0.05);
-    transition: all 0.3s ease;
-    text-shadow: 0 0 10px var(--neon-cyan);
-    letter-spacing: 0.05em;
-  }
-
-  .home-link:hover {
-    background: rgba(0, 245, 255, 0.15);
-    box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
-    transform: translateX(-4px);
-  }
-
-  .subtitle {
-    color: var(--text-dim);
-    margin-bottom: 2rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-  }
-
-  .metronome-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-    margin-top: 2rem;
-  }
 
   /* Beat Indicator */
   .beat-indicator {
@@ -410,11 +365,7 @@
 
   /* Tempo Reference */
   .tempo-reference {
-    margin-top: 1rem;
-    padding: 1rem 2rem;
-    border: 1px solid var(--neon-purple);
-    background: rgba(157, 78, 221, 0.05);
-    box-shadow: 0 0 15px rgba(157, 78, 221, 0.2);
+    max-width: 500px;
   }
 
   .tempo-label {
@@ -429,7 +380,7 @@
 
   /* Responsive Design */
   @media (max-width: 768px) {
-    .metronome-container {
+    .page-container {
       padding: 1rem;
     }
 
