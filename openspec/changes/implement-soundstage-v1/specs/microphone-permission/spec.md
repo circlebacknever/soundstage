@@ -1,0 +1,70 @@
+## ADDED Requirements
+
+### Requirement: Friendly microphone pre-prompt
+The system SHALL show a SoundStage microphone pre-prompt before requesting browser microphone access for Tuner or Scale Practice.
+
+#### Scenario: Mobile pre-prompt appears as a bottom sheet
+- **WHEN** a mobile user opens a mic-required tool without prior granted access
+- **THEN** the app dims the underlying tool page to approximately 0.5 opacity with grayscale and displays the microphone explanation as a bottom sheet with 24px padding and 24px rounded top corners
+
+#### Scenario: Larger pre-prompt appears as a modal
+- **WHEN** a tablet or desktop user opens a mic-required tool without prior granted access
+- **THEN** the app dims the background with `rgba(31,27,23,0.45)`, applies 3px blur, and displays a 440px centered modal with 32px padding, `--r-lg` corners, and `--shadow-lg`
+
+#### Scenario: Pre-prompt content renders
+- **WHEN** the microphone pre-prompt is displayed
+- **THEN** it shows a coral-soft microphone illustration with two expanding rings, heading "Can we hear you?", explanatory centered body text, trust items "Processed on this device only", "Nothing is recorded or uploaded", and "You can revoke in settings anytime", primary button "Allow microphone", and ghost button "Not right now"
+
+#### Scenario: Pre-prompt illustration sizes
+- **WHEN** the pre-prompt is displayed on mobile
+- **THEN** the microphone illustration uses an 80px circle
+
+#### Scenario: Modal illustration sizes
+- **WHEN** the pre-prompt is displayed on tablet or desktop
+- **THEN** the microphone illustration uses a 96px circle
+
+#### Scenario: User allows microphone
+- **WHEN** the user activates the allow microphone action
+- **THEN** the app calls `navigator.mediaDevices.getUserMedia({ audio: true })` and starts the relevant audio engine after access is granted
+
+#### Scenario: User declines pre-prompt
+- **WHEN** the user activates the decline action in the pre-prompt
+- **THEN** the app dismisses the prompt and returns to the home launcher
+
+### Requirement: Permission state handling
+The system SHALL track microphone permission as unknown, pending, granted, or denied for the current browser session and store only a local consent hint.
+
+#### Scenario: Permission state shape is used
+- **WHEN** microphone permission is represented in tool state
+- **THEN** it uses `unknown`, `pending`, `granted`, or `denied`
+
+#### Scenario: Browser denies access
+- **WHEN** `getUserMedia` rejects with a permission denial
+- **THEN** the app records denied state and routes the tool to the Mic Denied error state
+
+#### Scenario: Stored consent is only a hint
+- **WHEN** local storage says microphone access was granted previously
+- **THEN** the app still relies on the browser permission request or stream result before starting mic-driven detection
+
+### Requirement: Microphone and browser error states
+The system SHALL provide error states for denied microphone access, silent microphone input, unsupported browser APIs, and noisy input.
+
+#### Scenario: Mic denied copy renders
+- **WHEN** microphone access is denied
+- **THEN** the app displays title "Mic is blocked", body "Your browser blocked mic access for this site. Three quick steps to fix:", steps "Tap the lock icon in the address bar", "Set Microphone -> Allow", and "Reload the page", primary action "Try again", and ghost action "Use tuning notes instead"
+
+#### Scenario: Unsupported browser
+- **WHEN** `navigator.mediaDevices.getUserMedia` is unavailable
+- **THEN** the app displays title "This browser can't listen", body "Mic features need a modern browser. Try Chrome, Safari, or Firefox to use the tuner and scales.", and primary action "Browse the chord library"
+
+#### Scenario: Silent microphone
+- **WHEN** microphone access is granted and input level stays below threshold for at least 5 seconds
+- **THEN** the app displays title "We can't hear anything", body "Your mic is on but it's silent. Try moving closer or checking your input.", primary action "Keep listening", and ghost action "Switch input device" where supported
+
+#### Scenario: Noisy input
+- **WHEN** input level is present but no clear fundamental is detected for at least 8 seconds
+- **THEN** the app displays title "It's a bit noisy", body "We're picking up background noise. Try a quieter spot or get closer to your instrument.", primary action "Keep trying", and ghost action "Practice without mic"
+
+#### Scenario: Error illustration style
+- **WHEN** an error state is displayed
+- **THEN** it uses a centered 120px illustration circle, with rose styling for mic denied, peri styling for silent input, paper-sink styling for unsupported browser, and sun styling for noisy environment

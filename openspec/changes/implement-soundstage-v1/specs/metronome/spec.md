@@ -1,0 +1,92 @@
+## ADDED Requirements
+
+### Requirement: Metronome route and controls
+The system SHALL provide a `/metronome` route with BPM controls, start/stop, visual mode selection, and time signature selection.
+
+#### Scenario: Metronome top bar renders
+- **WHEN** the metronome route is displayed
+- **THEN** the top bar shows a back button, title "Metronome", and a time-signature button such as "4/4"
+
+#### Scenario: Visual style picker renders
+- **WHEN** the metronome route is displayed
+- **THEN** it shows a segmented pill with "Pulse", "Beats", and "Wave"
+
+#### Scenario: BPM changes within range
+- **WHEN** the user taps the minus or plus BPM control
+- **THEN** the BPM changes by 1 and remains within 40 through 240
+
+#### Scenario: BPM controls render
+- **WHEN** the BPM control row is displayed
+- **THEN** it shows 48px circular minus and plus secondary buttons around an 80px Fraunces 600 BPM number with a JetBrains Mono 12px "bpm" label
+
+#### Scenario: Metronome state shape is available
+- **WHEN** metronome state is represented
+- **THEN** it includes BPM, time signature, visual style, running state, current beat, and click sound
+
+#### Scenario: User changes time signature
+- **WHEN** the user opens the time signature picker
+- **THEN** the app offers 2/4, 3/4, 4/4, and 6/8
+
+### Requirement: Visual modes
+The metronome SHALL provide Pulse, Beats, and Wave visual modes that can be changed while the tool is open.
+
+#### Scenario: Pulse mode displays active tempo
+- **WHEN** Pulse mode is selected
+- **THEN** the app displays a large yellow circle of 220px on desktop scaled down on mobile, a 64px Fraunces 600 BPM number, an 11px mono tempo word, two concentric outline rings, and the beat indicator row
+
+#### Scenario: Pulse beat animation
+- **WHEN** the metronome reaches beat 1
+- **THEN** the pulse circle briefly scales from 1.0 to 1.04 with a `--coral` ring flash
+
+#### Scenario: Pulse non-downbeat animation
+- **WHEN** the metronome reaches any other beat
+- **THEN** the pulse circle briefly scales from 1.0 to 1.02 with a `--sun` ring flash
+
+#### Scenario: Beats mode displays beat lights
+- **WHEN** Beats mode is selected
+- **THEN** the app displays the BPM number and one prominent 52px beat light per beat in the current time signature
+
+#### Scenario: Wave mode displays a moving waveform
+- **WHEN** Wave mode is selected and the metronome is running
+- **THEN** the app animates the waveform at a rate derived from BPM
+
+#### Scenario: Start and stop button renders
+- **WHEN** the metronome is stopped
+- **THEN** the full-width primary button reads "Start"
+
+#### Scenario: Running button renders
+- **WHEN** the metronome is running
+- **THEN** the full-width primary button reads "Stop" and uses a pause icon
+
+### Requirement: Scheduled browser audio
+The metronome SHALL schedule click sounds with Web Audio ahead of playback rather than relying on UI timer callbacks as the audio clock.
+
+#### Scenario: Metronome starts
+- **WHEN** the user starts the metronome
+- **THEN** the app creates or resumes an `AudioContext` and schedules click events with approximately 25ms lookahead refilled approximately every 25ms
+
+#### Scenario: Downbeat differs from other beats
+- **WHEN** a measure begins
+- **THEN** the downbeat click is audibly distinct from the other beats
+
+#### Scenario: Click sound options exist
+- **WHEN** click sound preferences are available
+- **THEN** the app offers Wood, Beep, and Cowbell, with Wood as the default
+
+#### Scenario: Click sounds are short
+- **WHEN** bundled or generated click sounds are used
+- **THEN** each sound is monophonic, percussive, and approximately 100ms or shorter
+
+### Requirement: Metronome persistence
+The metronome SHALL persist BPM, time signature, visual mode, and click sound locally.
+
+#### Scenario: User returns to metronome
+- **WHEN** the user changes metronome preferences and later reopens the route
+- **THEN** the metronome restores the last locally saved preferences
+
+### Requirement: Tempo word mapping
+The metronome SHALL map BPM to tempo words: 40-59 largo, 60-75 adagio, 76-107 andante, 108-119 moderato, 120-155 allegro, 156-175 vivace, 176-199 presto, and 200 or higher prestissimo.
+
+#### Scenario: Tempo label renders
+- **WHEN** the BPM changes
+- **THEN** the displayed tempo word matches the configured BPM range
