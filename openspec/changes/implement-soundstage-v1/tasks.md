@@ -1,18 +1,18 @@
 ## 1. Engineering Workflow Setup
 
-- [ ] 1.1 Add the smallest useful unit-test setup for TypeScript and Svelte behavior, with an npm script that can run focused tests by file.
-- [ ] 1.2 Create the module map in `src/lib`: `components`, `music`, `audio`, and `state`.
-- [ ] 1.3 Add a short module-boundary note under project docs or `src/lib` explaining which folder owns UI, music math, browser audio, and local state.
-- [ ] 1.4 Add a pitch-detection lesson note file that lists the planned lesson checkpoints, glossary, test files, and learning goal for each stage.
-- [ ] 1.5 Verify the implementation can be built from the OpenSpec design-fidelity specs if the external handoff files are unavailable.
+- [x] 1.1 Add the smallest useful unit-test setup for TypeScript and Svelte behavior, with an npm script that can run focused tests by file.
+- [x] 1.2 Create the module map in `src/lib`: `ui`, `music`, `audio`, and `state`.
+- [x] 1.3 Add scoped `AGENTS.md` instructions explaining which folder owns UI, music math, browser audio, and local state.
+- [x] 1.4 Add a pitch-detection lesson note file that lists the planned lesson checkpoints, glossary, test files, and learning goal for each stage.
+- [x] 1.5 Verify the implementation can be built from the OpenSpec design-fidelity specs if the external handoff files are unavailable.
 
 ## 2. App Foundation
 
 - [ ] 2.1 Test first in `src/lib/app` or the nearest app metadata module: tool names, routes, subtitles, accent tokens, and desktop sidebar order match the specs.
 - [ ] 2.2 Implement the tool catalog and route metadata that launcher tiles and sidebar navigation consume.
 - [ ] 2.3 Add shared global styles using the specified tokens, breakpoints, typography roles, radius scale, shadows, motion timings, and base page background.
-- [ ] 2.4 Recreate the icon set as reusable Svelte components under `src/lib/components/icons`, with tone support tested through simple rendered output or static component checks.
-- [ ] 2.5 Build shared UI primitives under `src/lib/components` for buttons, top bars, tool canvas, launcher tiles, sidebar navigation, modals, sheets, segmented controls, chips, cards, fretboards, and settings rows.
+- [ ] 2.4 Recreate the icon set as reusable Svelte components under `src/lib/ui/icons`, with tone support tested through simple rendered output or static component checks.
+- [ ] 2.5 Build shared UI primitives under `src/lib/ui` for buttons, top bars, tool canvas, launcher tiles, sidebar navigation, modals, sheets, segmented controls, chips, cards, fretboards, and settings rows.
 - [ ] 2.6 Build SvelteKit routes for home, tuner, metronome, scales, scales practice, chords, ear, and settings, keeping route files thin and pushing shared behavior into `src/lib`.
 - [ ] 2.7 Verify the home launcher on mobile, tablet, and desktop against the design-fidelity specs, including desktop left sidebar navigation.
 - [ ] 2.8 Add placeholder pages for Chords and Ear Training using the v1 visual style and deferred-scope copy.
@@ -46,7 +46,7 @@
 - [ ] 5.2 Implement browser-only microphone permission helpers around `navigator.mediaDevices.getUserMedia` in `src/lib/audio`.
 - [ ] 5.3 Test first in `src/lib/audio`: unsupported browser, denied access, silent input, and noisy input map to the correct UI state.
 - [ ] 5.4 Implement an analyser wrapper in `src/lib/audio` that supplies time-domain buffers to the pitch detector and hides Web Audio node setup from route files.
-- [ ] 5.5 Build the shared microphone pre-prompt UI as a mobile bottom sheet and tablet/desktop centered modal under `src/lib/components`.
+- [ ] 5.5 Build the shared microphone pre-prompt UI as a mobile bottom sheet and tablet/desktop centered modal under `src/lib/ui`.
 - [ ] 5.6 Build denied, unsupported browser, silent microphone, and noisy environment error states using the exact copy and visual styling from the specs.
 
 ## 6. Metronome

@@ -31,7 +31,7 @@ The OpenSpec specs must be sufficient to recreate v1 if the external handoff dir
 
 ### Use SvelteKit routes with shared tool components
 
-Routes will follow the handoff: `/`, `/tuner`, `/metronome`, `/scales`, `/scales/practice`, `/chords`, `/ear`, and `/settings`. Shared layout pieces should live under `src/lib/components`, with route pages assembling them. This keeps route intent visible while avoiding copied screen markup.
+Routes will follow the handoff: `/`, `/tuner`, `/metronome`, `/scales`, `/scales/practice`, `/chords`, `/ear`, and `/settings`. Shared layout pieces should live under `src/lib/ui`, with route pages assembling them. This keeps route intent visible while avoiding copied screen markup.
 
 Alternative considered: a single route with client-side view state. That would reduce route files but make browser navigation, direct links, and tool boundaries weaker.
 
@@ -55,7 +55,7 @@ Alternative considered: keep Web Audio logic inside route components. That would
 
 ### Use deep modules as the design lens
 
-Shared code should hide mechanism behind domain interfaces. `src/lib/music` owns note, tuning, scale, fretboard, and tempo calculations. `src/lib/audio` owns microphone streams, analyser buffers, pitch detection, smoothing, and metronome scheduling. `src/lib/state` owns localStorage parsing, defaults, and settings persistence. `src/lib/components` owns reusable Svelte UI primitives, while route files assemble workflows and avoid owning formulas, Web Audio setup, or persistence details.
+Shared code should hide mechanism behind domain interfaces. `src/lib/music` owns note, tuning, scale, fretboard, and tempo calculations. `src/lib/audio` owns microphone streams, analyser buffers, pitch detection, smoothing, and metronome scheduling. `src/lib/state` owns localStorage parsing, defaults, and settings persistence. `src/lib/ui` owns reusable Svelte UI primitives, while route files assemble workflows and avoid owning formulas, Web Audio setup, or persistence details.
 
 Alternative considered: split by screen only. That would make the first routes easy to start and would force every screen to carry its own little bag of formulas, thresholds, and browser quirks.
 
