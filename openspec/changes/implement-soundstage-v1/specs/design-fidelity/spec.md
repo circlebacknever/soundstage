@@ -18,6 +18,17 @@ The v1 design contract SHALL cover Home, Mic Permission, Tuner, Metronome, Scale
 - **WHEN** implementation scope is planned
 - **THEN** every listed screen is represented by either a dedicated route, a shared state component, or a tool state within the v1 app
 
+### Requirement: UI Copy Catalog
+The app SHALL mirror exact v1 user-visible copy from OpenSpec through `src/lib/content` and its exported `WORDS` catalog.
+
+#### Scenario: Copy catalog is reviewed
+- **WHEN** implementation copy is audited
+- **THEN** labels, headings, button text, document titles, helper text, ARIA labels, placeholder prose, and status copy match the OpenSpec strings through `WORDS`
+
+#### Scenario: Domain values are reviewed
+- **WHEN** route structure, icons, colors, numeric values, note values, tempo values, or scale formulas are audited
+- **THEN** those generated or structural values remain owned by their domain modules rather than the UI Copy Catalog
+
 ### Requirement: Breakpoints and layout frames
 The app SHALL use three responsive frames: mobile at 720px and below, tablet from 721px through 1199px, and desktop at 1200px and above.
 
@@ -31,7 +42,7 @@ The app SHALL use three responsive frames: mobile at 720px and below, tablet fro
 
 #### Scenario: Desktop frame
 - **WHEN** the viewport is at least 1200px wide
-- **THEN** the app uses a 220px slim left sidebar, a centered main canvas, a standard tool max-width of 560px, and a wider tool max-width of 720px where the screen needs room
+- **THEN** the app uses a 220px slim left sidebar, a centered main canvas, a standard tool max-width of 560px, a wider tool max-width of 720px where the screen needs room, and a launcher max-width of 840px when the five-card desktop launcher needs more readable labels
 
 ### Requirement: Color tokens
 The app SHALL define and use these exact color tokens as the v1 palette: `--paper: #FFFBF5`, `--paper-soft: #FFF6E8`, `--paper-sink: #F5EDDD`, `--ink: #1F1B17`, `--ink-2: #4A4338`, `--ink-3: #8A8170`, `--hairline: #E5DAC3`, `--coral: oklch(0.72 0.15 35)`, `--coral-soft: oklch(0.92 0.06 35)`, `--coral-ink: oklch(0.40 0.12 35)`, `--sun: oklch(0.86 0.14 85)`, `--sun-soft: oklch(0.95 0.06 85)`, `--sun-ink: oklch(0.42 0.09 85)`, `--mint: oklch(0.82 0.12 160)`, `--mint-soft: oklch(0.94 0.05 160)`, `--mint-ink: oklch(0.38 0.09 160)`, `--peri: oklch(0.78 0.11 260)`, `--peri-soft: oklch(0.94 0.04 260)`, `--peri-ink: oklch(0.38 0.09 260)`, `--rose: oklch(0.72 0.16 15)`, `--rose-soft: oklch(0.94 0.05 15)`, and `--rose-ink: oklch(0.42 0.13 15)`.
@@ -74,7 +85,7 @@ The app SHALL use handoff button and top-navigation styling across tools.
 
 #### Scenario: Primary button renders
 - **WHEN** a primary action button is displayed
-- **THEN** it uses inline-flex alignment, Nunito 700 at 15px, 14px by 20px padding, pill radius, `--coral` background, white text, `--shadow-sm`, and at least 48px height
+- **THEN** it uses inline-flex alignment, Nunito 700 at 15px, 14px by 20px padding, pill radius, `--coral` background, contrast-safe `--on-primary` text, `--shadow-sm`, and at least 48px height
 
 #### Scenario: Secondary and ghost buttons render
 - **WHEN** secondary and ghost buttons are displayed
@@ -82,7 +93,22 @@ The app SHALL use handoff button and top-navigation styling across tools.
 
 #### Scenario: Tool top bar renders
 - **WHEN** a tool screen displays a top bar
-- **THEN** it uses a minimum 32px height, a 36px circular `--paper-soft` back button, centered tool title in Nunito 700 at 15px, and a right-side action or spacer
+- **THEN** it uses a minimum 32px height, a 36px circular `--paper-soft` back button, an accessible page heading centered between equal side slots in Nunito 700 at 15px, and a right-side action or spacer
+
+### Requirement: Accessibility baseline
+The app SHALL keep the static UI foundation accessible enough that later logic can attach behavior without replacing component markup.
+
+#### Scenario: Document and navigation semantics render
+- **WHEN** a route is displayed
+- **THEN** the document title identifies the current SoundStage route, desktop navigation exposes distinct tool and settings landmarks, and the active navigation item exposes `aria-current`
+
+#### Scenario: Selection state renders
+- **WHEN** segmented controls, scale chips, root keys, switches, or fretboard cells display selected or stateful information
+- **THEN** their selected, checked, or cell state is available through accessible roles or ARIA attributes rather than color alone
+
+#### Scenario: Keyboard focus renders
+- **WHEN** a keyboard user focuses a link, button, tile, chip, or switch
+- **THEN** the control displays a visible focus ring that is distinct from hover and active styling
 
 ### Requirement: Motion timings
 The app SHALL use the handoff motion timings: modal or sheet open uses 220ms `cubic-bezier(0.32, 0.72, 0, 1)`, modal or sheet dismiss uses 180ms ease-out, desktop tile hover uses 160ms ease-out translate and shadow, button press uses 80ms scale to 0.97, tuner needle rotation uses 120ms ease-out, switch toggle uses 180ms ease-out, and scale REC dot pulse uses a 1.2s opacity loop.

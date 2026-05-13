@@ -13,7 +13,7 @@ The system SHALL provide a responsive SoundStage shell using the handoff breakpo
 
 #### Scenario: Desktop tool canvas is centered
 - **WHEN** a desktop user opens a standard-width tool
-- **THEN** the main content area centers the tool canvas with a max-width of 560px, while wider tool views can use 720px
+- **THEN** the main content area centers the tool canvas with a max-width of 560px, wider tool views can use 720px, and the desktop launcher can use up to 840px to keep five tool labels readable
 
 ### Requirement: Home launcher
 The system SHALL provide a launcher home page for the five v1 tool entries: Tuner, Metronome, Scales, Chords, and Ear Training.
@@ -28,7 +28,7 @@ The system SHALL provide a launcher home page for the five v1 tool entries: Tune
 
 #### Scenario: Desktop launcher uses horizontal cards
 - **WHEN** the user opens the home page on a desktop viewport
-- **THEN** the app displays the desktop sidebar and five launcher cards in a single horizontal row with 4/5 aspect ratio and hover lift
+- **THEN** the app displays the desktop sidebar and five launcher cards in a single horizontal row with 4/5 aspect ratio, readable tool labels, and hover lift
 
 #### Scenario: Launcher stays clean
 - **WHEN** the home launcher renders on mobile
@@ -51,6 +51,13 @@ Launcher tiles SHALL use these labels and subtitles: Tuner with "Get in tune", M
 #### Scenario: Tile text renders
 - **WHEN** the launcher is displayed
 - **THEN** each tile uses the specified tool name and subtitle
+
+### Requirement: App shell copy ownership
+The app shell SHALL source home, launcher, navigation, document title, and deferred-placeholder copy from `src/lib/content` through `WORDS`.
+
+#### Scenario: App shell copy is reviewed
+- **WHEN** the home launcher, desktop sidebar, route document title, or deferred placeholder is displayed
+- **THEN** the rendered copy matches the OpenSpec strings represented in `WORDS`
 
 ### Requirement: Design tokens and icon system
 The system SHALL use the handoff palette, type roles, radius scale, shadow scale, spacing rhythm, and two-tone icon geometry as the visual source of truth.

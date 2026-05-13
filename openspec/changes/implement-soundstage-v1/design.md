@@ -12,6 +12,7 @@ The OpenSpec specs must be sufficient to recreate v1 if the external handoff dir
 
 - Recreate the mid-fi handoff in SvelteKit using native Svelte components, shared tokens, self-hosted or local font assets, and responsive layouts.
 - Preserve the full v1 design contract inside OpenSpec: breakpoints, component geometry, token values, typography, motion, copy, state keys, and deferred scope.
+- Expose exact v1 user-visible copy through a first-party `src/lib/content` boundary so page and UI components consume named copy rather than embedding repeated strings.
 - Make the work executable by a junior engineer through explicit file placement, module boundaries, focused tests, and teaching checkpoints.
 - Keep the app local-first, anonymous, offline-friendly, and browser-only.
 - Build a dependency-free pitch detector from first principles, with staged tests and explanatory implementation notes.
@@ -29,9 +30,9 @@ The OpenSpec specs must be sufficient to recreate v1 if the external handoff dir
 
 ## Decisions
 
-### Use SvelteKit routes with shared tool components
+### Use SvelteKit route adapters with tool slices
 
-Routes will follow the handoff: `/`, `/tuner`, `/metronome`, `/scales`, `/scales/practice`, `/chords`, `/ear`, and `/settings`. Shared layout pieces should live under `src/lib/ui`, with route pages assembling them. This keeps route intent visible while avoiding copied screen markup.
+Routes will follow the handoff: `/`, `/tuner`, `/metronome`, `/scales`, `/scales/practice`, `/chords`, `/ear`, and `/settings`. SvelteKit `+page.svelte` files should stay as URL adapters that import tool pages from `src/lib/tools/<tool>`. Feature slices under `src/lib/tools` own page implementation and tool-specific composition; shared layout pieces live under `src/lib/ui`. This keeps URLs movable while avoiding copied page markup.
 
 Alternative considered: a single route with client-side view state. That would reduce route files but make browser navigation, direct links, and tool boundaries weaker.
 
@@ -47,15 +48,25 @@ The detailed visual contract belongs in `specs/design-fidelity/spec.md` and the 
 
 Alternative considered: keep the handoff files as the only detailed design source. That is fragile because the files live outside the app repo and can disappear.
 
+### Add a UI Copy Catalog boundary
+
+User-visible copy should live under `src/lib/content` and be exposed through a small typed `WORDS` interface. This includes tool labels, subtitles, document titles, navigation labels, home headings, button labels, helper text, ARIA labels, deferred placeholder copy, microphone/error prose, tuner guidance, metronome control labels, scale practice labels, and settings row text.
+
+The copy catalog excludes route paths, icon IDs, accent tokens, CSS tokens, numeric readouts, note letters, cents values, BPM values, scale formulas, and generated music facts. Those values stay with their existing domain modules, especially `src/lib/app` for route/tool structure and `src/lib/music` for generated musical facts.
+
+Alternative considered: keep strings embedded directly in Svelte files and metadata objects. That makes the first pass fast and scatters the product voice across pages, components, and tests like somebody dropped a tray of alphabet soup on the floor.
+
 ### Put browser audio behind first-party modules
 
 Microphone setup, `AudioContext` lifecycle, analyser buffers, generated click sounds, and scheduler timing should live in browser-only modules under `src/lib/audio`. Route components should ask for domain-level results: pitch estimates, permission status, metronome ticks, and input-level status. This keeps Web Audio details out of UI components.
 
 Alternative considered: keep Web Audio logic inside route components. That would make the first pass quick and make every later audio bug a small archaeological dig.
 
-### Use deep modules as the design lens
+### Use interface-first module design as the design lens
 
-Shared code should hide mechanism behind domain interfaces. `src/lib/music` owns note, tuning, scale, fretboard, and tempo calculations. `src/lib/audio` owns microphone streams, analyser buffers, pitch detection, smoothing, and metronome scheduling. `src/lib/state` owns localStorage parsing, defaults, and settings persistence. `src/lib/ui` owns reusable Svelte UI primitives, while route files assemble workflows and avoid owning formulas, Web Audio setup, or persistence details.
+Shared code should hide mechanism behind domain interfaces, following Ousterhout's "deep modules" idea from _A Philosophy of Software Design_. `src/routes` owns SvelteKit URL adapters. `src/lib/tools` owns feature slices and page implementation. `src/lib/app` owns route paths, tool IDs, icon names, accent families, canvas sizing, navigation placement, and placeholder status. `src/lib/content` owns user-visible copy through `WORDS`. `src/lib/music` owns note, tuning, scale, fretboard, and tempo calculations. `src/lib/audio` owns microphone streams, analyser buffers, pitch detection, smoothing, and metronome scheduling. `src/lib/state` owns localStorage parsing, defaults, and settings persistence. `src/lib/ui` owns reusable Svelte UI primitives, while tool pages assemble workflows and avoid owning formulas, Web Audio setup, copy catalogs, or persistence details.
+
+A module should expose a small caller-facing interface in domain language while hiding parsing, validation, defaults, sequencing rules, browser quirks, thresholds, state transitions, and error cases when that makes callers simpler. A module is too shallow when callers still assemble the mechanism by hand across helpers, flags, and ordering rules.
 
 Alternative considered: split by screen only. That would make the first routes easy to start and would force every screen to carry its own little bag of formulas, thresholds, and browser quirks.
 
@@ -63,7 +74,7 @@ Alternative considered: split by screen only. That would make the first routes e
 
 Behavior changes should start with focused tests at the public module boundary. Music math, pitch detection, tuner state, scale progression, metronome scheduling, settings persistence, and permission-state selection all need tests before production logic when the local test setup can run them safely. UI visual work can use component inspection and screenshots after the state and data transformations have focused coverage.
 
-Alternative considered: build screens first and add tests at the end. That produces confident-looking pages with unknown machinery under them, which is how software acquires a basement.
+Alternative considered: build route pages first and add tests at the end. That produces confident-looking pages with unknown machinery under them, which is how software acquires a basement.
 
 ### Build original pitch detection through staged learning modules
 
@@ -108,7 +119,7 @@ Alternative considered: introduce a Svelte store as the persistence boundary imm
 
 ## Migration Plan
 
-Start with the app foundation and shared tokens, then add tested music math and pitch detection before wiring mic-driven UI. Implement metronome separately because it uses Web Audio scheduling but no mic input. Add tuner and scale practice after the detector returns stable estimates. Finish with settings, placeholder routes, and visual QA across the three breakpoints.
+Start with the app foundation, shared tokens, and UI Copy Catalog, then add tested music math and pitch detection before wiring mic-driven UI. Implement metronome separately because it uses Web Audio scheduling but no mic input. Add tuner and scale practice after the detector returns stable estimates. Finish with settings, placeholder routes, and visual QA across the three breakpoints.
 
 Rollback is simple while the app is a starter: revert this change directory or the implementation diff. After implementation starts, keep changes vertical so any incomplete tool can be isolated behind its route.
 

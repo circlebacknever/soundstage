@@ -46,6 +46,13 @@ The system SHALL track microphone permission as unknown, pending, granted, or de
 - **WHEN** local storage says microphone access was granted previously
 - **THEN** the app still relies on the browser permission request or stream result before starting mic-driven detection
 
+### Requirement: Microphone flow copy ownership
+The microphone flow SHALL source pre-prompt and error-state copy from `src/lib/content` through `WORDS`.
+
+#### Scenario: Microphone copy is reviewed
+- **WHEN** the pre-prompt or any microphone error state is displayed
+- **THEN** headings, body prose, trust items, step text, button labels, and action labels match the OpenSpec strings represented in `WORDS`
+
 ### Requirement: Microphone and browser error states
 The system SHALL provide error states for denied microphone access, silent microphone input, unsupported browser APIs, and noisy input.
 

@@ -38,6 +38,13 @@ The system SHALL store settings in browser local storage under SoundStage-specif
 - **WHEN** the user changes a supported setting and reloads the app
 - **THEN** the app restores the saved setting from local storage
 
+### Requirement: Settings copy ownership
+The settings route SHALL source section labels, row text, fixed-value labels, switch labels, and about-status copy from `src/lib/content` through `WORDS`.
+
+#### Scenario: Settings copy is reviewed
+- **WHEN** Audio, Instrument, About, switch, fixed-value, or status rows are displayed
+- **THEN** the rendered copy matches the OpenSpec strings represented in `WORDS`
+
 ### Requirement: Microphone setting gates mic tools
 The microphone setting SHALL control access to Tuner and Scale Practice.
 

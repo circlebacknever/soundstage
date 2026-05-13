@@ -3,8 +3,8 @@ schema: spec-driven
 context: |
   Tech stack: SvelteKit, TypeScript, browser Web Audio, localStorage.
   Product shape: local-first responsive music utility app for beginner guitar players.
-  Engineering doctrine: prefer TDD, focused behavior tests, deep modules, thin route files, and explicit browser-audio boundaries.
-  Module ownership: src/lib/music owns music theory and note math; src/lib/audio owns Web Audio, pitch detection, smoothing, and scheduling; src/lib/state owns local persistence; src/lib/ui owns reusable Svelte UI.
+  Engineering doctrine: prefer TDD, focused behavior tests, interface-first module design inspired by Ousterhout's deep modules, thin route files, and explicit browser-audio boundaries.
+  Module ownership: src/routes owns SvelteKit URL adapters; src/lib/tools owns feature slices and page implementations; src/lib/app owns route and tool metadata; src/lib/music owns music theory and note math; src/lib/audio owns Web Audio, pitch detection, smoothing, and scheduling; src/lib/state owns local persistence; src/lib/ui owns reusable Svelte UI.
   Pitch detection is also a teaching exercise. Implementation plans should include lesson checkpoints that explain the concept, name the focused test, and summarize what passed.
 
 rules:
