@@ -29,14 +29,14 @@
 
 ## 4. Local State and Music Math
 
-- [ ] 4.1 Test first in `src/lib/state`: localStorage keys, default values, parse fallback behavior, and persistence for microphone consent, metronome preferences, scale preferences, and settings.
-- [ ] 4.2 Implement typed local storage helpers in `src/lib/state`.
-- [ ] 4.3 Test first in `src/lib/music`: MIDI note conversion, note names, octave labels, target frequencies, and cents offsets, including A4 at 440 Hz.
-- [ ] 4.4 Implement frequency and note helpers in `src/lib/music`.
-- [ ] 4.5 Test first in `src/lib/music`: standard guitar tuning targets and nearest-string target selection.
-- [ ] 4.6 Implement standard tuning constants and target helpers in `src/lib/music`.
-- [ ] 4.7 Test first in `src/lib/music`: scale formulas, whole-note root handling, G major sequence, and fretboard mapping for open, 2, 3, and 5 frets.
-- [ ] 4.8 Implement scale sequence and fretboard mapping helpers in `src/lib/music`.
+- [x] 4.1 Test first in `src/lib/state`: localStorage keys, default values, parse fallback behavior, and persistence for microphone consent, metronome preferences, scale preferences, and settings.
+- [x] 4.2 Implement typed local storage helpers in `src/lib/state`.
+- [x] 4.3 Test first in `src/lib/music`: MIDI note conversion, note names, octave labels, target frequencies, and cents offsets, including A4 at 440 Hz.
+- [x] 4.4 Implement frequency and note helpers in `src/lib/music`.
+- [x] 4.5 Test first in `src/lib/music`: standard guitar tuning targets and nearest-string target selection.
+- [x] 4.6 Implement standard tuning constants and target helpers in `src/lib/music`.
+- [x] 4.7 Test first in `src/lib/music`: scale formulas, whole-note root handling, G major sequence, and fretboard mapping for open, 2, 3, and 5 frets.
+- [x] 4.8 Implement scale sequence and fretboard mapping helpers in `src/lib/music`.
 
 ## 5. Pitch Detection Lesson Plan
 
