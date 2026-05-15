@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { WORDS } from '$lib/content';
 	import type { IconName, IconTone } from './icons/index.ts';
 	import { Icon } from './icons/index.ts';
 
@@ -31,7 +32,7 @@
 			type="button"
 			role="switch"
 			aria-checked={switchOn}
-			aria-label={`${title}: ${switchOn ? 'On' : 'Off'}`}
+			aria-label={`${title}: ${switchOn ? WORDS.settings.switch.on : WORDS.settings.switch.off}`}
 		></button>
 	{:else if value}
 		<div class="settings-row__value">{value}</div>

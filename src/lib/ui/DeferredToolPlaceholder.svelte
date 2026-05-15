@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ToolMetadata } from '$lib/app';
 	import { toolAccentTokens } from '$lib/app';
+	import { WORDS } from '$lib/content';
 	import Button from './Button.svelte';
 	import { Icon } from './icons/index.ts';
 
@@ -19,11 +20,11 @@
 		<Icon name={tool.icon} tone={tool.accent} size={44} />
 	</div>
 	<div>
-		<div class="eyebrow">Coming later</div>
+		<div class="eyebrow">{WORDS.navigation.deferredEyebrow}</div>
 		<h2 class="display-title" id="placeholder-title">{tool.placeholderTitle ?? tool.name}</h2>
 	</div>
 	<p class="placeholder-copy">{tool.placeholderBody}</p>
-	<Button href="/" variant="secondary">Back to tools</Button>
+	<Button href="/" variant="secondary">{WORDS.navigation.backToTools}</Button>
 </section>
 
 <style>

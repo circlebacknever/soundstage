@@ -1,12 +1,13 @@
 <script lang="ts">
+	import { WORDS } from '$lib/content';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
 	import TopBar from '$lib/ui/TopBar.svelte';
 </script>
 
 <ToolCanvas>
-	<TopBar title="Tuner" rightLabel="Auto" />
+	<TopBar title={WORDS.tuner.title} rightLabel={WORDS.tuner.auto} />
 
-	<section class="tuner-card" aria-label="Tuner readout">
+	<section class="tuner-card" aria-label={WORDS.tuner.readoutLabel}>
 		<svg class="arc-svg" viewBox="0 0 260 160" fill="none" aria-hidden="true">
 			<path
 				d="M20 140 A 110 110 0 0 1 240 140"
@@ -32,7 +33,7 @@
 			<circle cx="130" cy="140" r="8" fill="var(--ink)" />
 			<circle cx="130" cy="140" r="3" fill="var(--paper)" />
 			<text x="22" y="156" font-family="JetBrains Mono" font-size="10" fill="var(--coral-ink)">
-				♭ flat
+				{WORDS.tuner.flatLabel}
 			</text>
 			<text
 				x="238"
@@ -42,24 +43,24 @@
 				fill="var(--coral-ink)"
 				text-anchor="end"
 			>
-				sharp ♯
+				{WORDS.tuner.sharpLabel}
 			</text>
 		</svg>
 		<div class="readout">
 			<div class="note-xxl">E</div>
-			<div class="note-sub">+8¢ · sharp · tune down a touch</div>
+			<div class="note-sub">+8¢ · {WORDS.tuner.guidance.sharp}</div>
 		</div>
 	</section>
 
 	<section>
-		<div class="eyebrow strings-label">Standard tuning</div>
-		<div class="strings-row" aria-label="Standard tuning strings">
-			<div class="string-chip is-done">E<small>LOW</small></div>
+		<div class="eyebrow strings-label">{WORDS.tuner.standardTuning}</div>
+		<div class="strings-row" aria-label={WORDS.tuner.stringsLabel}>
+			<div class="string-chip is-done">E<small>{WORDS.tuner.low}</small></div>
 			<div class="string-chip is-done">A</div>
 			<div class="string-chip is-done">D</div>
 			<div class="string-chip is-done">G</div>
 			<div class="string-chip is-done">B</div>
-			<div class="string-chip is-active">E<small>HIGH</small></div>
+			<div class="string-chip is-active">E<small>{WORDS.tuner.high}</small></div>
 		</div>
 	</section>
 </ToolCanvas>

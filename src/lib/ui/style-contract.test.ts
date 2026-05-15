@@ -109,7 +109,7 @@ describe('SoundStage global style contract', () => {
 		assert.match(scalePractice, /import TopBar from '\$lib\/ui\/TopBar\.svelte'/);
 		assert.match(
 			scalePractice,
-			/<TopBar title="G major" backHref="\/scales" backLabel="Back to scales">/
+			/<TopBar title="G major" backHref="\/scales" backLabel=\{WORDS\.navigation\.backToScales\}>/
 		);
 		assert.doesNotMatch(scalePractice, /<div class="topbar">/);
 	});
@@ -122,8 +122,8 @@ describe('SoundStage global style contract', () => {
 		const settingsRow = componentSource('./SettingsRow.svelte');
 
 		assert.match(appShell, /<title>\{documentTitle\}<\/title>/);
-		assert.match(sidebar, /aria-label="Tool navigation"/);
-		assert.match(sidebar, /aria-label="App settings"/);
+		assert.match(sidebar, /aria-label=\{WORDS\.app\.landmarks\.tools\}/);
+		assert.match(sidebar, /aria-label=\{WORDS\.app\.landmarks\.settings\}/);
 		assert.match(sidebar, /aria-current=\{active \? 'page' : undefined\}/);
 		assert.match(segmentedControl, /role="radiogroup"/);
 		assert.match(segmentedControl, /role="radio"/);

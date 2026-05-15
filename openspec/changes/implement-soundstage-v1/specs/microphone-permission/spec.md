@@ -13,7 +13,7 @@ The system SHALL show a SoundStage microphone pre-prompt before requesting brows
 
 #### Scenario: Pre-prompt content renders
 - **WHEN** the microphone pre-prompt is displayed
-- **THEN** it shows a coral-soft microphone illustration with two expanding rings, heading "Can we hear you?", explanatory centered body text, trust items "Processed on this device only", "Nothing is recorded or uploaded", and "You can revoke in settings anytime", primary button "Allow microphone", and ghost button "Not right now"
+- **THEN** it shows a coral-soft microphone illustration with two expanding rings, heading "Can we hear you?", centered body text "The tuner listens through your mic to tell you if you're sharp or flat.", trust items "Processed on this device only", "Nothing is recorded or uploaded", and "You can revoke in settings anytime", primary button "Allow microphone", and ghost button "Not right now"
 
 #### Scenario: Pre-prompt illustration sizes
 - **WHEN** the pre-prompt is displayed on mobile

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { WORDS } from '$lib/content';
+
 	type Option = {
 		label: string;
 		value: string;
@@ -10,7 +12,7 @@
 		label?: string;
 	};
 
-	let { options, value, label = 'Options' }: Props = $props();
+	let { options, value, label = WORDS.controls.optionsLabel }: Props = $props();
 </script>
 
 <div class="segmented" role="radiogroup" aria-label={label}>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { AppRoute } from '$lib/app';
+	import { WORDS } from '$lib/content';
 	import type { Snippet } from 'svelte';
 	import Button from './Button.svelte';
 
@@ -15,7 +16,7 @@
 	let {
 		title,
 		backHref = '/',
-		backLabel = 'Back to tools',
+		backLabel = WORDS.navigation.backToTools,
 		right,
 		rightLabel,
 		rightHref

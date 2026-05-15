@@ -10,6 +10,7 @@ import {
 	toolAccentTokens,
 	toolCatalog
 } from './tools.ts';
+import { WORDS } from '../content/index.ts';
 
 describe('SoundStage tool catalog', () => {
 	it('defines launcher tools with the specified names, routes, subtitles, and accents', () => {
@@ -21,11 +22,36 @@ describe('SoundStage tool catalog', () => {
 				accent: tool.accent
 			})),
 			[
-				{ name: 'Tuner', route: '/tuner', subtitle: 'Get in tune', accent: 'coral' },
-				{ name: 'Metronome', route: '/metronome', subtitle: 'Keep time', accent: 'sun' },
-				{ name: 'Scales', route: '/scales', subtitle: 'Play & learn', accent: 'peri' },
-				{ name: 'Chords', route: '/chords', subtitle: 'Learn shapes', accent: 'mint' },
-				{ name: 'Ear Training', route: '/ear', subtitle: 'Train your ear', accent: 'rose' }
+				{
+					name: WORDS.tools.tuner.label,
+					route: '/tuner',
+					subtitle: WORDS.tools.tuner.subtitle,
+					accent: 'coral'
+				},
+				{
+					name: WORDS.tools.metronome.label,
+					route: '/metronome',
+					subtitle: WORDS.tools.metronome.subtitle,
+					accent: 'sun'
+				},
+				{
+					name: WORDS.tools.scales.label,
+					route: '/scales',
+					subtitle: WORDS.tools.scales.subtitle,
+					accent: 'peri'
+				},
+				{
+					name: WORDS.tools.chords.label,
+					route: '/chords',
+					subtitle: WORDS.tools.chords.subtitle,
+					accent: 'mint'
+				},
+				{
+					name: WORDS.tools.ear.label,
+					route: '/ear',
+					subtitle: WORDS.tools.ear.subtitle,
+					accent: 'rose'
+				}
 			]
 		);
 	});
@@ -38,13 +64,29 @@ describe('SoundStage tool catalog', () => {
 				placement: item.placement
 			})),
 			[
-				{ name: 'Home', route: '/', placement: 'primary' },
-				{ name: 'Tuner', route: '/tuner', placement: 'primary' },
-				{ name: 'Metronome', route: '/metronome', placement: 'primary' },
-				{ name: 'Scales', route: '/scales', placement: 'primary' },
-				{ name: 'Chords', route: '/chords', placement: 'primary' },
-				{ name: 'Ear Training', route: '/ear', placement: 'primary' },
-				{ name: 'Settings', route: '/settings', placement: 'footer' }
+				{ name: WORDS.navigation.home, route: '/', placement: 'primary' },
+				{ name: WORDS.tools.tuner.label, route: '/tuner', placement: 'primary' },
+				{ name: WORDS.tools.metronome.label, route: '/metronome', placement: 'primary' },
+				{ name: WORDS.tools.scales.label, route: '/scales', placement: 'primary' },
+				{ name: WORDS.tools.chords.label, route: '/chords', placement: 'primary' },
+				{ name: WORDS.tools.ear.label, route: '/ear', placement: 'primary' },
+				{ name: WORDS.tools.settings.label, route: '/settings', placement: 'footer' }
+			]
+		);
+	});
+
+	it('uses WORDS for route document titles', () => {
+		assert.deepEqual(
+			Object.values(routeMetadata).map((route) => route.title),
+			[
+				WORDS.app.document.defaultTitle,
+				WORDS.tools.tuner.documentTitle,
+				WORDS.tools.metronome.documentTitle,
+				WORDS.tools.scales.documentTitle,
+				WORDS.tools.scalePractice.documentTitle,
+				WORDS.tools.chords.documentTitle,
+				WORDS.tools.ear.documentTitle,
+				WORDS.tools.settings.documentTitle
 			]
 		);
 	});
@@ -69,19 +111,36 @@ describe('SoundStage tool catalog', () => {
 	it('marks Chords and Ear Training as deferred v1 routes', () => {
 		assert.deepEqual(
 			toolCatalog.filter((tool) => tool.deferred).map((tool) => tool.name),
-			['Chords', 'Ear Training']
+			[WORDS.tools.chords.label, WORDS.tools.ear.label]
 		);
 	});
 
-	it('returns required route metadata for deferred placeholder pages', () => {
-		assert.equal(getRequiredToolByRoute('/chords').name, 'Chords');
+	it('returns required route metadata and WORDS copy for deferred placeholder pages', () => {
+		assert.deepEqual(
+			{
+				name: getRequiredToolByRoute('/chords').name,
+				placeholderTitle: getRequiredToolByRoute('/chords').placeholderTitle,
+				placeholderBody: getRequiredToolByRoute('/chords').placeholderBody
+			},
+			{
+				name: WORDS.tools.chords.label,
+				placeholderTitle: WORDS.tools.chords.placeholderTitle,
+				placeholderBody: WORDS.tools.chords.placeholderBody
+			}
+		);
 		assert.throws(() => getRequiredToolByRoute('/missing' as never), /Missing tool metadata/);
 	});
 
 	it('builds document titles from route metadata', () => {
-		assert.equal(getDocumentTitle('/'), 'SoundStage');
-		assert.equal(getDocumentTitle('/tuner'), 'Tuner · SoundStage');
-		assert.equal(getDocumentTitle('/scales/practice'), 'Scale Practice · SoundStage');
-		assert.equal(getDocumentTitle('/missing'), 'SoundStage');
+		assert.equal(getDocumentTitle('/'), WORDS.app.brand.full);
+		assert.equal(
+			getDocumentTitle('/tuner'),
+			`${WORDS.tools.tuner.documentTitle}${WORDS.app.document.separator}${WORDS.app.brand.full}`
+		);
+		assert.equal(
+			getDocumentTitle('/scales/practice'),
+			`${WORDS.tools.scalePractice.documentTitle}${WORDS.app.document.separator}${WORDS.app.brand.full}`
+		);
+		assert.equal(getDocumentTitle('/missing'), WORDS.app.brand.full);
 	});
 });

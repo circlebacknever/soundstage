@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { WORDS } from '$lib/content';
 	import Button from '$lib/ui/Button.svelte';
 	import Fretboard from '$lib/ui/Fretboard.svelte';
 	import TopBar from '$lib/ui/TopBar.svelte';
@@ -32,15 +33,15 @@
 </script>
 
 <ToolCanvas wide>
-	<TopBar title="G major" backHref="/scales" backLabel="Back to scales">
+	<TopBar title="G major" backHref="/scales" backLabel={WORDS.navigation.backToScales}>
 		{#snippet right()}
-			<span class="rec-pill"><span class="rec-pill__dot"></span>REC</span>
+			<span class="rec-pill"><span class="rec-pill__dot"></span>{WORDS.scales.rec}</span>
 		{/snippet}
 	</TopBar>
 
-	<section class="next-card" aria-label="Next note">
+	<section class="next-card" aria-label={WORDS.scales.nextNote}>
 		<div>
-			<div class="eyebrow">Next note</div>
+			<div class="eyebrow">{WORDS.scales.nextNote}</div>
 			<div class="big-note">B</div>
 		</div>
 		<div class="progress-mini">
@@ -52,8 +53,8 @@
 	<Fretboard rows={practiceRows} />
 
 	<div class="action-row">
-		<Button variant="secondary" block>Pause</Button>
-		<Button block>Restart</Button>
+		<Button variant="secondary" block>{WORDS.scales.pause}</Button>
+		<Button block>{WORDS.scales.restart}</Button>
 	</div>
 </ToolCanvas>
 

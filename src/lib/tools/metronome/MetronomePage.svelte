@@ -1,28 +1,28 @@
 <script lang="ts">
+	import { WORDS } from '$lib/content';
 	import Button from '$lib/ui/Button.svelte';
 	import SegmentedControl from '$lib/ui/SegmentedControl.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
 	import TopBar from '$lib/ui/TopBar.svelte';
 
-	const visualModes = [
-		{ label: 'Pulse', value: 'pulse' },
-		{ label: 'Beats', value: 'beats' },
-		{ label: 'Wave', value: 'wave' }
-	];
+	const visualModes = WORDS.metronome.visualModes.map((label) => ({
+		label,
+		value: label.toLowerCase()
+	}));
 </script>
 
 <ToolCanvas>
-	<TopBar title="Metronome" rightLabel="4/4" />
-	<SegmentedControl options={visualModes} value="pulse" label="Metronome visual mode" />
+	<TopBar title={WORDS.metronome.title} rightLabel="4/4" />
+	<SegmentedControl options={visualModes} value="pulse" label={WORDS.metronome.visualModeLabel} />
 
-	<section class="metro-stage" aria-label="Metronome pulse">
+	<section class="metro-stage" aria-label={WORDS.metronome.pulseLabel}>
 		<div class="pulse">
 			<div>
 				120
 				<small>allegro</small>
 			</div>
 		</div>
-		<div class="beats-row" aria-label="Beat indicators">
+		<div class="beats-row" aria-label={WORDS.metronome.beatIndicatorsLabel}>
 			<div class="beat is-downbeat">1</div>
 			<div class="beat is-on">2</div>
 			<div class="beat">3</div>
@@ -30,16 +30,16 @@
 		</div>
 	</section>
 
-	<div class="bpm-row" aria-label="BPM controls">
-		<Button variant="secondary" icon="minus" iconOnly ariaLabel="Decrease BPM" />
+	<div class="bpm-row" aria-label={WORDS.metronome.bpmControlsLabel}>
+		<Button variant="secondary" icon="minus" iconOnly ariaLabel={WORDS.metronome.decreaseBpm} />
 		<div class="bpm-big">
 			120
-			<small>bpm</small>
+			<small>{WORDS.metronome.bpmUnit}</small>
 		</div>
-		<Button variant="secondary" icon="plus" iconOnly ariaLabel="Increase BPM" />
+		<Button variant="secondary" icon="plus" iconOnly ariaLabel={WORDS.metronome.increaseBpm} />
 	</div>
 
-	<Button block>Start</Button>
+	<Button block>{WORDS.metronome.actions.start}</Button>
 </ToolCanvas>
 
 <style>

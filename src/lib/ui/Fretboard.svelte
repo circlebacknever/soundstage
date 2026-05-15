@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { WORDS } from '$lib/content';
+
 	type CellState = 'empty' | 'scale' | 'hit' | 'next';
 
 	type FretCell = {
@@ -17,10 +19,10 @@
 
 	const strings = ['E', 'A', 'D', 'G', 'B', 'e'];
 	const stateLabels: Record<CellState, string> = {
-		empty: 'empty',
-		scale: 'scale note',
-		hit: 'correct note',
-		next: 'next note'
+		empty: WORDS.fretboard.states.empty,
+		scale: WORDS.fretboard.states.scale,
+		hit: WORDS.fretboard.states.hit,
+		next: WORDS.fretboard.states.next
 	};
 
 	const defaultRows: FretRow[] = [
@@ -55,11 +57,11 @@
 		const state = cell.state ?? 'empty';
 		const note = cell.label ? `${cell.label} ` : '';
 
-		return `${note}${stateLabels[state]} on ${strings[cellIndex]} string at fret ${fret}`;
+		return `${note}${stateLabels[state]} ${WORDS.fretboard.cellDescription} ${strings[cellIndex]} string at fret ${fret}`;
 	}
 </script>
 
-<div class="fretboard" role="grid" aria-label="Scale fretboard">
+<div class="fretboard" role="grid" aria-label={WORDS.fretboard.label}>
 	{#each rows as row (row.fret)}
 		<div class="fretboard__row" role="row">
 			<div class="fretboard__num" role="rowheader">{row.fret}</div>

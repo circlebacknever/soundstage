@@ -1,30 +1,31 @@
 <script lang="ts">
+	import { WORDS } from '$lib/content';
 	import Button from '$lib/ui/Button.svelte';
 	import Chip from '$lib/ui/Chip.svelte';
 	import Fretboard from '$lib/ui/Fretboard.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
 	import TopBar from '$lib/ui/TopBar.svelte';
 
-	const scaleTypes = ['Major', 'Minor', 'Pentatonic', 'Blues', 'Dorian'];
+	const selectedScaleType = WORDS.scales.scaleTypes[0];
 	const rootKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 </script>
 
 <ToolCanvas wide>
-	<TopBar title="Scales" />
+	<TopBar title={WORDS.scales.setupTitle} />
 
 	<section class="scale-card" aria-labelledby="scale-type-title">
 		<div>
-			<div class="eyebrow" id="scale-type-title">Scale type</div>
+			<div class="eyebrow" id="scale-type-title">{WORDS.scales.scaleTypeLabel}</div>
 			<div class="chip-row">
-				{#each scaleTypes as scaleType (scaleType)}
-					<Chip active={scaleType === 'Major'}>{scaleType}</Chip>
+				{#each WORDS.scales.scaleTypes as scaleType (scaleType)}
+					<Chip active={scaleType === selectedScaleType}>{scaleType}</Chip>
 				{/each}
 			</div>
 		</div>
 
 		<div>
-			<div class="eyebrow">Root key</div>
-			<div class="key-picker" aria-label="Root key">
+			<div class="eyebrow">{WORDS.scales.rootKeyLabel}</div>
+			<div class="key-picker" aria-label={WORDS.scales.rootKeyPickerLabel}>
 				{#each rootKeys as rootKey (rootKey)}
 					<button
 						class={`key-btn ${rootKey === 'C' ? 'is-active' : ''}`}
@@ -38,7 +39,7 @@
 		<Fretboard />
 	</section>
 
-	<Button href="/scales/practice" icon="mic" block>Start practice</Button>
+	<Button href="/scales/practice" icon="mic" block>{WORDS.scales.startPractice}</Button>
 </ToolCanvas>
 
 <style>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { desktopNavItems, isRouteActive } from '$lib/app';
+	import { WORDS } from '$lib/content';
 	import { Icon } from './icons/index.ts';
 
 	type Props = {
@@ -13,9 +14,11 @@
 	const footerItems = $derived(desktopNavItems.filter((item) => item.placement === 'footer'));
 </script>
 
-<aside class="app-sidebar" aria-label="Primary">
-	<a class="brand" href={resolve('/')}>Sound<em>Stage</em></a>
-	<nav class="sidebar-nav" aria-label="Tool navigation">
+<aside class="app-sidebar" aria-label={WORDS.app.landmarks.primary}>
+	<a class="brand" href={resolve('/')}
+		>{WORDS.app.brand.parts.sound}<em>{WORDS.app.brand.parts.stage}</em></a
+	>
+	<nav class="sidebar-nav" aria-label={WORDS.app.landmarks.tools}>
 		{#each primaryItems as item (item.route)}
 			{@const active = isRouteActive(item.route, pathname)}
 			<a
@@ -28,7 +31,7 @@
 			</a>
 		{/each}
 	</nav>
-	<nav class="sidebar-footer" aria-label="App settings">
+	<nav class="sidebar-footer" aria-label={WORDS.app.landmarks.settings}>
 		{#each footerItems as item (item.route)}
 			{@const active = isRouteActive(item.route, pathname)}
 			<a

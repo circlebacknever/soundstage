@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { homeTools } from '$lib/app';
+	import { WORDS } from '$lib/content';
 	import LauncherTile from '$lib/ui/LauncherTile.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
 </script>
@@ -7,15 +8,17 @@
 <ToolCanvas size="launcher">
 	<section class="home-screen" aria-labelledby="home-title">
 		<header class="home-header">
-			<div class="eyebrow">Good afternoon</div>
-			<h1 class="display-title" id="home-title">What'll we<br />practice today?</h1>
+			<div class="eyebrow">{WORDS.home.eyebrow}</div>
+			<h1 class="display-title" id="home-title" aria-label={WORDS.home.heading}>
+				{WORDS.home.headingLine1}<br />{WORDS.home.headingLine2}
+			</h1>
 		</header>
 
-		<div class="home-grid" aria-label="Practice tools">
+		<div class="home-grid" aria-label={WORDS.home.toolsLabel}>
 			{#each homeTools as tool, index (tool.id)}
 				<LauncherTile {tool} wideMobile={index === homeTools.length - 1} />
 			{/each}
-			<div class="home-more">More soon</div>
+			<div class="home-more">{WORDS.home.moreSoon}</div>
 		</div>
 	</section>
 </ToolCanvas>

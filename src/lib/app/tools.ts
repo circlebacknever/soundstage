@@ -1,3 +1,4 @@
+import { WORDS } from '../content/index.ts';
 import type { IconName } from '../ui/icons/registry.ts';
 
 export type ToolAccent = 'coral' | 'sun' | 'peri' | 'mint' | 'rose';
@@ -52,79 +53,101 @@ export const toolAccentTokens: Record<ToolAccent, { accent: string; soft: string
 export const toolCatalog: ToolMetadata[] = [
 	{
 		id: 'tuner',
-		name: 'Tuner',
+		name: WORDS.tools.tuner.label,
 		route: '/tuner',
-		subtitle: 'Get in tune',
+		subtitle: WORDS.tools.tuner.subtitle,
 		accent: 'coral',
 		icon: 'tuner'
 	},
 	{
 		id: 'metronome',
-		name: 'Metronome',
+		name: WORDS.tools.metronome.label,
 		route: '/metronome',
-		subtitle: 'Keep time',
+		subtitle: WORDS.tools.metronome.subtitle,
 		accent: 'sun',
 		icon: 'metronome'
 	},
 	{
 		id: 'scales',
-		name: 'Scales',
+		name: WORDS.tools.scales.label,
 		route: '/scales',
-		subtitle: 'Play & learn',
+		subtitle: WORDS.tools.scales.subtitle,
 		accent: 'peri',
 		icon: 'scale'
 	},
 	{
 		id: 'chords',
-		name: 'Chords',
+		name: WORDS.tools.chords.label,
 		route: '/chords',
-		subtitle: 'Learn shapes',
+		subtitle: WORDS.tools.chords.subtitle,
 		accent: 'mint',
 		icon: 'chord',
 		deferred: true,
-		placeholderTitle: 'Chord Library',
-		placeholderBody:
-			'Chord shapes are planned for the offline library. v1 keeps the route visible while the full workflow waits its turn.'
+		placeholderTitle: WORDS.tools.chords.placeholderTitle,
+		placeholderBody: WORDS.tools.chords.placeholderBody
 	},
 	{
 		id: 'ear',
-		name: 'Ear Training',
+		name: WORDS.tools.ear.label,
 		route: '/ear',
-		subtitle: 'Train your ear',
+		subtitle: WORDS.tools.ear.subtitle,
 		accent: 'rose',
 		icon: 'ear',
 		deferred: true,
-		placeholderTitle: 'Ear Training',
-		placeholderBody:
-			'Interval drills are planned after the core tuner, metronome, and scale practice flows are working cleanly.'
+		placeholderTitle: WORDS.tools.ear.placeholderTitle,
+		placeholderBody: WORDS.tools.ear.placeholderBody
 	}
 ];
 
 export const homeTools = toolCatalog;
 
 export const routeMetadata = {
-	home: { path: '/', title: 'SoundStage', canvas: 'wide' },
-	tuner: { path: '/tuner', title: 'Tuner', accent: 'coral', icon: 'tuner', canvas: 'standard' },
+	home: { path: '/', title: WORDS.app.document.defaultTitle, canvas: 'wide' },
+	tuner: {
+		path: '/tuner',
+		title: WORDS.tools.tuner.documentTitle,
+		accent: 'coral',
+		icon: 'tuner',
+		canvas: 'standard'
+	},
 	metronome: {
 		path: '/metronome',
-		title: 'Metronome',
+		title: WORDS.tools.metronome.documentTitle,
 		accent: 'sun',
 		icon: 'metronome',
 		canvas: 'standard'
 	},
-	scales: { path: '/scales', title: 'Scales', accent: 'peri', icon: 'scale', canvas: 'wide' },
+	scales: {
+		path: '/scales',
+		title: WORDS.tools.scales.documentTitle,
+		accent: 'peri',
+		icon: 'scale',
+		canvas: 'wide'
+	},
 	scalePractice: {
 		path: '/scales/practice',
-		title: 'Scale Practice',
+		title: WORDS.tools.scalePractice.documentTitle,
 		accent: 'coral',
 		icon: 'mic',
 		canvas: 'wide'
 	},
-	chords: { path: '/chords', title: 'Chords', accent: 'mint', icon: 'chord', canvas: 'standard' },
-	ear: { path: '/ear', title: 'Ear Training', accent: 'rose', icon: 'ear', canvas: 'standard' },
+	chords: {
+		path: '/chords',
+		title: WORDS.tools.chords.documentTitle,
+		accent: 'mint',
+		icon: 'chord',
+		canvas: 'standard'
+	},
+	ear: {
+		path: '/ear',
+		title: WORDS.tools.ear.documentTitle,
+		accent: 'rose',
+		icon: 'ear',
+		canvas: 'standard'
+	},
 	settings: {
 		path: '/settings',
-		title: 'Settings',
+		title: WORDS.tools.settings.documentTitle,
 		accent: 'peri',
 		icon: 'settings',
 		canvas: 'standard'
@@ -132,19 +155,43 @@ export const routeMetadata = {
 } as const satisfies Record<string, RouteMetadata>;
 
 export const desktopNavItems: DesktopNavItem[] = [
-	{ name: 'Home', route: '/', icon: 'home', placement: 'primary' },
-	{ name: 'Tuner', route: '/tuner', icon: 'tuner', placement: 'primary', accent: 'coral' },
+	{ name: WORDS.navigation.home, route: '/', icon: 'home', placement: 'primary' },
 	{
-		name: 'Metronome',
+		name: WORDS.tools.tuner.label,
+		route: '/tuner',
+		icon: 'tuner',
+		placement: 'primary',
+		accent: 'coral'
+	},
+	{
+		name: WORDS.tools.metronome.label,
 		route: '/metronome',
 		icon: 'metronome',
 		placement: 'primary',
 		accent: 'sun'
 	},
-	{ name: 'Scales', route: '/scales', icon: 'scale', placement: 'primary', accent: 'peri' },
-	{ name: 'Chords', route: '/chords', icon: 'chord', placement: 'primary', accent: 'mint' },
-	{ name: 'Ear Training', route: '/ear', icon: 'ear', placement: 'primary', accent: 'rose' },
-	{ name: 'Settings', route: '/settings', icon: 'settings', placement: 'footer' }
+	{
+		name: WORDS.tools.scales.label,
+		route: '/scales',
+		icon: 'scale',
+		placement: 'primary',
+		accent: 'peri'
+	},
+	{
+		name: WORDS.tools.chords.label,
+		route: '/chords',
+		icon: 'chord',
+		placement: 'primary',
+		accent: 'mint'
+	},
+	{
+		name: WORDS.tools.ear.label,
+		route: '/ear',
+		icon: 'ear',
+		placement: 'primary',
+		accent: 'rose'
+	},
+	{ name: WORDS.tools.settings.label, route: '/settings', icon: 'settings', placement: 'footer' }
 ];
 
 export function isRouteActive(route: AppRoute, pathname: string) {
@@ -161,9 +208,11 @@ export function isRouteActive(route: AppRoute, pathname: string) {
 
 export function getDocumentTitle(pathname: string) {
 	const route = Object.values(routeMetadata).find((metadata) => metadata.path === pathname);
-	const title = route?.title ?? 'SoundStage';
+	const title = route?.title ?? WORDS.app.document.defaultTitle;
 
-	return title === 'SoundStage' ? title : `${title} · SoundStage`;
+	return title === WORDS.app.document.defaultTitle
+		? title
+		: `${title}${WORDS.app.document.separator}${WORDS.app.brand.full}`;
 }
 
 export function getToolByRoute(route: AppRoute) {

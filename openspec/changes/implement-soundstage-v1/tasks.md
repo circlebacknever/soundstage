@@ -19,13 +19,13 @@
 
 ## 3. UI Copy Catalog
 
-- [ ] 3.1 Test first in `src/lib/content`: exact v1 labels, headings, button text, document titles, helper text, ARIA labels, placeholder prose, and status copy match the OpenSpec strings.
-- [ ] 3.2 Implement a first-party `WORDS` boundary in `src/lib/content` that exposes grouped UI copy through a small typed interface.
-- [ ] 3.3 Move tool labels, subtitles, document titles, nav labels, deferred placeholder copy, screen headings, button labels, ARIA labels, and status prose behind `WORDS`.
-- [ ] 3.4 Keep route paths, icon IDs, accent tokens, CSS tokens, numeric readouts, note letters, cents values, BPM values, scale formulas, and generated music facts outside `WORDS`, with generated music facts owned by `src/lib/music`.
-- [ ] 3.5 Update app, tool, and UI implementation guidance so agents know `src/lib/content` owns user-visible copy and `src/lib/app` owns route/tool structure.
-- [ ] 3.6 Update existing app metadata tests so launcher, sidebar, route title, and deferred placeholder behavior still match the specs after consuming `WORDS`.
-- [ ] 3.7 Run focused content and app tests, Svelte checks, and `openspec validate implement-soundstage-v1`.
+- [x] 3.1 Test first in `src/lib/content`: exact v1 labels, headings, button text, document titles, helper text, ARIA labels, placeholder prose, and status copy match the OpenSpec strings.
+- [x] 3.2 Implement a first-party `WORDS` boundary in `src/lib/content` that exposes grouped UI copy through a small typed interface.
+- [x] 3.3 Move tool labels, subtitles, document titles, nav labels, deferred placeholder copy, screen headings, button labels, ARIA labels, and status prose behind `WORDS`.
+- [x] 3.4 Keep route paths, icon IDs, accent tokens, CSS tokens, numeric readouts, note letters, cents values, BPM values, scale formulas, and generated music facts outside `WORDS`, with generated music facts owned by `src/lib/music`.
+- [x] 3.5 Update app, tool, and UI implementation guidance so agents know `src/lib/content` owns user-visible copy and `src/lib/app` owns route/tool structure.
+- [x] 3.6 Update existing app metadata tests so launcher, sidebar, route title, and deferred placeholder behavior still match the specs after consuming `WORDS`.
+- [x] 3.7 Run focused content and app tests, Svelte checks, and `openspec validate implement-soundstage-v1`.
 
 ## 4. Local State and Music Math
 
