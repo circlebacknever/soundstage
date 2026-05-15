@@ -1,3 +1,3 @@
-# allow crawling everything by default
+# Block all crawlers, including AI crawlers that honor robots.txt.
 User-agent: *
-Disallow:
+Disallow: /
