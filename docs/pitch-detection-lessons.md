@@ -109,3 +109,10 @@ Record each lesson result here during implementation. Include the focused test, 
 - What passed: `periodLengthToFrequency(...)` converts period length and sample rate into hertz, and `estimateFrequency(...)` returns expected 1 Hz and 2 Hz estimates from clean generated sine buffers while preserving period rejection reasons.
 - What the code proves: frequency is cycles per second, so `sampleRate / periodLength` converts samples-per-second divided by samples-per-cycle into cycles-per-second. The estimator now chooses the smallest clear repeating period so larger repeated copies do not halve the detected frequency in clean generated buffers.
 - Next signal problem: frequency is still raw hertz, so Lesson 5 maps accepted frequencies to musical note names and cents offsets.
+
+### Lesson 5: Note and cents mapping
+
+- Focused tests: `src/lib/music/notes.test.ts` and `src/lib/audio/pitch.test.ts`
+- What passed: `nearestNoteFromFrequency(...)` maps 440 Hz to A4 with 0 cents, maps slightly sharp A4 input to positive cents, and maps slightly flat A4 input to negative cents. `estimatePitch(...)` now turns accepted clean generated samples into A4 pitch feedback and preserves quiet or period rejection reasons.
+- What the code proves: hertz becomes musical feedback through `src/lib/music`, where note names, target frequencies, and cents math belong. `src/lib/audio` owns the detector sequence and hands accepted frequency estimates to the music boundary rather than duplicating note formulas.
+- Next signal problem: an accepted note can still be a bad guess when the waveform is noisy or ambiguous, so Lesson 6 adds confidence scoring and ambiguous-input rejection.

@@ -1,3 +1,5 @@
+import { nearestNoteFromFrequency, type FrequencyNoteEstimate } from '../music/index.ts';
+
 export type TimeDomainBuffer = {
 	frequency: number;
 	sampleRate: number;
@@ -48,9 +50,27 @@ export type FrequencyEstimateResult =
 			reason: 'not-enough-cycles' | 'no-clear-period';
 	  };
 
+export type PitchEstimateOptions = {
+	quietThreshold?: number;
+	concertA?: number;
+};
+
+export type PitchEstimateResult =
+	| {
+			ok: true;
+			reason: 'pitch-detected';
+			frequency: number;
+			note: FrequencyNoteEstimate;
+	  }
+	| {
+			ok: false;
+			reason: 'quiet-input' | 'not-enough-cycles' | 'no-clear-period';
+	  };
+
 const MIN_PERIOD_LENGTH = 4;
 const MIN_CYCLES_FOR_PERIOD_COMPARISON = 2;
 const MAX_CLEAN_WAVEFORM_ERROR = 0.001;
+const DEFAULT_QUIET_THRESHOLD = 0.02;
 
 function assertFinitePositive(value: number, label: string) {
 	if (!Number.isFinite(value) || value <= 0) {
@@ -211,5 +231,30 @@ export function estimateFrequency(
 		ok: true,
 		reason: 'frequency-detected',
 		frequency: periodLengthToFrequency(period.periodLength, sampleRate)
+	};
+}
+
+export function estimatePitch(
+	samples: Float32Array,
+	sampleRate: number,
+	{ quietThreshold = DEFAULT_QUIET_THRESHOLD, concertA = 440 }: PitchEstimateOptions = {}
+): PitchEstimateResult {
+	const inputLevel = evaluateInputLevel(samples, { quietThreshold });
+
+	if (!inputLevel.ok) {
+		return inputLevel;
+	}
+
+	const frequency = estimateFrequency(samples, sampleRate);
+
+	if (!frequency.ok) {
+		return frequency;
+	}
+
+	return {
+		ok: true,
+		reason: 'pitch-detected',
+		frequency: frequency.frequency,
+		note: nearestNoteFromFrequency(frequency.frequency, concertA)
 	};
 }
