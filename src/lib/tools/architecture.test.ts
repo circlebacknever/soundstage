@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, it } from 'node:test';
+import { describe, it } from 'vitest';
 
 const root = new URL('../../..', import.meta.url).pathname;
 const readProjectFile = (path: string) => readFileSync(join(root, path), 'utf8');

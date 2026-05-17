@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { describe, it } from 'node:test';
+import { describe, it } from 'vitest';
 
 const indexSource = readFileSync(new URL('./index.ts', import.meta.url), 'utf8');
 

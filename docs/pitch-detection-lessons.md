@@ -13,6 +13,10 @@ For each lesson:
 5. Implement the smallest code that passes the test.
 6. Record what the code now proves and which signal problem comes next.
 
+During knowledge checks, guide before telling. If the user gives a partial or uncertain answer, ask one targeted follow-up question before giving a hint, correction, or completed answer. If the answer remains vague, keep narrowing the question until the user reaches the answer or asks to stop.
+
+This lesson group is not complete when the code merely works. It is complete only after the user passes a quiz covering all eight stages and explicitly confirms the material is understood.
+
 ## Lesson Checkpoints
 
 1. Waveform samples and generated sine buffers
@@ -77,3 +81,10 @@ For each lesson:
 ## Lesson Log
 
 Record each lesson result here during implementation. Include the focused test, what passed, and the next signal problem.
+
+### Lesson 1: Waveform samples and generated sine buffers
+
+- Focused test: `src/lib/audio/waveform.test.ts`
+- What passed: `generateSineWave(...)` returns a deterministic time-domain buffer with the requested `frequency`, `sampleRate`, and `sampleCount`. The test proves a 1 Hz wave sampled 4 times per second produces the expected first-cycle shape: `0`, `1`, `0`, `-1`.
+- What the code proves: a sample index can be converted to seconds with `index / sampleRate`, seconds can be converted to completed cycles with `frequency * seconds`, and cycles can be converted to radians with `cycles * 2 * Math.PI`.
+- Next signal problem: real microphone input may be silent or too weak, so Lesson 2 measures RMS input level before attempting period detection.

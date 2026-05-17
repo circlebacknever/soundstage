@@ -37,9 +37,28 @@ The pitch detection work SHALL include teaching checkpoints before and after eac
 - **WHEN** work starts on a pitch-detection stage
 - **THEN** the engineer explains the concept in plain language, names the focused test that will prove it, and identifies the module boundary being built
 
+#### Scenario: User answer is incomplete
+- **WHEN** the user gives a partial or uncertain answer during a lesson checkpoint
+- **THEN** the engineer asks a targeted follow-up question before giving a hint, correction, or completed answer
+
+#### Scenario: User answer remains vague
+- **WHEN** the user's follow-up answer is still vague or incomplete
+- **THEN** the engineer continues with smaller guiding questions until the user reaches the answer or asks to stop
+
 #### Scenario: Lesson checkpoint completes
 - **WHEN** the stage implementation passes its focused tests
 - **THEN** the engineer summarizes what the code now proves, what signal problem remains, and how the next stage follows from it
+
+### Requirement: Pitch detection comprehension gate
+The pitch detection lesson group SHALL remain incomplete until the user demonstrates understanding through a quiz and explicitly confirms the material is understood.
+
+#### Scenario: Lesson group is ready for completion
+- **WHEN** every pitch-detection lesson stage has passing focused tests and updated lesson notes
+- **THEN** the engineer gives the user a quiz covering waveform samples, RMS input level, period length, frequency conversion, note and cents mapping, confidence, smoothing, and live analyser integration
+
+#### Scenario: Lesson group is marked complete
+- **WHEN** the user passes the quiz and confirms they understand the material
+- **THEN** the pitch-detection lesson group may be marked complete in the task list
 
 ### Requirement: Pitch detection lesson order
 The pitch detection teaching plan SHALL proceed in this order: waveform samples and generated sine buffers, RMS input level, period estimation, frequency conversion, note and cents mapping, confidence scoring, smoothing and hysteresis, then live microphone integration.

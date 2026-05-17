@@ -26,4 +26,4 @@ Keep route-facing interfaces small and domain-shaped. Route code should ask for 
 
 Prefer pure functions in `music` and state-transition helpers. Keep browser-only APIs inside `audio` and `state` boundaries.
 
-Use `npm run test:unit -- <path-to-test>` for focused TypeScript tests. Use `npm run test:svelte` for Svelte compiler and type checks. Use `npm test` for both full checks.
+Use `npm run test -- <path-to-test>` for focused Vitest tests. Use `npm run test` for the full Vitest suite. Use `npm run test:svelte` for Svelte compiler and type checks.

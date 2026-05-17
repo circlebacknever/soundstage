@@ -40,7 +40,7 @@
 
 ## 5. Pitch Detection Lesson Plan
 
-- [ ] 5.1 Lesson 1, waveform samples: explain time-domain buffers and generated sine waves, then test generated buffers in `src/lib/audio` test helpers before using them anywhere else.
+- [x] 5.1 Lesson 1, waveform samples: explain time-domain buffers and generated sine waves, then test generated buffers in `src/lib/audio` test helpers before using them anywhere else.
 - [ ] 5.2 Lesson 2, input level: explain RMS as signal strength, test quiet and audible buffers, then implement input-level measurement and quiet-input rejection in `src/lib/audio`.
 - [ ] 5.3 Lesson 3, period length: explain repeated waveform period and `frequency = sampleRate / periodLength`, test known sine-wave periods, then implement first-party period estimation in `src/lib/audio`.
 - [ ] 5.4 Lesson 4, frequency: explain conversion from period length to hertz, test expected frequencies from generated buffers, then implement frequency estimation.
@@ -49,6 +49,7 @@
 - [ ] 5.7 Lesson 7, smoothing: explain moving windows and hysteresis, test jittery estimate sequences, then implement stable pitch smoothing without Kalman filtering.
 - [ ] 5.8 Lesson 8, live mic integration: explain how analyser buffers feed the tested detector, then connect live microphone samples only after generated-buffer tests pass.
 - [ ] 5.9 After each lesson, update the lesson note with what the code proves, what remains uncertain, and the next signal problem.
+- [ ] 5.10 Keep this lesson group incomplete until the user passes a quiz covering the lesson concepts and explicitly confirms the material is understood.
 
 ## 6. Microphone Permission and Audio Boundary
 

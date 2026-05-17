@@ -86,10 +86,13 @@ Before each pitch-detection lesson stage, explain the signal concept, name the f
 
 Use focused checks first:
 
-- `npm run test:unit -- <path-to-test>`
-- `npm run test:unit:all`
+- `npm run test -- <path-to-test>` for a focused Vitest run
+- `npm run test` for all Vitest tests
 - `npm run test:svelte`
-- `npm test`
 - `openspec validate implement-soundstage-v1`
 
 Full `npm run lint` currently scans generated and handoff files too. Prefer targeted Prettier and ESLint checks for changed source files unless the lint inputs are narrowed.
+
+## Package Manager Policy
+
+Project npm installs use a two-day release cooling period through `.npmrc` with `min-release-age=2`. Do not bypass it with `--before`, `--force`, alternate package managers, or old npm versions. The project requires npm `>=11.10.0` because that is the npm line that supports the release-age gate.
