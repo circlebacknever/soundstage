@@ -116,3 +116,10 @@ Record each lesson result here during implementation. Include the focused test, 
 - What passed: `nearestNoteFromFrequency(...)` maps 440 Hz to A4 with 0 cents, maps slightly sharp A4 input to positive cents, and maps slightly flat A4 input to negative cents. `estimatePitch(...)` now turns accepted clean generated samples into A4 pitch feedback and preserves quiet or period rejection reasons.
 - What the code proves: hertz becomes musical feedback through `src/lib/music`, where note names, target frequencies, and cents math belong. `src/lib/audio` owns the detector sequence and hands accepted frequency estimates to the music boundary rather than duplicating note formulas.
 - Next signal problem: an accepted note can still be a bad guess when the waveform is noisy or ambiguous, so Lesson 6 adds confidence scoring and ambiguous-input rejection.
+
+### Lesson 6: Confidence scoring
+
+- Focused test: `src/lib/audio/confidence.test.ts`
+- What passed: `estimatePitch(...)` reports high confidence for a clean generated A4 buffer, rejects audible unclear input with `unclear-pitch`, and keeps the smallest clear period so a clean repeated wave does not drop an octave.
+- What the code proves: confidence is shape agreement, not loudness. The detector compares a shifted copy of the waveform against the original, normalizes the shift error by signal power, and accepts a candidate period only when it is a confidence peak rather than a tiny nearby slide that merely looks similar.
+- Next signal problem: accepted estimates can still jump around frame to frame, so Lesson 7 adds smoothing and hysteresis before UI tools treat a note as stable.

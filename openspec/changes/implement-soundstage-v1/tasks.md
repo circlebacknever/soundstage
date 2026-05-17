@@ -45,7 +45,7 @@
 - [x] 5.3 Lesson 3, period length: explain repeated waveform period and `frequency = sampleRate / periodLength`, test known sine-wave periods, then implement first-party period estimation in `src/lib/audio`.
 - [x] 5.4 Lesson 4, frequency: explain conversion from period length to hertz, test expected frequencies from generated buffers, then implement frequency estimation.
 - [x] 5.5 Lesson 5, note and cents mapping: explain nearest note and cents offset, test A4, sharp, and flat cases, then connect detector output to `src/lib/music` note helpers.
-- [ ] 5.6 Lesson 6, confidence: explain ambiguous periodicity and octave mistakes, test noisy and unclear buffers, then implement confidence scoring and ambiguous-input rejection.
+- [x] 5.6 Lesson 6, confidence: explain ambiguous periodicity and octave mistakes, test noisy and unclear buffers, then implement confidence scoring and ambiguous-input rejection.
 - [ ] 5.7 Lesson 7, smoothing: explain moving windows and hysteresis, test jittery estimate sequences, then implement stable pitch smoothing without Kalman filtering.
 - [ ] 5.8 Lesson 8, live mic integration: explain how analyser buffers feed the tested detector, then connect live microphone samples only after generated-buffer tests pass.
 - [ ] 5.9 After each lesson, update the lesson note with what the code proves, what remains uncertain, and the next signal problem.
