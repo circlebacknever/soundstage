@@ -95,3 +95,10 @@ Record each lesson result here during implementation. Include the focused test, 
 - What passed: `measureRms(...)` returns `0` for empty or silent buffers, measures `[1, -1, 1, -1]` as a strong signal with RMS `1`, and measures `[0.1, -0.1, 0.1, -0.1]` as RMS `0.1` without positive and negative samples canceling out.
 - What the code proves: signal strength needs square, mean, then square root. `evaluateInputLevel(...)` uses that RMS value internally to reject input below a configured quiet threshold before later pitch stages try to find a waveform period, while callers receive only `usable-input` or `quiet-input` so the measurement technique can change later.
 - Next signal problem: an audible signal can still be the wrong shape or too ambiguous, so Lesson 3 looks for a repeated period in generated buffers.
+
+### Lesson 3: Period length
+
+- Focused test: `src/lib/audio/period.test.ts`
+- What passed: `estimatePeriodLength(...)` detects clean generated sine buffers with 4-sample and 8-sample periods, and rejects a short buffer that does not contain enough repeated waveform to compare cycles.
+- What the code proves: one period is the shift where the waveform best matches itself again. The first estimator compares samples against shifted copies of the same buffer and returns the smallest clear repeating period with a domain reason.
+- Next signal problem: a period length is still measured in samples, so Lesson 4 converts period length into hertz with `frequency = sampleRate / periodLength`.

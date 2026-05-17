@@ -26,6 +26,21 @@ export type InputLevelResult =
 			reason: 'quiet-input';
 	  };
 
+export type PeriodLengthResult =
+	| {
+			ok: true;
+			reason: 'period-detected';
+			periodLength: number;
+	  }
+	| {
+			ok: false;
+			reason: 'not-enough-cycles' | 'no-clear-period';
+	  };
+
+const MIN_PERIOD_LENGTH = 4;
+const MIN_CYCLES_FOR_PERIOD_COMPARISON = 2;
+const MAX_CLEAN_WAVEFORM_ERROR = 0.001;
+
 function assertFinitePositive(value: number, label: string) {
 	if (!Number.isFinite(value) || value <= 0) {
 		throw new RangeError(`${label} must be a finite positive number`);
@@ -119,5 +134,52 @@ export function evaluateInputLevel(
 	return {
 		ok: true,
 		reason: 'usable-input'
+	};
+}
+
+function meanSquaredShiftError(samples: Float32Array, periodLength: number) {
+	let sumOfSquares = 0;
+	const comparisonCount = samples.length - periodLength;
+
+	for (let index = 0; index < comparisonCount; index += 1) {
+		const difference = samples[index] - samples[index + periodLength];
+		sumOfSquares += difference * difference;
+	}
+
+	return sumOfSquares / comparisonCount;
+}
+
+export function estimatePeriodLength(samples: Float32Array): PeriodLengthResult {
+	if (samples.length < MIN_PERIOD_LENGTH * MIN_CYCLES_FOR_PERIOD_COMPARISON) {
+		return {
+			ok: false,
+			reason: 'not-enough-cycles'
+		};
+	}
+
+	const maxPeriodLength = Math.floor(samples.length / MIN_CYCLES_FOR_PERIOD_COMPARISON);
+	let bestPeriodLength: number | undefined;
+	let bestError = Number.POSITIVE_INFINITY;
+
+	for (let periodLength = MIN_PERIOD_LENGTH; periodLength <= maxPeriodLength; periodLength += 1) {
+		const error = meanSquaredShiftError(samples, periodLength);
+
+		if (error < bestError) {
+			bestError = error;
+			bestPeriodLength = periodLength;
+		}
+	}
+
+	if (bestPeriodLength === undefined || bestError > MAX_CLEAN_WAVEFORM_ERROR) {
+		return {
+			ok: false,
+			reason: 'no-clear-period'
+		};
+	}
+
+	return {
+		ok: true,
+		reason: 'period-detected',
+		periodLength: bestPeriodLength
 	};
 }
