@@ -37,6 +37,17 @@ export type PeriodLengthResult =
 			reason: 'not-enough-cycles' | 'no-clear-period';
 	  };
 
+export type FrequencyEstimateResult =
+	| {
+			ok: true;
+			reason: 'frequency-detected';
+			frequency: number;
+	  }
+	| {
+			ok: false;
+			reason: 'not-enough-cycles' | 'no-clear-period';
+	  };
+
 const MIN_PERIOD_LENGTH = 4;
 const MIN_CYCLES_FOR_PERIOD_COMPARISON = 2;
 const MAX_CLEAN_WAVEFORM_ERROR = 0.001;
@@ -158,28 +169,47 @@ export function estimatePeriodLength(samples: Float32Array): PeriodLengthResult 
 	}
 
 	const maxPeriodLength = Math.floor(samples.length / MIN_CYCLES_FOR_PERIOD_COMPARISON);
-	let bestPeriodLength: number | undefined;
-	let bestError = Number.POSITIVE_INFINITY;
 
 	for (let periodLength = MIN_PERIOD_LENGTH; periodLength <= maxPeriodLength; periodLength += 1) {
 		const error = meanSquaredShiftError(samples, periodLength);
 
-		if (error < bestError) {
-			bestError = error;
-			bestPeriodLength = periodLength;
+		if (error <= MAX_CLEAN_WAVEFORM_ERROR) {
+			return {
+				ok: true,
+				reason: 'period-detected',
+				periodLength
+			};
 		}
 	}
 
-	if (bestPeriodLength === undefined || bestError > MAX_CLEAN_WAVEFORM_ERROR) {
-		return {
-			ok: false,
-			reason: 'no-clear-period'
-		};
+	return {
+		ok: false,
+		reason: 'no-clear-period'
+	};
+}
+
+export function periodLengthToFrequency(periodLength: number, sampleRate: number): number {
+	assertFinitePositive(periodLength, 'periodLength');
+	assertFinitePositive(sampleRate, 'sampleRate');
+
+	return sampleRate / periodLength;
+}
+
+export function estimateFrequency(
+	samples: Float32Array,
+	sampleRate: number
+): FrequencyEstimateResult {
+	assertFinitePositive(sampleRate, 'sampleRate');
+
+	const period = estimatePeriodLength(samples);
+
+	if (!period.ok) {
+		return period;
 	}
 
 	return {
 		ok: true,
-		reason: 'period-detected',
-		periodLength: bestPeriodLength
+		reason: 'frequency-detected',
+		frequency: periodLengthToFrequency(period.periodLength, sampleRate)
 	};
 }

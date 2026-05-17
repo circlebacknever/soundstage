@@ -102,3 +102,10 @@ Record each lesson result here during implementation. Include the focused test, 
 - What passed: `estimatePeriodLength(...)` detects clean generated sine buffers with 4-sample and 8-sample periods, and rejects a short buffer that does not contain enough repeated waveform to compare cycles.
 - What the code proves: one period is the shift where the waveform best matches itself again. The first estimator compares samples against shifted copies of the same buffer and returns the smallest clear repeating period with a domain reason.
 - Next signal problem: a period length is still measured in samples, so Lesson 4 converts period length into hertz with `frequency = sampleRate / periodLength`.
+
+### Lesson 4: Frequency conversion
+
+- Focused test: `src/lib/audio/frequency.test.ts`
+- What passed: `periodLengthToFrequency(...)` converts period length and sample rate into hertz, and `estimateFrequency(...)` returns expected 1 Hz and 2 Hz estimates from clean generated sine buffers while preserving period rejection reasons.
+- What the code proves: frequency is cycles per second, so `sampleRate / periodLength` converts samples-per-second divided by samples-per-cycle into cycles-per-second. The estimator now chooses the smallest clear repeating period so larger repeated copies do not halve the detected frequency in clean generated buffers.
+- Next signal problem: frequency is still raw hertz, so Lesson 5 maps accepted frequencies to musical note names and cents offsets.
