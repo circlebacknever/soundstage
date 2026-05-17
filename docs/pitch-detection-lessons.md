@@ -88,3 +88,10 @@ Record each lesson result here during implementation. Include the focused test, 
 - What passed: `generateSineWave(...)` returns a deterministic time-domain buffer with the requested `frequency`, `sampleRate`, and `sampleCount`. The test proves a 1 Hz wave sampled 4 times per second produces the expected first-cycle shape: `0`, `1`, `0`, `-1`.
 - What the code proves: a sample index can be converted to seconds with `index / sampleRate`, seconds can be converted to completed cycles with `frequency * seconds`, and cycles can be converted to radians with `cycles * 2 * Math.PI`.
 - Next signal problem: real microphone input may be silent or too weak, so Lesson 2 measures RMS input level before attempting period detection.
+
+### Lesson 2: RMS input level
+
+- Focused test: `src/lib/audio/input-level.test.ts`
+- What passed: `measureRms(...)` returns `0` for empty or silent buffers, measures `[1, -1, 1, -1]` as a strong signal with RMS `1`, and measures `[0.1, -0.1, 0.1, -0.1]` as RMS `0.1` without positive and negative samples canceling out.
+- What the code proves: signal strength needs square, mean, then square root. `evaluateInputLevel(...)` uses that RMS value internally to reject input below a configured quiet threshold before later pitch stages try to find a waveform period, while callers receive only `usable-input` or `quiet-input` so the measurement technique can change later.
+- Next signal problem: an audible signal can still be the wrong shape or too ambiguous, so Lesson 3 looks for a repeated period in generated buffers.

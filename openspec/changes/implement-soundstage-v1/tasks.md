@@ -41,7 +41,7 @@
 ## 5. Pitch Detection Lesson Plan
 
 - [x] 5.1 Lesson 1, waveform samples: explain time-domain buffers and generated sine waves, then test generated buffers in `src/lib/audio` test helpers before using them anywhere else.
-- [ ] 5.2 Lesson 2, input level: explain RMS as signal strength, test quiet and audible buffers, then implement input-level measurement and quiet-input rejection in `src/lib/audio`.
+- [x] 5.2 Lesson 2, input level: explain RMS as signal strength, test quiet and audible buffers, then implement input-level measurement and quiet-input rejection in `src/lib/audio`.
 - [ ] 5.3 Lesson 3, period length: explain repeated waveform period and `frequency = sampleRate / periodLength`, test known sine-wave periods, then implement first-party period estimation in `src/lib/audio`.
 - [ ] 5.4 Lesson 4, frequency: explain conversion from period length to hertz, test expected frequencies from generated buffers, then implement frequency estimation.
 - [ ] 5.5 Lesson 5, note and cents mapping: explain nearest note and cents offset, test A4, sharp, and flat cases, then connect detector output to `src/lib/music` note helpers.
