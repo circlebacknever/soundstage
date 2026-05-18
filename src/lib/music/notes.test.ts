@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
 import {
-	centsBetween,
+	CHROMATIC_NOTE_NAMES,
+	centsBetweenFrequencies,
 	frequencyForMidiNote,
 	nearestNoteFromFrequency,
-	noteFromMidi,
-	NOTE_NAMES
+	noteFromMidi
 } from './index.ts';
 
 function assertApproximately(actual: number, expected: number, tolerance = 0.001) {
@@ -18,8 +18,21 @@ function assertApproximately(actual: number, expected: number, tolerance = 0.001
 }
 
 describe('music note math', () => {
-	it('defines chromatic note names in MIDI pitch-class order', () => {
-		assert.deepEqual(NOTE_NAMES, ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']);
+	it('defines chromatic note names in MIDI note-number order', () => {
+		assert.deepEqual(CHROMATIC_NOTE_NAMES, [
+			'C',
+			'C#',
+			'D',
+			'D#',
+			'E',
+			'F',
+			'F#',
+			'G',
+			'G#',
+			'A',
+			'A#',
+			'B'
+		]);
 	});
 
 	it('converts MIDI notes to note names, octave labels, and target frequencies', () => {
@@ -68,8 +81,8 @@ describe('music note math', () => {
 	});
 
 	it('calculates cents between an input frequency and a target frequency', () => {
-		assert.equal(centsBetween(440, 440), 0);
-		assertApproximately(centsBetween(880, 440), 1200);
-		assertApproximately(centsBetween(440 * 2 ** (-5 / 1200), 440), -5);
+		assert.equal(centsBetweenFrequencies(440, 440), 0);
+		assertApproximately(centsBetweenFrequencies(880, 440), 1200);
+		assertApproximately(centsBetweenFrequencies(440 * 2 ** (-5 / 1200), 440), -5);
 	});
 });

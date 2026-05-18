@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { estimateFrequency, generateSineWave, periodLengthToFrequency } from './index.ts';
+import { periodLengthToFrequency } from './period.ts';
+import { estimateFrequency } from './pitch.ts';
+import { generateSineWave } from './waveform.ts';
 
 function assertApproximately(actual: number, expected: number, tolerance = 0.000001) {
 	assert.equal(

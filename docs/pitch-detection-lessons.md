@@ -123,3 +123,10 @@ Record each lesson result here during implementation. Include the focused test, 
 - What passed: `estimatePitch(...)` reports high confidence for a clean generated A4 buffer, rejects audible unclear input with `unclear-pitch`, and keeps the smallest clear period so a clean repeated wave does not drop an octave.
 - What the code proves: confidence is shape agreement, not loudness. The detector compares a shifted copy of the waveform against the original, normalizes the shift error by signal power, and accepts a candidate period only when it is a confidence peak rather than a tiny nearby slide that merely looks similar.
 - Next signal problem: accepted estimates can still jump around frame to frame, so Lesson 7 adds smoothing and hysteresis before UI tools treat a note as stable.
+
+### Lesson 7: Smoothing and hysteresis
+
+- Focused test: `src/lib/audio/stable-pitch.test.ts`
+- What passed: `buildStablePitchState(...)` withholds stable output until enough recent estimates agree, keeps the current stable note through a jittery outlier, changes to a new note only after that note settles, clears stable output after repeated rejected estimates, and lets tools choose faster or stricter stability rules through `StablePitchOptions`.
+- What the code proves: smoothing is a state rule over pitch estimates, not another waveform detector. A moving window counts recent agreement, while hysteresis keeps the previous stable note during short bursts of disagreement so tuner and scale practice UI do not twitch at every buffer.
+- Next signal problem: the detector is still fed by generated buffers or synthetic estimates, so Lesson 8 connects browser analyser buffers to the same tested detector boundary.

@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { estimatePeriodLength, generateSineWave } from './index.ts';
+import { estimatePeriodLength } from './period.ts';
+import { generateSineWave } from './waveform.ts';
 
 describe('audio period estimation', () => {
 	it('estimates how many samples make one cycle in clean generated sine buffers', () => {

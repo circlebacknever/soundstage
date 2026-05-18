@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { estimateFrequency, estimatePitch, generateSineWave } from './index.ts';
+import { estimateFrequency, estimatePitch } from './pitch.ts';
+import { generateSineWave } from './waveform.ts';
 
 describe('audio pitch confidence', () => {
 	it('reports high confidence for a clean repeated waveform', () => {

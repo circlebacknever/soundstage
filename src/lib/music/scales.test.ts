@@ -4,14 +4,14 @@ import { describe, it } from 'vitest';
 import {
 	buildScaleFretboard,
 	buildScaleSequence,
-	ROOT_KEYS,
-	SCALE_FORMULAS,
+	NATURAL_ROOT_KEYS,
+	SCALE_INTERVALS_BY_TYPE,
 	STANDARD_GUITAR_FRETS
 } from './index.ts';
 
-describe('scale formulas and fretboard mapping', () => {
-	it('defines v1 scale formulas as semitone offsets from the root', () => {
-		assert.deepEqual(SCALE_FORMULAS, {
+describe('scale intervals and fretboard mapping', () => {
+	it('defines v1 scale intervals as semitone offsets from the root', () => {
+		assert.deepEqual(SCALE_INTERVALS_BY_TYPE, {
 			major: [0, 2, 4, 5, 7, 9, 11, 12],
 			minor: [0, 2, 3, 5, 7, 8, 10, 12],
 			pentatonic: [0, 2, 4, 7, 9, 12],
@@ -21,9 +21,9 @@ describe('scale formulas and fretboard mapping', () => {
 	});
 
 	it('keeps v1 root keys to whole-note roots', () => {
-		assert.deepEqual(ROOT_KEYS, ['C', 'D', 'E', 'F', 'G', 'A', 'B']);
+		assert.deepEqual(NATURAL_ROOT_KEYS, ['C', 'D', 'E', 'F', 'G', 'A', 'B']);
 
-		for (const rootKey of ROOT_KEYS) {
+		for (const rootKey of NATURAL_ROOT_KEYS) {
 			const sequence = buildScaleSequence(rootKey, 'major');
 			assert.equal(sequence[0], rootKey);
 			assert.equal(sequence.at(-1), rootKey);

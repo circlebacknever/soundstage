@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { estimatePitch, generateSineWave } from './index.ts';
+import { estimatePitch } from './pitch.ts';
+import { generateSineWave } from './waveform.ts';
 
 function assertApproximately(actual: number, expected: number, tolerance = 0.000001) {
 	assert.equal(

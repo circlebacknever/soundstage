@@ -62,6 +62,21 @@ Keep the module boundaries plain:
 
 Avoid shallow pass-through wrappers. A shared function should hide real complexity or express a clearer domain boundary.
 
+## Dependency and Seam Discipline
+
+Before deepening a module, classify its dependencies. The dependency category decides how the module is tested across its seam.
+
+- In-process: pure computation, in-memory state, and no I/O. Deepen directly, keep the seam internal, and test through the module interface. Audio pitch math and music theory helpers are in-process.
+- Local-substitutable: dependencies with local stand-ins such as an in-memory filesystem or PGLite. Deepen only when the stand-in runs in tests. Keep the stand-in seam internal rather than adding a public port.
+- Remote but owned: internal services across a network boundary. Define a port at the seam, put logic in the deep module, use an HTTP/gRPC/queue adapter in production, and use an in-memory adapter in tests.
+- True external: third-party services the project does not control. Inject a port for the external dependency and test with a mock adapter.
+
+One adapter is a hypothetical seam. Two adapters prove a real seam. Do not add a port unless at least two adapters are justified, usually production plus test. A single-adapter seam is just ceremony with a hat.
+
+Internal seams may exist inside a deep module for implementation and focused tests. Do not expose those seams through the module's public interface just because tests use them. Product callers should depend on domain-level outputs, while lesson or implementation tests may import narrower internal files when OpenSpec explicitly requires teaching evidence.
+
+When a shallow module is deepened, replace tests rather than layering them. Tests should assert observable outcomes through the deep module interface. Keep tests on internal seams only when that seam is a deliberate teaching artifact, diagnostic boundary, or independently meaningful pure computation.
+
 ## Naming Decisions
 
 `src/lib/content` exports its catalog as `WORDS`. The screaming case is intentional: mildly deranged and still readable. This is the correct flavor for SoundStage copy because human-facing language deserves a little voltage while the call site stays obvious.

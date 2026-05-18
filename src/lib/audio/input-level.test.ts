@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { evaluateInputLevel, measureRms } from './index.ts';
+import { evaluateInputLevel, measureRms } from './input-level.ts';
 
 function samples(values: number[]) {
 	return new Float32Array(values);
