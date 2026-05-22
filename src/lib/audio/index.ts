@@ -1,3 +1,5 @@
+export { readLivePitchFrame } from './analyser.ts';
+export type { LivePitchFrame, LivePitchFrameOptions, TimeDomainAnalyser } from './analyser.ts';
 export { estimatePitch } from './pitch.ts';
 export type { AcceptedPitchEstimate, PitchEstimateOptions, PitchEstimateResult } from './pitch.ts';
 export {

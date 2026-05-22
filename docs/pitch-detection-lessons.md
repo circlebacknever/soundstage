@@ -130,3 +130,27 @@ Record each lesson result here during implementation. Include the focused test, 
 - What passed: `buildStablePitchState(...)` withholds stable output until enough recent estimates agree, keeps the current stable note through a jittery outlier, changes to a new note only after that note settles, clears stable output after repeated rejected estimates, and lets tools choose faster or stricter stability rules through `StablePitchOptions`.
 - What the code proves: smoothing is a state rule over pitch estimates, not another waveform detector. A moving window counts recent agreement, while hysteresis keeps the previous stable note during short bursts of disagreement so tuner and scale practice UI do not twitch at every buffer.
 - Next signal problem: the detector is still fed by generated buffers or synthetic estimates, so Lesson 8 connects browser analyser buffers to the same tested detector boundary.
+
+### Lesson 8: Live microphone integration
+
+- Focused test: `src/lib/audio/analyser.test.ts`
+- Text diagram:
+
+```text
+Microphone
+  -> getUserMedia({ audio: true }) permission request
+  -> MediaStream live mic tracks
+  -> AudioContext browser audio engine
+  -> MediaStreamSourceNode adapter
+  -> AnalyserNode rolling waveform frame
+  -> Float32Array samples
+  -> estimatePitch(samples, audioContext.sampleRate)
+  -> pitch result such as A4 at +3 cents
+  -> buildStablePitchState(...) for UI-safe output
+```
+
+- Recording boundary: SoundStage listens to the current analyser frame, analyzes it, then discards it. `MediaRecorder` is not part of this flow, so Lesson 8 does not save microphone audio.
+- What passed: `readAnalyserSamples(...)` copies an analyser time-domain frame into a fresh detector buffer, and `readLivePitchFrame(...)` feeds that buffer through `estimatePitch(...)` and `buildStablePitchState(...)`. The focused test uses generated A4 samples inside a fake analyser frame so the live path is proven against the same signal shape as the earlier lessons.
+- What the code proves: analyser frames are just time-domain sample buffers once they cross the `src/lib/audio` boundary. Live microphone input can use the same detector and smoothing path that generated buffers already proved, while callers receive pitch and stable-state results instead of assembling buffer reads, pitch estimation, and smoothing by hand.
+- What remains uncertain: browser permission state, `AudioContext` setup, media stream cleanup, real microphone silence, and noisy-room behavior still need their own boundary and tests.
+- Next signal problem: Task group 6 builds the microphone permission flow and Web Audio analyser setup around this detector boundary.

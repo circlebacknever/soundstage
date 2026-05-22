@@ -47,8 +47,8 @@
 - [x] 5.5 Lesson 5, note and cents mapping: explain nearest note and cents offset, test A4, sharp, and flat cases, then connect detector output to `src/lib/music` note helpers.
 - [x] 5.6 Lesson 6, confidence: explain ambiguous periodicity and octave mistakes, test noisy and unclear buffers, then implement confidence scoring and ambiguous-input rejection.
 - [x] 5.7 Lesson 7, smoothing: explain moving windows and hysteresis, test jittery estimate sequences, then implement stable pitch smoothing without Kalman filtering.
-- [ ] 5.8 Lesson 8, live mic integration: explain how analyser buffers feed the tested detector, then connect live microphone samples only after generated-buffer tests pass.
-- [ ] 5.9 After each lesson, update the lesson note with what the code proves, what remains uncertain, and the next signal problem.
+- [x] 5.8 Lesson 8, live mic integration: explain how analyser buffers feed the tested detector, then connect live microphone samples only after generated-buffer tests pass.
+- [x] 5.9 After each lesson, update the lesson note with what the code proves, what remains uncertain, and the next signal problem.
 - [ ] 5.10 Keep this lesson group incomplete until the user passes a quiz covering the lesson concepts and explicitly confirms the material is understood.
 
 ## 6. Microphone Permission and Audio Boundary
