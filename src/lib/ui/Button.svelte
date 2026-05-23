@@ -16,6 +16,7 @@
 		ariaLabel?: string;
 		type?: 'button' | 'submit' | 'reset';
 		disabled?: boolean;
+		onclick?: (event: MouseEvent) => void;
 		class?: string;
 		children?: Snippet;
 	};
@@ -31,6 +32,7 @@
 		ariaLabel,
 		type = 'button',
 		disabled = false,
+		onclick,
 		class: className = '',
 		children
 	}: Props = $props();
@@ -59,7 +61,7 @@
 		{/if}
 	</a>
 {:else}
-	<button class={classes} {type} {disabled} aria-label={ariaLabel}>
+	<button class={classes} {type} {disabled} {onclick} aria-label={ariaLabel}>
 		{#if icon}
 			<Icon name={icon} tone={iconTone} size={iconOnly ? 20 : 18} />
 		{/if}

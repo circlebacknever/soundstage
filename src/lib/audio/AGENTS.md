@@ -16,6 +16,10 @@ Audio pitch math is currently in-process. Do not add ports, adapters, mocks, or 
 - `period.ts` owns period search, shift-confidence scoring, and period-to-frequency conversion.
 - `pitch.ts` owns the detector sequence that turns samples into accepted pitch estimates or rejection reasons.
 - `stable-pitch.ts` owns moving-window smoothing and hysteresis over accepted pitch estimates.
+- `analyser.ts` owns reading analyser time-domain frames into detector buffers.
+- `microphone-permission.ts` owns current-session microphone permission state and the `getUserMedia({ audio: true })` request wrapper.
+- `microphone-input-state.ts` owns mapping permission and pitch observations to microphone UI states such as unsupported browser, mic denied, silent input, and noisy input.
+- `microphone-analyser.ts` owns the live microphone source to analyser graph and exposes pitch frames without leaking Web Audio node setup to route files.
 - `assertions.ts` owns local numeric guards shared by audio modules.
 
 Keep Web Audio analyser and scheduler modules beside these files when those tasks arrive. Do not put browser node setup into pitch math modules.

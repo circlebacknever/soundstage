@@ -14,6 +14,8 @@ describe('SoundStage UI primitive exports', () => {
 			'DeferredToolPlaceholder',
 			'Fretboard',
 			'LauncherTile',
+			'MicrophoneErrorState',
+			'MicrophonePrePrompt',
 			'ModalFrame',
 			'SegmentedControl',
 			'SettingsRow',

@@ -49,16 +49,16 @@
 - [x] 5.7 Lesson 7, smoothing: explain moving windows and hysteresis, test jittery estimate sequences, then implement stable pitch smoothing without Kalman filtering.
 - [x] 5.8 Lesson 8, live mic integration: explain how analyser buffers feed the tested detector, then connect live microphone samples only after generated-buffer tests pass.
 - [x] 5.9 After each lesson, update the lesson note with what the code proves, what remains uncertain, and the next signal problem.
-- [ ] 5.10 Keep this lesson group incomplete until the user passes a quiz covering the lesson concepts and explicitly confirms the material is understood.
+- [x] 5.10 Keep this lesson group incomplete until the user passes a quiz covering the lesson concepts and explicitly confirms the material is understood.
 
 ## 6. Microphone Permission and Audio Boundary
 
-- [ ] 6.1 Test first in `src/lib/audio`: permission-state transitions for unknown, pending, granted, and denied.
-- [ ] 6.2 Implement browser-only microphone permission helpers around `navigator.mediaDevices.getUserMedia` in `src/lib/audio`.
-- [ ] 6.3 Test first in `src/lib/audio`: unsupported browser, denied access, silent input, and noisy input map to the correct UI state.
-- [ ] 6.4 Implement an analyser wrapper in `src/lib/audio` that supplies time-domain buffers to the pitch detector and hides Web Audio node setup from route files.
-- [ ] 6.5 Build the shared microphone pre-prompt UI as a mobile bottom sheet and tablet/desktop centered modal under `src/lib/ui`.
-- [ ] 6.6 Build denied, unsupported browser, silent microphone, and noisy environment error states using the exact copy and visual styling from the specs.
+- [x] 6.1 Test first in `src/lib/audio`: permission-state transitions for unknown, pending, granted, and denied.
+- [x] 6.2 Implement browser-only microphone permission helpers around `navigator.mediaDevices.getUserMedia` in `src/lib/audio`.
+- [x] 6.3 Test first in `src/lib/audio`: unsupported browser, denied access, silent input, and noisy input map to the correct UI state.
+- [x] 6.4 Implement an analyser wrapper in `src/lib/audio` that supplies time-domain buffers to the pitch detector and hides Web Audio node setup from route files.
+- [x] 6.5 Build the shared microphone pre-prompt UI as a mobile bottom sheet and tablet/desktop centered modal under `src/lib/ui`.
+- [x] 6.6 Build denied, unsupported browser, silent microphone, and noisy environment error states using the exact copy and visual styling from the specs.
 
 ## 7. Metronome
 
