@@ -10,9 +10,10 @@
 		options: Option[];
 		value: string;
 		label?: string;
+		onchange?: (value: string) => void;
 	};
 
-	let { options, value, label = WORDS.controls.optionsLabel }: Props = $props();
+	let { options, value, label = WORDS.controls.optionsLabel, onchange }: Props = $props();
 </script>
 
 <div class="segmented" role="radiogroup" aria-label={label}>
@@ -22,6 +23,7 @@
 			type="button"
 			role="radio"
 			aria-checked={option.value === value}
+			onclick={() => onchange?.(option.value)}
 		>
 			{option.label}
 		</button>

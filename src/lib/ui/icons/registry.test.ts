@@ -4,7 +4,7 @@ import { describe, it } from 'vitest';
 import { iconNames, iconRegistry } from './registry.ts';
 
 describe('SoundStage icon registry', () => {
-	it('contains the required two-tone icon names from the design contract', () => {
+	it('contains the icons required by the v1 tool controls', () => {
 		assert.deepEqual(iconNames, [
 			'tuner',
 			'metronome',
@@ -18,7 +18,8 @@ describe('SoundStage icon registry', () => {
 			'back',
 			'settings',
 			'home',
-			'check'
+			'check',
+			'pause'
 		]);
 	});
 

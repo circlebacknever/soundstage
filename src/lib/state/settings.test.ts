@@ -6,14 +6,20 @@ import {
 	DEFAULT_MIC_CONSENT,
 	DEFAULT_SCALE_PREFERENCES,
 	DEFAULT_SETTINGS,
+	changeMetronomeBpm,
+	createMetronomeState,
 	loadMetronomePreferences,
 	loadMicConsent,
 	loadScalePreferences,
 	loadSettings,
+	metronomePreferencesFromState,
+	receiveScheduledMetronomeBeat,
 	saveMetronomePreferences,
 	saveMicConsent,
 	saveScalePreferences,
 	saveSettings,
+	selectMetronomeTimeSignature,
+	setMetronomeRunning,
 	STORAGE_KEYS
 } from './index.ts';
 
@@ -120,6 +126,28 @@ describe('SoundStage local state', () => {
 		assert.deepEqual(loadMetronomePreferences(storage), {
 			...DEFAULT_METRONOME_PREFERENCES,
 			clickSound: 'wood'
+		});
+	});
+
+	it('keeps running beat state separate from stored preferences', () => {
+		let state = createMetronomeState({ ...DEFAULT_METRONOME_PREFERENCES, bpm: 40 });
+
+		state = changeMetronomeBpm(state, -1);
+		state = setMetronomeRunning(state, true);
+		state = receiveScheduledMetronomeBeat(state, 4);
+		state = selectMetronomeTimeSignature(state, '2/4');
+
+		assert.deepEqual(state, {
+			...DEFAULT_METRONOME_PREFERENCES,
+			bpm: 40,
+			timeSignature: '2/4',
+			running: true,
+			currentBeat: 1
+		});
+		assert.deepEqual(metronomePreferencesFromState(state), {
+			...DEFAULT_METRONOME_PREFERENCES,
+			bpm: 40,
+			timeSignature: '2/4'
 		});
 	});
 

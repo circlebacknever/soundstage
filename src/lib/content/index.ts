@@ -115,9 +115,12 @@ export const WORDS = {
 	},
 	metronome: {
 		title: 'Metronome',
+		timeSignatureLabel: 'Time signature',
 		visualModeLabel: 'Metronome visual mode',
 		visualModes: ['Pulse', 'Beats', 'Wave'],
 		pulseLabel: 'Metronome pulse',
+		beatsLabel: 'Metronome beats',
+		waveLabel: 'Metronome wave',
 		beatIndicatorsLabel: 'Beat indicators',
 		bpmControlsLabel: 'BPM controls',
 		decreaseBpm: 'Decrease BPM',

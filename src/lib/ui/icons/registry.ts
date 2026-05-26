@@ -13,7 +13,8 @@ export type IconName =
 	| 'back'
 	| 'settings'
 	| 'home'
-	| 'check';
+	| 'check'
+	| 'pause';
 
 export type IconDefinition = {
 	viewBox: '0 0 24 24';
@@ -99,6 +100,12 @@ export const iconRegistry: Record<IconName, IconDefinition> = {
 		defaultTone: 'mint',
 		markup:
 			'<circle cx="12" cy="12" r="9" fill="var(--tone)" opacity="0.3"/><path d="M7 12.5l3.2 3.2L17 8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'
+	},
+	pause: {
+		viewBox: '0 0 24 24',
+		defaultTone: 'sun',
+		markup:
+			'<path d="M8 6v12M16 6v12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/>'
 	}
 };
 

@@ -1,3 +1,5 @@
+import { adjustMetronomeBpm, beatCountForTimeSignature } from '../music/index.ts';
+
 export type StorageLike = {
 	getItem(key: string): string | null;
 	setItem(key: string, value: string): void;
@@ -23,6 +25,11 @@ export type MetronomePreferences = {
 	timeSignature: TimeSignature;
 	visualMode: MetronomeVisualMode;
 	clickSound: ClickSound;
+};
+
+export type MetronomeState = MetronomePreferences & {
+	running: boolean;
+	currentBeat: number;
 };
 
 export type ScalePreferences = {
@@ -158,6 +165,58 @@ export function saveMetronomePreferences(
 	storage: StorageLike | undefined = browserStorage()
 ) {
 	writeJson(storage, STORAGE_KEYS.metronome, preferences);
+}
+
+/** Creates session state from locally remembered metronome preferences. */
+export function createMetronomeState(
+	preferences: MetronomePreferences = DEFAULT_METRONOME_PREFERENCES
+): MetronomeState {
+	return { ...preferences, running: false, currentBeat: 0 };
+}
+
+/** Changes tempo by one BPM while preserving the selectable range. */
+export function changeMetronomeBpm(state: MetronomeState, change: -1 | 1): MetronomeState {
+	return { ...state, bpm: adjustMetronomeBpm(state.bpm, change) };
+}
+
+/** Selects a measure shape and begins a valid measure when playback is active. */
+export function selectMetronomeTimeSignature(
+	state: MetronomeState,
+	timeSignature: TimeSignature
+): MetronomeState {
+	return { ...state, timeSignature, currentBeat: state.running ? 1 : 0 };
+}
+
+export function selectMetronomeVisualMode(
+	state: MetronomeState,
+	visualMode: MetronomeVisualMode
+): MetronomeState {
+	return { ...state, visualMode };
+}
+
+/** Updates the ephemeral playback flag; stopping also clears the displayed beat. */
+export function setMetronomeRunning(state: MetronomeState, running: boolean): MetronomeState {
+	return { ...state, running, currentBeat: running ? state.currentBeat : 0 };
+}
+
+/** Records a beat emitted by the audio scheduler, ignoring invalid beat numbers. */
+export function receiveScheduledMetronomeBeat(
+	state: MetronomeState,
+	currentBeat: number
+): MetronomeState {
+	const beatCount = beatCountForTimeSignature(state.timeSignature);
+
+	return currentBeat >= 1 && currentBeat <= beatCount ? { ...state, currentBeat } : state;
+}
+
+/** Omits session-only playback fields before local persistence. */
+export function metronomePreferencesFromState(state: MetronomeState): MetronomePreferences {
+	return {
+		bpm: state.bpm,
+		timeSignature: state.timeSignature,
+		visualMode: state.visualMode,
+		clickSound: state.clickSound
+	};
 }
 
 export function loadScalePreferences(

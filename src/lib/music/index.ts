@@ -16,3 +16,11 @@ export {
 	STANDARD_GUITAR_FRETS
 } from './scales.ts';
 export type { FretboardCell, FretboardRow, RootKey, ScaleFretboard, ScaleType } from './scales.ts';
+export {
+	adjustMetronomeBpm,
+	beatCountForTimeSignature,
+	METRONOME_BPM_BOUNDS,
+	METRONOME_TIME_SIGNATURES,
+	tempoWordForBpm
+} from './metronome.ts';
+export type { MetronomeTimeSignature, TempoWord } from './metronome.ts';

@@ -11,6 +11,7 @@
 		right?: Snippet;
 		rightLabel?: string;
 		rightHref?: AppRoute;
+		rightOnclick?: () => void;
 	};
 
 	let {
@@ -19,7 +20,8 @@
 		backLabel = WORDS.navigation.backToTools,
 		right,
 		rightLabel,
-		rightHref
+		rightHref,
+		rightOnclick
 	}: Props = $props();
 </script>
 
@@ -39,7 +41,7 @@
 		{:else if rightLabel && rightHref}
 			<Button href={rightHref} variant="secondary" size="sm">{rightLabel}</Button>
 		{:else if rightLabel}
-			<Button variant="secondary" size="sm">{rightLabel}</Button>
+			<Button variant="secondary" size="sm" onclick={rightOnclick}>{rightLabel}</Button>
 		{/if}
 	</div>
 </div>

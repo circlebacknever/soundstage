@@ -9,6 +9,18 @@ export type {
 	MicrophonePitchSource
 } from './microphone-analyser.ts';
 export {
+	createMetronomeScheduler,
+	METRONOME_LOOKAHEAD_MS,
+	METRONOME_SCHEDULE_AHEAD_SECONDS,
+	planMetronomeClicks
+} from './metronome.ts';
+export type {
+	MetronomeClickSound,
+	MetronomeScheduleSettings,
+	MetronomeScheduler,
+	ScheduledMetronomeBeat
+} from './metronome.ts';
+export {
 	buildMicrophoneInputState,
 	MICROPHONE_NOISY_INPUT_MS,
 	MICROPHONE_SILENT_INPUT_MS

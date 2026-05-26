@@ -62,12 +62,12 @@
 
 ## 7. Metronome
 
-- [ ] 7.1 Test first in `src/lib/music` or `src/lib/audio`: tempo word mapping, BPM bounds, time-signature beat counts, and click plan timing.
-- [ ] 7.2 Implement metronome preference state and pure scheduling helpers behind a domain interface that route components can consume.
-- [ ] 7.3 Build the metronome route with top bar, time-signature picker trigger, visual style picker, BPM controls, and start/stop action.
-- [ ] 7.4 Implement Pulse, Beats, and Wave visual modes with beat-state animation driven by scheduled beat state.
-- [ ] 7.5 Implement Web Audio click scheduling in `src/lib/audio` with lookahead timing and distinct downbeat click.
-- [ ] 7.6 Run focused metronome tests and inspect the route file to confirm scheduling details stay inside `src/lib/audio`.
+- [x] 7.1 Test first in `src/lib/music` or `src/lib/audio`: tempo word mapping, BPM bounds, time-signature beat counts, and click plan timing.
+- [x] 7.2 Implement metronome preference state and pure scheduling helpers behind a domain interface that route components can consume.
+- [x] 7.3 Build the metronome route with top bar, time-signature picker trigger, visual style picker, BPM controls, and start/stop action.
+- [x] 7.4 Implement Pulse, Beats, and Wave visual modes with beat-state animation driven by scheduled beat state.
+- [x] 7.5 Implement Web Audio click scheduling in `src/lib/audio` with lookahead timing and distinct downbeat click.
+- [x] 7.6 Run focused metronome tests and inspect the route file to confirm scheduling details stay inside `src/lib/audio`.
 
 ## 8. Guitar Tuner
 
