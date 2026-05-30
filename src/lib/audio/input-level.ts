@@ -1,4 +1,4 @@
-import { assertThreshold } from './assertions.ts';
+import { assertNonNegative } from './assertions.ts';
 
 export type InputLevelOptions = {
 	quietThreshold: number;
@@ -33,7 +33,7 @@ export function evaluateInputLevel(
 	samples: Float32Array,
 	{ quietThreshold }: InputLevelOptions
 ): InputLevelResult {
-	assertThreshold(quietThreshold, 'quietThreshold');
+	assertNonNegative(quietThreshold, 'quietThreshold');
 
 	const rms = measureRms(samples);
 

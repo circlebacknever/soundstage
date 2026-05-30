@@ -36,7 +36,7 @@ The scale practicer SHALL show a guitar fretboard using the handoff rows, string
 
 #### Scenario: Fretboard frame renders
 - **WHEN** a scale fretboard is displayed
-- **THEN** it uses `--paper-sink` background, `--r-md` corners, 14px padding, four fret rows for open, 2, 3, and 5, and a seven-column grid with a 24px fret-number column plus six equal string columns
+- **THEN** it uses `--paper-sink` background, `--r-md` corners, 14px padding, six string rows ordered high `e` at the top to low `E` at the bottom, a fret-number header row, and a 24px string-label column plus equal fret columns for open, 2, 3, and 5
 
 #### Scenario: Fretboard cell geometry renders
 - **WHEN** fretboard cells are displayed
@@ -51,8 +51,8 @@ The scale practicer SHALL show a guitar fretboard using the handoff rows, string
 - **THEN** the cell renders as an empty paper cell
 
 #### Scenario: String labels render
-- **WHEN** the fretboard renders its string label row
-- **THEN** it displays "E A D G B e", with lowercase `e` for the high E string
+- **WHEN** the fretboard renders its string label column
+- **THEN** it displays, top to bottom, "e B G D A E", with lowercase `e` for the high E string on top and uppercase `E` for the low E string on the bottom
 
 ### Requirement: Live scale practice route
 The system SHALL provide `/scales/practice` for microphone-based scale progression using the selected root and scale type.

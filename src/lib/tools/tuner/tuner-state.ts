@@ -7,44 +7,58 @@ import {
 	type NoteName
 } from '$lib/music';
 
+/** How long the active string must stay in tune before it is marked done (ms). */
 export const TUNER_HOLD_MS = 800;
+/** How long "Tuned ✓" lingers after the last string before resetting to low E (ms). */
 export const TUNER_COMPLETION_FEEDBACK_MS = 1_500;
+/** How long the last reading stays on screen through a detector dropout (ms). */
 export const TUNER_PITCH_HOLD_MS = 900;
+/** Half-width of the in-tune window (cents); within ±this the hold timer runs. */
 export const TUNER_IN_TUNE_CENTS = 5;
+// Absorbs floating-point drift when comparing |cents| against the ±5 edge.
 const TUNER_CENTS_EPSILON = 0.000001;
+// EMA weight for same-string cents: lower damps needle/readout jitter while a
+// string rings, at the cost of more lag. Applied only across the same string.
 const TUNER_CENTS_RESPONSE = 0.35;
+// Cents past which the needle stops travelling, and the swing it reaches there.
+// TUNER_IN_TUNE_CENTS must map to an angle that stays inside the gauge's mint
+// zone (±~7°), so changing either of these requires re-checking the SVG arc.
+const TUNER_NEEDLE_MAX_CENTS = 50;
+const TUNER_NEEDLE_MAX_DEGREES = 58;
 
 export type TunerGuidance = 'wayFlat' | 'flat' | 'inTune' | 'sharp' | 'waySharp';
 export type TunerStringStatus = 'untouched' | 'active' | 'done';
 export type TunerFeedback = 'idle' | 'tuned';
 
+/** One standard-tuning string as the strings row renders it. */
 export type TunerStringView = {
 	id: GuitarStringId;
-	note: NoteName;
-	label: string;
-	octaveLabel?: 'low' | 'high';
+	note: NoteName; // Open-string note letter, e.g. "E".
+	octaveLabel?: 'low' | 'high'; // Set only for the two E strings; drives the LOW/HIGH sublabel.
 	status: TunerStringStatus;
 };
 
+/** Pitch readout for the gauge and note display, derived from one estimate. */
 export type TunerPitchView = {
-	frequency: number;
-	confidence: number;
-	note: NoteName;
-	label: string;
-	cents: number;
-	centsLabel: string;
-	guidance: TunerGuidance;
-	targetString: GuitarStringId;
-	needleAngleDegrees: number;
+	note: NoteName; // Nearest standard-string note letter — not the nearest chromatic note.
+	cents: number; // Signed offset from that string, rounded and dampened; positive is sharp.
+	centsLabel: string; // `cents` formatted for display, e.g. "+12¢" or "0¢".
+	guidance: TunerGuidance; // Band `cents` falls into; keys WORDS.tuner.guidance.
+	targetString: GuitarStringId; // Nearest string; may differ from the active tuning target.
+	needleAngleDegrees: number; // Gauge rotation: 0 in tune, positive sharp, clamped to ±TUNER_NEEDLE_MAX_DEGREES.
 };
 
 declare const tunerStateBrand: unique symbol;
 
+/**
+ * Opaque tuner UI state. Build it only through createTunerState, buildTunerState,
+ * and selectTunerString — those carry hidden hold/feedback timing the view cannot see.
+ */
 export type TunerState = {
 	readonly [tunerStateBrand]: true;
-	activeString: GuitarStringId;
-	strings: readonly TunerStringView[];
-	currentPitch?: TunerPitchView;
+	activeString: GuitarStringId; // String the user is currently asked to tune.
+	strings: readonly TunerStringView[]; // All six strings, low-to-high order.
+	currentPitch?: TunerPitchView; // Latest readable pitch; undefined while listening or just reset.
 	feedback: TunerFeedback;
 };
 
@@ -85,7 +99,6 @@ function stringViews(
 	return STANDARD_GUITAR_TUNING.map((target) => ({
 		id: target.id,
 		note: target.name,
-		label: target.label,
 		octaveLabel: octaveLabelForString(target.id),
 		status: doneStrings.has(target.id)
 			? 'done'
@@ -101,6 +114,8 @@ function doneStringIds(state: TunerState): Set<GuitarStringId> {
 	);
 }
 
+// Active-string ids always come from STANDARD_GUITAR_TUNING, so the find never
+// misses; the low-E fallback only satisfies the type and never runs in practice.
 function targetForString(id: GuitarStringId) {
 	return STANDARD_GUITAR_TUNING.find((target) => target.id === id) ?? STANDARD_GUITAR_TUNING[0];
 }
@@ -138,6 +153,11 @@ function dampenCents(cents: number, targetString: GuitarStringId, previousPitch?
 	return previousPitch.cents + (cents - previousPitch.cents) * TUNER_CENTS_RESPONSE;
 }
 
+/**
+ * Classifies a signed cents offset into a tuner guidance band: ≤-25 wayFlat,
+ * -24..-6 flat, -5..5 inTune, 6..24 sharp, ≥25 waySharp. Throws on a non-finite
+ * input rather than silently bucketing NaN as waySharp.
+ */
 export function guidanceBandForCents(cents: number): TunerGuidance {
 	if (!Number.isFinite(cents)) {
 		throw new RangeError('cents must be a finite number');
@@ -162,6 +182,7 @@ export function guidanceBandForCents(cents: number): TunerGuidance {
 	return 'waySharp';
 }
 
+/** Fresh tuner state: low E active, no reading, every other string untouched. */
 export function createTunerState(): TunerState {
 	return createTunerMemory({
 		activeString: 'E_low',
@@ -170,6 +191,10 @@ export function createTunerState(): TunerState {
 	});
 }
 
+/**
+ * Makes `activeString` the current tuning target, clearing any in-progress hold
+ * timing and re-opening that string for tuning even if it was already done.
+ */
 export function selectTunerString(
 	previousState: TunerState,
 	activeString: GuitarStringId
@@ -193,15 +218,15 @@ function pitchViewForEstimate(
 	const roundedCents = Math.round(cents);
 
 	return {
-		frequency: pitch.frequency,
-		confidence: pitch.confidence,
 		note: nearestString.target.name,
-		label: nearestString.target.label,
 		cents: roundedCents,
 		centsLabel: centsLabel(roundedCents),
 		guidance: guidanceBandForCents(roundedCents),
 		targetString: nearestString.target.id,
-		needleAngleDegrees: Math.round((clamp(cents, -50, 50) / 50) * 58)
+		needleAngleDegrees: Math.round(
+			(clamp(cents, -TUNER_NEEDLE_MAX_CENTS, TUNER_NEEDLE_MAX_CENTS) / TUNER_NEEDLE_MAX_CENTS) *
+				TUNER_NEEDLE_MAX_DEGREES
+		)
 	};
 }
 
@@ -272,11 +297,19 @@ function completeActiveString(
 	);
 }
 
-/** Converts the latest pitch estimate into tuner UI state while owning hold and reset timing. */
+/**
+ * Folds the latest pitch estimate into the next tuner UI state, owning the
+ * in-tune hold, brief-dropout readout hold, and complete→reset timing. Pass
+ * `undefined` for `pitch` when no estimate was accepted this frame.
+ *
+ * `observedAtMs` must come from one monotonic clock for the whole tuning session
+ * (e.g. the requestAnimationFrame timestamp); the timing windows compare
+ * successive values, so mixing clocks corrupts the hold logic.
+ */
 export function buildTunerState(
 	pitch: AcceptedPitchEstimate | undefined,
-	previousState: TunerState = createTunerState(),
-	observedAtMs = Date.now()
+	previousState: TunerState,
+	observedAtMs: number
 ): TunerState {
 	const previousMemory = previousState as TunerMemory;
 

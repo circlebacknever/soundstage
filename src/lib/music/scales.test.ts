@@ -4,6 +4,7 @@ import { describe, it } from 'vitest';
 import {
 	buildScaleFretboard,
 	buildScaleSequence,
+	buildScaleSteps,
 	NATURAL_ROOT_KEYS,
 	SCALE_INTERVALS_BY_TYPE,
 	STANDARD_GUITAR_FRETS
@@ -33,6 +34,42 @@ describe('scale intervals and fretboard mapping', () => {
 	it('spells major scales from whole-note roots using readable accidentals', () => {
 		assert.deepEqual(buildScaleSequence('G', 'major'), ['G', 'A', 'B', 'C', 'D', 'E', 'F#', 'G']);
 		assert.deepEqual(buildScaleSequence('F', 'major'), ['F', 'G', 'A', 'Bb', 'C', 'D', 'E', 'F']);
+	});
+
+	it('pairs each scale note with the pitch class needed to match a detected note', () => {
+		assert.deepEqual(buildScaleSteps('G', 'major'), [
+			{ name: 'G', chromaticIndex: 7 },
+			{ name: 'A', chromaticIndex: 9 },
+			{ name: 'B', chromaticIndex: 11 },
+			{ name: 'C', chromaticIndex: 0 },
+			{ name: 'D', chromaticIndex: 2 },
+			{ name: 'E', chromaticIndex: 4 },
+			{ name: 'F#', chromaticIndex: 6 },
+			{ name: 'G', chromaticIndex: 7 }
+		]);
+
+		assert.deepEqual(
+			buildScaleSteps('A', 'minor').map((step) => step.name),
+			['A', 'B', 'C', 'D', 'E', 'F', 'G', 'A']
+		);
+	});
+
+	it('changes which fretboard cells are in-scale when the selected scale type changes', () => {
+		const cellAt = (rootKey: 'A', scaleType: 'major' | 'minor', fret: number, stringId: string) => {
+			const fretboard = buildScaleFretboard(rootKey, scaleType);
+			const row = fretboard.rows.find((entry) => entry.fret === fret);
+			assert.ok(row, `missing fret ${fret}`);
+			const cell = row.cells.find((entry) => entry.string.id === stringId);
+			assert.ok(cell, `missing ${stringId} at fret ${fret}`);
+			return cell;
+		};
+
+		// The B string at fret 2 sounds C#: in A major (degree 3) but not in A minor.
+		assert.deepEqual(
+			{ note: cellAt('A', 'major', 2, 'B').note, inScale: cellAt('A', 'major', 2, 'B').inScale },
+			{ note: 'C#', inScale: true }
+		);
+		assert.equal(cellAt('A', 'minor', 2, 'B').inScale, false);
 	});
 
 	it('maps the standard guitar fretboard over the open, 2, 3, and 5 frets', () => {

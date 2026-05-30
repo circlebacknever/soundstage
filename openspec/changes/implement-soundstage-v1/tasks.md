@@ -80,13 +80,13 @@
 
 ## 9. Scale Practice
 
-- [ ] 9.1 Test first in `src/lib/music`: selected scale and root produce the expected sequence and fretboard markers.
-- [ ] 9.2 Test first in a scale practice state module: correct-note advancement after +/- 50 cents for at least 300ms, wrong-note blocking, restart behavior, and completion feedback.
-- [ ] 9.3 Implement scale practice state helpers behind a domain interface that accepts pitch estimates and returns UI-ready practice state.
-- [ ] 9.4 Build the scale setup route with scale chips, root key picker, preview fretboard, and start practice action.
-- [ ] 9.5 Build the live practice route with REC pill, next-note card, progress bar, stateful fretboard, pause, and restart actions.
-- [ ] 9.6 Connect live pitch estimates to scale practice state while keeping fretboard markers as the only scoring visualization.
-- [ ] 9.7 Run focused scale tests and verify route components consume `src/lib/music` and practice-state outputs rather than duplicating scale formulas.
+- [x] 9.1 Test first in `src/lib/music`: selected scale and root produce the expected sequence and fretboard markers.
+- [x] 9.2 Test first in a scale practice state module: correct-note advancement after +/- 50 cents for at least 300ms, wrong-note blocking, restart behavior, and completion feedback.
+- [x] 9.3 Implement scale practice state helpers behind a domain interface that accepts pitch estimates and returns UI-ready practice state.
+- [x] 9.4 Build the scale setup route with scale chips, root key picker, preview fretboard, and start practice action.
+- [x] 9.5 Build the live practice route with REC pill, next-note card, progress bar, stateful fretboard, pause, and restart actions.
+- [x] 9.6 Connect live pitch estimates to scale practice state while keeping fretboard markers as the only scoring visualization.
+- [x] 9.7 Run focused scale tests and verify route components consume `src/lib/music` and practice-state outputs rather than duplicating scale formulas.
 
 ## 10. Settings
 

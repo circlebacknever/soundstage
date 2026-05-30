@@ -15,7 +15,7 @@ Music helpers are in-process. Do not introduce ports, adapters, mocks, services,
 - `index.ts` is the public barrel. Keep consumer imports stable here.
 - `notes.ts` owns chromatic note names, MIDI conversion, frequency conversion, nearest-note selection, and cents math.
 - `guitar.ts` owns guitar string identifiers, standard tuning targets, and nearest-string target selection.
-- `scales.ts` owns natural root keys, scale intervals, spelled scale sequences, fret rows, and scale fretboard maps.
+- `scales.ts` owns natural root keys, scale intervals, spelled scale sequences, per-step pitch classes (for note matching), fret rows, and scale fretboard maps.
 - `metronome.ts` owns tempo labels, BPM bounds, and time-signature beat counts.
 
 Keep generated music facts here rather than in UI copy or route modules.

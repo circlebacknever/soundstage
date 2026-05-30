@@ -29,7 +29,10 @@
 			<p id="microphone-prompt-body">{WORDS.microphone.prePrompt.body}</p>
 		</div>
 
-		<ul class="microphone-prompt__trust-list" aria-label="Microphone privacy promises">
+		<ul
+			class="microphone-prompt__trust-list"
+			aria-label={WORDS.microphone.prePrompt.trustListLabel}
+		>
 			{#each WORDS.microphone.prePrompt.trustItems as item (item)}
 				<li>
 					<span class="microphone-prompt__trust-dot" aria-hidden="true"></span>

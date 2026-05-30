@@ -3,13 +3,14 @@
 
 	type Props = {
 		active?: boolean;
+		onclick?: () => void;
 		children: Snippet;
 	};
 
-	let { active = false, children }: Props = $props();
+	let { active = false, onclick, children }: Props = $props();
 </script>
 
-<button class={`chip ${active ? 'is-active' : ''}`} type="button" aria-pressed={active}>
+<button class={`chip ${active ? 'is-active' : ''}`} type="button" aria-pressed={active} {onclick}>
 	{@render children()}
 </button>
 

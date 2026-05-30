@@ -109,7 +109,7 @@ describe('SoundStage global style contract', () => {
 		assert.match(scalePractice, /import TopBar from '\$lib\/ui\/TopBar\.svelte'/);
 		assert.match(
 			scalePractice,
-			/<TopBar title="G major" backHref="\/scales" backLabel=\{WORDS\.navigation\.backToScales\}>/
+			/<TopBar \{title\} backHref="\/scales" backLabel=\{WORDS\.navigation\.backToScales\}>/
 		);
 		assert.doesNotMatch(scalePractice, /<div class="topbar">/);
 	});
@@ -137,13 +137,23 @@ describe('SoundStage global style contract', () => {
 		const fretboard = componentSource('./Fretboard.svelte');
 		const scalesPage = componentSource('../tools/scales/ScalesPage.svelte');
 		const scalePractice = componentSource('../tools/scales/ScalePracticePage.svelte');
+		const practiceState = componentSource('../tools/scales/scale-practice-state.ts');
 
 		assert.match(fretboard, /role="grid"/);
 		assert.match(fretboard, /role="gridcell"/);
-		assert.match(fretboard, /aria-label=\{describeCell\(cell, row\.fret, cellIndex\)\}/);
-		assert.doesNotMatch(scalesPage, /state: 'hit'|state: 'next'/);
-		assert.match(scalePractice, /state: 'hit'/);
-		assert.match(scalePractice, /state: 'next'/);
+		// Strings render as rows (high e top to low E bottom) with frets as columns.
+		assert.match(fretboard, /role="columnheader"/);
+		assert.match(fretboard, /role="rowheader"/);
+		assert.match(
+			fretboard,
+			/aria-label=\{describeCell\(cell, frets\[fretIndex\], stringRow\.stringIndex\)\}/
+		);
+		// The setup preview shows scale notes only; the live run owns hit/next scoring,
+		// which the tested practice-state module generates (not inline page markup).
+		assert.doesNotMatch(scalesPage, /'hit'|'next'/);
+		assert.match(scalePractice, /<Fretboard rows=\{practice\.rows\}/);
+		assert.match(practiceState, /'hit'/);
+		assert.match(practiceState, /'next'/);
 	});
 
 	it('uses contrast-safe foregrounds on accent fills', () => {

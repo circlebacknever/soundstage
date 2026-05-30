@@ -1,4 +1,8 @@
-import { assertNonNegativeInteger, assertPositiveInteger, assertThreshold } from './assertions.ts';
+import {
+	assertNonNegative,
+	assertNonNegativeInteger,
+	assertPositiveInteger
+} from './assertions.ts';
 import type { AcceptedPitchEstimate, PitchEstimateResult } from './pitch.ts';
 
 export type StablePitchOptions = {
@@ -46,7 +50,7 @@ function assertStablePitchOptions({
 }: StablePitchOptions) {
 	assertPositiveInteger(windowSize, 'windowSize');
 	assertPositiveInteger(minimumStableEstimates, 'minimumStableEstimates');
-	assertThreshold(centsTolerance, 'centsTolerance');
+	assertNonNegative(centsTolerance, 'centsTolerance');
 	assertNonNegativeInteger(maxUnstableEstimates, 'maxUnstableEstimates');
 
 	if (minimumStableEstimates > windowSize) {
@@ -87,6 +91,10 @@ function estimatesAgree(
 	);
 }
 
+// Returns the most recent estimate that agrees with at least `minimumStableEstimates`
+// of the window, or undefined if none does. Scanning newest-first is deliberate: when
+// two notes are equally supported, the freshly-played one wins, so a real note change
+// settles promptly instead of being held back by the previous note's votes.
 function findStablePitch(
 	estimates: AcceptedPitchEstimate[],
 	{ minimumStableEstimates, centsTolerance }: StablePitchOptions
@@ -105,6 +113,9 @@ function findStablePitch(
 	return undefined;
 }
 
+// Hysteresis: while a stable note is held, tolerate up to `maxUnstableEstimates`
+// disagreeing/rejected frames before dropping back to "collecting". This is what
+// keeps a ringing string from flickering on the occasional bad frame.
 function keepPreviousStablePitch(
 	previousState: StablePitchMemory,
 	unstableEstimateCount: number,

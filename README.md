@@ -1,6 +1,6 @@
-# Soundstage
+# SoundStage
 
-Soundstage is a small SvelteKit app. It uses SvelteKit file-based routing, so pages live under
+SoundStage is a small SvelteKit app. It uses SvelteKit file-based routing, so pages live under
 `src/routes` and route folders map directly to URLs.
 
 ## Agent Instructions

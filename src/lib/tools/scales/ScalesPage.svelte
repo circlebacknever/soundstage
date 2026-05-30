@@ -1,13 +1,46 @@
 <script lang="ts">
 	import { WORDS } from '$lib/content';
+	import { NATURAL_ROOT_KEYS, type RootKey, type ScaleType } from '$lib/music';
+	import { loadScalePreferences, saveScalePreferences } from '$lib/state';
 	import Button from '$lib/ui/Button.svelte';
 	import Chip from '$lib/ui/Chip.svelte';
 	import Fretboard from '$lib/ui/Fretboard.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
 	import TopBar from '$lib/ui/TopBar.svelte';
+	import { buildScalePreviewRows } from './scale-practice-state.ts';
 
-	const selectedScaleType = WORDS.scales.scaleTypes[0];
-	const rootKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+	// Order must line up with WORDS.scales.scaleTypes so each value gets its label.
+	const SCALE_TYPE_VALUES = [
+		'major',
+		'minor',
+		'pentatonic',
+		'blues',
+		'dorian'
+	] as const satisfies readonly ScaleType[];
+	const scaleOptions = SCALE_TYPE_VALUES.map((value, index) => ({
+		value,
+		label: WORDS.scales.scaleTypes[index]
+	}));
+
+	const initial = loadScalePreferences();
+	let scaleType = $state<ScaleType>(initial.scaleType);
+	let rootKey = $state<RootKey>(initial.rootKey);
+
+	const previewRows = $derived(buildScalePreviewRows(rootKey, scaleType));
+
+	function rememberSelection() {
+		saveScalePreferences({ scaleType, rootKey, mode: 'setup' });
+	}
+
+	function selectScale(value: ScaleType) {
+		scaleType = value;
+		rememberSelection();
+	}
+
+	function selectRoot(key: RootKey) {
+		rootKey = key;
+		rememberSelection();
+	}
 </script>
 
 <ToolCanvas wide>
@@ -17,8 +50,10 @@
 		<div>
 			<div class="eyebrow" id="scale-type-title">{WORDS.scales.scaleTypeLabel}</div>
 			<div class="chip-row">
-				{#each WORDS.scales.scaleTypes as scaleType (scaleType)}
-					<Chip active={scaleType === selectedScaleType}>{scaleType}</Chip>
+				{#each scaleOptions as option (option.value)}
+					<Chip active={option.value === scaleType} onclick={() => selectScale(option.value)}>
+						{option.label}
+					</Chip>
 				{/each}
 			</div>
 		</div>
@@ -26,17 +61,19 @@
 		<div>
 			<div class="eyebrow">{WORDS.scales.rootKeyLabel}</div>
 			<div class="key-picker" aria-label={WORDS.scales.rootKeyPickerLabel}>
-				{#each rootKeys as rootKey (rootKey)}
+				{#each NATURAL_ROOT_KEYS as key (key)}
 					<button
-						class={`key-btn ${rootKey === 'C' ? 'is-active' : ''}`}
+						class="key-btn"
+						class:is-active={key === rootKey}
 						type="button"
-						aria-pressed={rootKey === 'C'}>{rootKey}</button
+						aria-pressed={key === rootKey}
+						onclick={() => selectRoot(key)}>{key}</button
 					>
 				{/each}
 			</div>
 		</div>
 
-		<Fretboard />
+		<Fretboard rows={previewRows} />
 	</section>
 
 	<Button href="/scales/practice" icon="mic" block>{WORDS.scales.startPractice}</Button>
@@ -72,6 +109,7 @@
 		border-radius: var(--r-sm);
 		box-shadow: inset 0 0 0 1px var(--hairline);
 		color: var(--ink);
+		cursor: pointer;
 		font-family: var(--font-display);
 		font-size: 24px;
 		font-weight: 600;

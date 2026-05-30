@@ -30,13 +30,24 @@ type PeriodCandidate = {
 
 const MIN_PERIOD_LENGTH = 4;
 const MIN_CYCLES_FOR_PERIOD_COMPARISON = 2;
+// Normalized shift error (see normalizedShiftError) at which confidence hits 0.
+// Two uncorrelated signals of equal power differ by differencePower ≈ 2·signalPower,
+// so an error of 2 means "no better than noise". 0 means a perfect period match.
 const SHIFT_ERROR_FOR_NO_CONFIDENCE = 2;
+// Minimum confidence (0..1) a candidate period must clear to be accepted.
 const MIN_PERIOD_CONFIDENCE = 0.9;
 
 function clampConfidence(confidence: number) {
 	return Math.min(Math.max(confidence, 0), 1);
 }
 
+/**
+ * Measures how well the buffer repeats when shifted by `periodLength` samples.
+ * Sums the squared sample-vs-shifted-sample difference and divides by the average
+ * signal power, giving a dimensionless error in [0, ∞): 0 is a perfect repeat,
+ * ~2 is uncorrelated (noise). This is the per-lag cost of an autocorrelation-style
+ * (NSDF-like) search; `confidenceForPeriodLength` turns it into a 0..1 score.
+ */
 function normalizedShiftError(samples: Float32Array, periodLength: number) {
 	let differencePower = 0;
 	let signalPower = 0;
@@ -68,6 +79,10 @@ function confidenceForPeriodLength(samples: Float32Array, periodLength: number) 
 	return clampConfidence(1 - error / SHIFT_ERROR_FOR_NO_CONFIDENCE);
 }
 
+// Scores every period length from 1..maxPeriodLength. Each score is itself an
+// O(samples) scan, so this is O(samples²) per call — the heaviest step in the
+// per-frame detector. Kept brute-force for clarity; revisit only if profiling
+// the live tuner shows it matters.
 function buildPeriodCandidates(samples: Float32Array, maxPeriodLength: number): PeriodCandidate[] {
 	const candidates: PeriodCandidate[] = [];
 

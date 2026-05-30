@@ -24,6 +24,10 @@ const CHROMATIC_INDEX_BY_NATURAL_NOTE: Record<RootKey, number> = {
 	B: 11
 };
 
+// Letter (staff line) each scale degree is spelled on, as an offset from the root
+// letter. Diatonic scales step one letter per degree (0..7). Gapped scales skip
+// letters. Blues repeats step 4: its ♭5 and ♮5 sit a half-step apart but share the
+// fifth's letter (e.g. D♭ then D in a G blues), so the repeat is intentional, not a typo.
 const LETTER_STEPS_BY_SCALE_TYPE: Record<ScaleType, readonly number[]> = {
 	major: [0, 1, 2, 3, 4, 5, 6, 7],
 	minor: [0, 1, 2, 3, 4, 5, 6, 7],
@@ -86,13 +90,30 @@ function spellScaleNote(
 	return `${noteLetter}${accidentalForPitchDifference(targetChromaticIndex - naturalChromaticIndex)}`;
 }
 
-export function buildScaleSequence(rootKey: RootKey, scaleType: ScaleType): string[] {
+export type ScaleStep = {
+	name: string; // how the note is spelled, e.g. "F#"
+	chromaticIndex: number; // its pitch class, 0 = C … 11 = B
+};
+
+/**
+ * Notes of the scale run, each spelling paired with the pitch class used to match
+ * a played note. Paired in one call so the two can't drift out of step. Throws
+ * RangeError on an unsupported root key or scale type.
+ */
+export function buildScaleSteps(rootKey: RootKey, scaleType: ScaleType): ScaleStep[] {
 	assertRootKey(rootKey);
 	assertScaleType(scaleType);
 
-	return SCALE_INTERVALS_BY_TYPE[scaleType].map((offset, index) =>
-		spellScaleNote(rootKey, scaleType, offset, index)
-	);
+	const chromaticIndexes = scaleChromaticIndexes(rootKey, scaleType);
+
+	return SCALE_INTERVALS_BY_TYPE[scaleType].map((offset, index) => ({
+		name: spellScaleNote(rootKey, scaleType, offset, index),
+		chromaticIndex: chromaticIndexes[index]
+	}));
+}
+
+export function buildScaleSequence(rootKey: RootKey, scaleType: ScaleType): string[] {
+	return buildScaleSteps(rootKey, scaleType).map((step) => step.name);
 }
 
 export const STANDARD_GUITAR_FRETS = [0, 2, 3, 5] as const;

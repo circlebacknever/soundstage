@@ -2,7 +2,44 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, it } from 'vitest';
 
+import { nearestNoteFromFrequency, STANDARD_GUITAR_TUNING } from '$lib/music';
+import { buildTunerState, createTunerState, TUNER_IN_TUNE_CENTS } from './tuner-state.ts';
+
 const page = readFileSync(new URL('./TunerPage.svelte', import.meta.url), 'utf8');
+
+function needleAngleAtCents(cents: number) {
+	const lowE = STANDARD_GUITAR_TUNING[0];
+	const frequency = lowE.frequency * 2 ** (cents / 1200);
+	const state = buildTunerState(
+		{
+			ok: true,
+			reason: 'pitch-detected',
+			frequency,
+			confidence: 0.99,
+			note: nearestNoteFromFrequency(frequency)
+		},
+		createTunerState(),
+		0
+	);
+
+	return state.currentPitch?.needleAngleDegrees ?? 0;
+}
+
+// Half-angle of the SVG mint in-tune zone, measured from the needle pivot. Reads
+// the real geometry so this stays honest if the markup changes.
+function mintZoneHalfAngleDegrees() {
+	const arc = page.match(/M\d+ \d+ A \d+ \d+ \d+ \d+ \d+ (\d+) (\d+)/);
+	const pivot = page.match(/transform-origin:\s*(\d+)px (\d+)px/);
+
+	if (!arc || !pivot) {
+		throw new Error('could not parse mint-zone arc or needle pivot from TunerPage.svelte');
+	}
+
+	const [endX, endY] = [Number(arc[1]), Number(arc[2])];
+	const [pivotX, pivotY] = [Number(pivot[1]), Number(pivot[2])];
+
+	return (Math.atan2(endX - pivotX, pivotY - endY) * 180) / Math.PI;
+}
 
 describe('tuner page boundary', () => {
 	it('consumes microphone, pitch-source, and tuner-state boundaries', () => {
@@ -49,5 +86,9 @@ describe('tuner page boundary', () => {
 		assert.doesNotMatch(page, /class="string-chip is-done"/);
 		assert.doesNotMatch(page, /\+8¢/);
 		assert.doesNotMatch(page, /: WORDS\.tuner\.guidance\.inTune/);
+	});
+
+	it('keeps the in-tune needle swing inside the gauge mint zone', () => {
+		assert.ok(needleAngleAtCents(TUNER_IN_TUNE_CENTS) <= mintZoneHalfAngleDegrees());
 	});
 });

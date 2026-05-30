@@ -55,6 +55,7 @@ export const WORDS = {
 		prePrompt: {
 			title: 'Can we hear you?',
 			body: "The tuner listens through your mic to tell you if you're sharp or flat.",
+			trustListLabel: 'Microphone privacy promises',
 			trustItems: [
 				'Processed on this device only',
 				'Nothing is recorded or uploaded',
@@ -106,6 +107,13 @@ export const WORDS = {
 		high: 'HIGH',
 		listening: 'Play a note',
 		tuned: 'Tuned ✓',
+		spokenOctave: { low: 'Low', high: 'High' },
+		stringStatus: {
+			untouched: 'not yet tuned',
+			active: 'tuning now',
+			done: 'tuned'
+		},
+		allTunedAnnouncement: 'All six strings tuned',
 		guidance: {
 			waySharp: 'way sharp · tune down',
 			sharp: 'sharp · tune down a touch',

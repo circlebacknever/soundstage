@@ -1,6 +1,7 @@
 export {
 	CHROMATIC_NOTE_NAMES,
 	centsBetweenFrequencies,
+	chromaticIndexForMidi,
 	frequencyForMidiNote,
 	nearestNoteFromFrequency,
 	noteFromMidi
@@ -11,11 +12,19 @@ export type { GuitarStringEstimate, GuitarStringId, GuitarStringTarget } from '.
 export {
 	buildScaleFretboard,
 	buildScaleSequence,
+	buildScaleSteps,
 	NATURAL_ROOT_KEYS,
 	SCALE_INTERVALS_BY_TYPE,
 	STANDARD_GUITAR_FRETS
 } from './scales.ts';
-export type { FretboardCell, FretboardRow, RootKey, ScaleFretboard, ScaleType } from './scales.ts';
+export type {
+	FretboardCell,
+	FretboardRow,
+	RootKey,
+	ScaleFretboard,
+	ScaleStep,
+	ScaleType
+} from './scales.ts';
 export {
 	adjustMetronomeBpm,
 	beatCountForTimeSignature,

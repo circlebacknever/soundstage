@@ -9,9 +9,10 @@
 		backHref?: AppRoute;
 		backLabel?: string;
 		right?: Snippet;
-		rightLabel?: string;
+		rightLabel?: string; // Renders an interactive button (needs rightHref or rightOnclick).
 		rightHref?: AppRoute;
 		rightOnclick?: () => void;
+		rightBadge?: string; // Renders a non-interactive status pill, e.g. an always-on mode indicator.
 	};
 
 	let {
@@ -21,7 +22,8 @@
 		right,
 		rightLabel,
 		rightHref,
-		rightOnclick
+		rightOnclick,
+		rightBadge
 	}: Props = $props();
 </script>
 
@@ -42,6 +44,8 @@
 			<Button href={rightHref} variant="secondary" size="sm">{rightLabel}</Button>
 		{:else if rightLabel}
 			<Button variant="secondary" size="sm" onclick={rightOnclick}>{rightLabel}</Button>
+		{:else if rightBadge}
+			<span class="topbar__badge">{rightBadge}</span>
 		{/if}
 	</div>
 </div>
@@ -63,5 +67,15 @@
 
 	.topbar__right {
 		justify-self: end;
+	}
+
+	.topbar__badge {
+		background: var(--paper);
+		border-radius: var(--r-sm);
+		box-shadow: inset 0 0 0 1px var(--hairline);
+		color: var(--ink-2);
+		font-size: 13px;
+		font-weight: 700;
+		padding: 8px 14px;
 	}
 </style>

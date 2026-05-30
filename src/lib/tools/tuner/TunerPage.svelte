@@ -26,7 +26,8 @@
 		createTunerState,
 		selectTunerString,
 		type TunerPitchView,
-		type TunerState
+		type TunerState,
+		type TunerStringView
 	} from './tuner-state.ts';
 
 	let permission = $state<MicrophonePermissionState>(createMicrophonePermissionState());
@@ -62,6 +63,43 @@
 			: WORDS.tuner.listening
 	);
 	const needleAngleDegrees = $derived(currentPitch?.needleAngleDegrees ?? 0);
+
+	// Screen-reader announcement of discrete milestones only. The visible readout
+	// changes every animation frame, so it stays out of any live region; instead
+	// we announce each string completing and the final "all tuned".
+	let announcement = $state('');
+	let announcedDoneIds = new Set<string>();
+	let announcedAllTuned = false;
+
+	function spokenStringName(string: TunerStringView) {
+		return string.octaveLabel
+			? `${WORDS.tuner.spokenOctave[string.octaveLabel]} ${string.note}`
+			: string.note;
+	}
+
+	function stringAriaLabel(string: TunerStringView) {
+		return `${spokenStringName(string)}, ${WORDS.tuner.stringStatus[string.status]}`;
+	}
+
+	$effect(() => {
+		if (tuner.feedback === 'tuned') {
+			if (!announcedAllTuned) {
+				announcement = WORDS.tuner.allTunedAnnouncement;
+				announcedAllTuned = true;
+			}
+			return;
+		}
+
+		announcedAllTuned = false;
+		for (const string of tuner.strings) {
+			if (string.status === 'done' && !announcedDoneIds.has(string.id)) {
+				announcement = `${spokenStringName(string)}, ${WORDS.tuner.stringStatus.done}`;
+			}
+		}
+		announcedDoneIds = new Set(
+			tuner.strings.filter((string) => string.status === 'done').map((string) => string.id)
+		);
+	});
 
 	function resetInputTimers() {
 		quietInputStartedAtMs = undefined;
@@ -178,29 +216,29 @@
 
 {#if inputState.status === 'unsupported-browser'}
 	<ToolCanvas>
-		<TopBar title={WORDS.tuner.title} rightLabel={WORDS.tuner.auto} />
+		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
 		<MicrophoneErrorState kind="unsupported" onPrimary={browseChords} />
 	</ToolCanvas>
 {:else if inputState.status === 'mic-denied'}
 	<ToolCanvas>
-		<TopBar title={WORDS.tuner.title} rightLabel={WORDS.tuner.auto} />
+		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
 		<MicrophoneErrorState kind="denied" onPrimary={requestMicrophone} onGhost={declineMicrophone} />
 	</ToolCanvas>
 {:else if inputState.status === 'silent-input'}
 	<ToolCanvas>
-		<TopBar title={WORDS.tuner.title} rightLabel={WORDS.tuner.auto} />
+		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
 		<MicrophoneErrorState kind="silent" onPrimary={keepListening} onGhost={requestMicrophone} />
 	</ToolCanvas>
 {:else if inputState.status === 'noisy-input'}
 	<ToolCanvas>
-		<TopBar title={WORDS.tuner.title} rightLabel={WORDS.tuner.auto} />
+		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
 		<MicrophoneErrorState kind="noisy" onPrimary={keepListening} onGhost={practiceWithoutMic} />
 	</ToolCanvas>
 {:else}
 	<ToolCanvas>
-		<TopBar title={WORDS.tuner.title} rightLabel={WORDS.tuner.auto} />
+		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
 
-		<section class="tuner-card" aria-label={WORDS.tuner.readoutLabel} aria-live="polite">
+		<section class="tuner-card" aria-label={WORDS.tuner.readoutLabel}>
 			<svg class="arc-svg" viewBox="0 0 260 160" fill="none" aria-hidden="true">
 				<path
 					d="M20 140 A 110 110 0 0 1 240 140"
@@ -208,6 +246,8 @@
 					stroke-width="10"
 					stroke-linecap="round"
 				/>
+				<!-- In-tune zone. Its arc width is tied to TUNER_IN_TUNE_CENTS and the
+				     needle scale in tuner-state.ts; keep them in sync if either changes. -->
 				<path
 					d="M117 36 A 104 104 0 0 1 143 36"
 					stroke="var(--mint)"
@@ -227,13 +267,13 @@
 				/>
 				<circle cx="130" cy="140" r="8" fill="var(--ink)" />
 				<circle cx="130" cy="140" r="3" fill="var(--paper)" />
-				<text x="22" y="156" font-family="JetBrains Mono" font-size="10" fill="var(--coral-ink)">
+				<text class="arc-label" x="22" y="156" font-size="10" fill="var(--coral-ink)">
 					{WORDS.tuner.flatLabel}
 				</text>
 				<text
+					class="arc-label"
 					x="238"
 					y="156"
-					font-family="JetBrains Mono"
 					font-size="10"
 					fill="var(--coral-ink)"
 					text-anchor="end"
@@ -263,6 +303,7 @@
 						class:is-active={string.status === 'active'}
 						type="button"
 						aria-pressed={string.status === 'active'}
+						aria-label={stringAriaLabel(string)}
 						onclick={() => selectString(string.id)}
 					>
 						{string.note}
@@ -275,6 +316,8 @@
 				{/each}
 			</div>
 		</section>
+
+		<div class="sr-only" aria-live="polite" aria-atomic="true">{announcement}</div>
 	</ToolCanvas>
 
 	{#if showPrompt}
@@ -301,10 +344,25 @@
 		width: 100%;
 	}
 
+	.arc-label {
+		font-family: var(--font-mono);
+	}
+
+	.sr-only {
+		border: 0;
+		clip-path: inset(50%);
+		height: 1px;
+		overflow: hidden;
+		padding: 0;
+		position: absolute;
+		white-space: nowrap;
+		width: 1px;
+	}
+
 	.needle {
 		transform-box: view-box;
 		transform-origin: 130px 140px;
-		transition: transform 180ms ease-out;
+		transition: transform 120ms ease-out;
 	}
 
 	.readout {
