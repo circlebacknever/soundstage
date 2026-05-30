@@ -19,6 +19,7 @@ export type { FretboardCell, FretboardRow, RootKey, ScaleFretboard, ScaleType } 
 export {
 	adjustMetronomeBpm,
 	beatCountForTimeSignature,
+	clampMetronomeBpm,
 	METRONOME_BPM_BOUNDS,
 	METRONOME_TIME_SIGNATURES,
 	tempoWordForBpm

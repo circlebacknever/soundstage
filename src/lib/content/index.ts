@@ -104,6 +104,7 @@ export const WORDS = {
 		stringsLabel: 'Standard tuning strings',
 		low: 'LOW',
 		high: 'HIGH',
+		listening: 'Play a note',
 		tuned: 'Tuned ✓',
 		guidance: {
 			waySharp: 'way sharp · tune down',

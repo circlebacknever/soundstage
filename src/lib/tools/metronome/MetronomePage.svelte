@@ -3,6 +3,7 @@
 	import { WORDS } from '$lib/content';
 	import {
 		beatCountForTimeSignature,
+		METRONOME_BPM_BOUNDS,
 		METRONOME_TIME_SIGNATURES,
 		tempoWordForBpm
 	} from '$lib/music';
@@ -11,10 +12,11 @@
 		createMetronomeState,
 		loadMetronomePreferences,
 		metronomePreferencesFromState,
-		receiveScheduledMetronomeBeat,
+		receiveMetronomeBeat,
 		saveMetronomePreferences,
 		selectMetronomeTimeSignature,
 		selectMetronomeVisualMode,
+		setMetronomeBpm,
 		setMetronomeRunning,
 		type MetronomeState,
 		type MetronomeVisualMode,
@@ -30,6 +32,7 @@
 		label,
 		value: label.toLowerCase() as MetronomeVisualMode
 	}));
+	const waveBumpBars = [34, 58, 84, 108, 84, 58, 34] as const;
 
 	let metronome = $state<MetronomeState>(createMetronomeState(loadMetronomePreferences()));
 	let scheduler: MetronomeScheduler | undefined;
@@ -50,7 +53,11 @@
 				? WORDS.metronome.beatsLabel
 				: WORDS.metronome.waveLabel
 	);
-	const waveDurationSeconds = $derived(60 / metronome.bpm);
+	const bpmSliderPosition = $derived(
+		((metronome.bpm - METRONOME_BPM_BOUNDS.minimum) /
+			(METRONOME_BPM_BOUNDS.maximum - METRONOME_BPM_BOUNDS.minimum)) *
+			100
+	);
 
 	function scheduleSettings(nextState: MetronomeState) {
 		return {
@@ -70,6 +77,11 @@
 		remember(changeMetronomeBpm(metronome, change));
 	}
 
+	function dragBpm(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		remember(setMetronomeBpm(metronome, input.valueAsNumber));
+	}
+
 	function chooseVisualMode(visualMode: string) {
 		if (visualMode === 'pulse' || visualMode === 'beats' || visualMode === 'wave') {
 			remember(selectMetronomeVisualMode(metronome, visualMode));
@@ -80,21 +92,40 @@
 		timeSignaturePickerOpen = !timeSignaturePickerOpen;
 	}
 
+	async function restartMetronome() {
+		const activeScheduler = scheduler;
+		scheduler = undefined;
+		await activeScheduler?.stop();
+
+		if (metronome.running) {
+			await startMetronome();
+		}
+	}
+
 	function chooseTimeSignature(timeSignature: TimeSignature) {
 		remember(selectMetronomeTimeSignature(metronome, timeSignature));
 		timeSignaturePickerOpen = false;
+
+		if (metronome.running) {
+			void restartMetronome();
+		}
 	}
 
 	async function stopMetronome() {
 		metronome = setMetronomeRunning(metronome, false);
-		await scheduler?.stop();
+		const activeScheduler = scheduler;
 		scheduler = undefined;
+		await activeScheduler?.stop();
 	}
 
 	async function startMetronome() {
+		if (scheduler) {
+			return;
+		}
+
 		const nextScheduler = createMetronomeScheduler(scheduleSettings(metronome), {
-			onScheduledBeat(beat) {
-				metronome = receiveScheduledMetronomeBeat(metronome, beat.beat);
+			onPlaybackBeat(beat) {
+				metronome = receiveMetronomeBeat(metronome, beat.beat);
 				pulseCycle += 1;
 			}
 		});
@@ -154,7 +185,11 @@
 		onchange={chooseVisualMode}
 	/>
 
-	<section class="metro-stage" aria-label={stageLabel}>
+	<section
+		class="metro-stage"
+		class:is-wave-mode={metronome.visualMode === 'wave'}
+		aria-label={stageLabel}
+	>
 		{#if metronome.visualMode === 'pulse'}
 			{#key pulseCycle}
 				<div
@@ -174,40 +209,45 @@
 				<small>{tempoWord}</small>
 			</div>
 		{:else if metronome.visualMode === 'wave'}
-			<div class="mode-readout">
-				{metronome.bpm}
-				<small>{tempoWord}</small>
-			</div>
-			<div
-				class="wave"
-				class:is-running={metronome.running}
-				style={`--wave-duration: ${waveDurationSeconds}s`}
-				aria-hidden="true"
-			>
-				<svg viewBox="0 0 640 100" preserveAspectRatio="none">
-					<g class="wave__track">
-						<path
-							d="M0 50 C40 4 80 4 120 50 S200 96 240 50 S320 4 360 50 S440 96 480 50 S560 4 600 50 S680 96 720 50"
-						/>
-						<path
-							d="M640 50 C680 4 720 4 760 50 S840 96 880 50 S960 4 1000 50 S1080 96 1120 50 S1200 4 1240 50 S1320 96 1360 50"
-						/>
-					</g>
-				</svg>
+			<div class="wave" aria-hidden="true">
+				{#key pulseCycle}
+					<div class="wave__measure" style={`--measure-beats: ${visibleBeats.length}`}>
+						{#each visibleBeats as beat (beat)}
+							<div
+								class="wave__bump"
+								class:is-current={metronome.running && metronome.currentBeat === beat}
+								class:is-downbeat={metronome.running &&
+									metronome.currentBeat === beat &&
+									beat === 1}
+							>
+								{#each waveBumpBars as height, index (index)}
+									<span class="wave__bar" style={`--bar-height: ${height}px`}></span>
+								{/each}
+							</div>
+						{/each}
+					</div>
+				{/key}
 			</div>
 		{/if}
 
-		<div class="beats-row" aria-label={WORDS.metronome.beatIndicatorsLabel}>
-			{#each visibleBeats as beat (beat)}
-				<div
-					class="beat"
-					class:is-on={metronome.currentBeat === beat && beat !== 1}
-					class:is-downbeat={metronome.currentBeat === beat && beat === 1}
-				>
-					{beat}
-				</div>
-			{/each}
-		</div>
+		{#if metronome.visualMode === 'wave'}
+			<div class="wave-bpm">
+				{metronome.bpm}
+				<small>{WORDS.metronome.bpmUnit}</small>
+			</div>
+		{:else}
+			<div class="beats-row" aria-label={WORDS.metronome.beatIndicatorsLabel}>
+				{#each visibleBeats as beat (beat)}
+					<div
+						class="beat"
+						class:is-on={metronome.currentBeat === beat && beat !== 1}
+						class:is-downbeat={metronome.currentBeat === beat && beat === 1}
+					>
+						{beat}
+					</div>
+				{/each}
+			</div>
+		{/if}
 	</section>
 
 	<div class="bpm-row" aria-label={WORDS.metronome.bpmControlsLabel}>
@@ -218,9 +258,22 @@
 			ariaLabel={WORDS.metronome.decreaseBpm}
 			onclick={() => changeBpm(-1)}
 		/>
-		<div class="bpm-big">
-			{metronome.bpm}
-			<small>{WORDS.metronome.bpmUnit}</small>
+		<div class="bpm-slider">
+			<input
+				type="range"
+				min={METRONOME_BPM_BOUNDS.minimum}
+				max={METRONOME_BPM_BOUNDS.maximum}
+				step="1"
+				value={metronome.bpm}
+				style={`--bpm-position: ${bpmSliderPosition}%`}
+				aria-label={WORDS.metronome.bpmControlsLabel}
+				aria-valuetext={`${metronome.bpm} ${WORDS.metronome.bpmUnit}`}
+				oninput={dragBpm}
+			/>
+			<div class="bpm-slider__limits" aria-hidden="true">
+				<span>{METRONOME_BPM_BOUNDS.minimum}</span>
+				<span>{METRONOME_BPM_BOUNDS.maximum}</span>
+			</div>
 		</div>
 		<Button
 			variant="secondary"
@@ -280,6 +333,10 @@
 		justify-content: center;
 		min-height: 420px;
 		padding: 24px;
+	}
+
+	.metro-stage.is-wave-mode {
+		background: var(--paper-soft);
 	}
 
 	.pulse {
@@ -349,6 +406,26 @@
 		text-align: center;
 	}
 
+	.wave-bpm {
+		color: var(--ink);
+		font-family: var(--font-display);
+		font-size: 52px;
+		font-weight: 600;
+		line-height: 1;
+		text-align: center;
+	}
+
+	.wave-bpm small {
+		color: var(--ink-3);
+		display: block;
+		font-family: var(--font-mono);
+		font-size: 11px;
+		font-weight: 400;
+		letter-spacing: 0.1em;
+		margin-top: 6px;
+		text-transform: uppercase;
+	}
+
 	.beats-row {
 		display: flex;
 		gap: 14px;
@@ -384,54 +461,134 @@
 	}
 
 	.wave {
-		height: 100px;
+		align-items: center;
+		background: var(--paper);
+		border-radius: var(--r-xl);
+		display: flex;
+		height: 180px;
 		overflow: hidden;
-		width: min(100%, 400px);
+		width: 100%;
 	}
 
-	.wave svg {
-		height: 100%;
-		overflow: visible;
-		width: 200%;
+	.wave__measure {
+		align-items: center;
+		display: grid;
+		gap: clamp(4px, 1vw, 12px);
+		grid-template-columns: repeat(var(--measure-beats), minmax(0, 1fr));
+		height: 120px;
+		margin: 0 auto;
+		width: min(calc(100% - 32px), calc(var(--measure-beats) * 78px));
 	}
 
-	.wave__track {
-		fill: none;
-		stroke: var(--sun);
-		stroke-linecap: round;
-		stroke-width: 5;
-		transform: translateX(0);
+	.wave__bump {
+		align-items: center;
+		display: flex;
+		gap: clamp(1px, 0.45vw, 4px);
+		height: 120px;
+		justify-content: center;
+		min-width: 0;
 	}
 
-	.wave.is-running .wave__track {
-		animation: wave-travel var(--wave-duration) linear infinite;
+	.wave__bar {
+		background: var(--sun-ink);
+		border-radius: 999px;
+		display: block;
+		flex-shrink: 0;
+		height: var(--bar-height);
+		opacity: 0.42;
+		width: clamp(3px, 0.75vw, 5px);
+	}
+
+	.wave__bump.is-current .wave__bar {
+		animation: wave-beat 180ms ease-out;
+		background: var(--sun);
+		opacity: 1;
+	}
+
+	.wave__bump.is-downbeat .wave__bar {
+		background: var(--coral);
 	}
 
 	.bpm-row {
 		align-items: center;
-		display: flex;
-		gap: 16px;
-		justify-content: space-between;
+		display: grid;
+		gap: 22px;
+		grid-template-columns: 48px minmax(0, 1fr) 48px;
 		width: 100%;
 	}
 
-	.bpm-big {
-		font-family: var(--font-display);
-		font-size: 80px;
-		font-weight: 600;
-		letter-spacing: 0;
-		line-height: 1;
-		text-align: center;
+	.bpm-slider {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		min-width: 0;
 	}
 
-	.bpm-big small {
+	.bpm-slider input {
+		appearance: none;
+		background: transparent;
+		cursor: pointer;
+		height: 34px;
+		margin: 0;
+		width: 100%;
+	}
+
+	.bpm-slider input:focus-visible {
+		outline: 2px solid var(--peri);
+		outline-offset: 3px;
+	}
+
+	.bpm-slider input::-webkit-slider-runnable-track {
+		background: linear-gradient(
+			to right,
+			var(--peri) 0%,
+			var(--peri) var(--bpm-position),
+			var(--paper-sink) var(--bpm-position),
+			var(--paper-sink) 100%
+		);
+		border-radius: 999px;
+		height: 12px;
+	}
+
+	.bpm-slider input::-moz-range-track {
+		background: var(--paper-sink);
+		border-radius: 999px;
+		height: 12px;
+	}
+
+	.bpm-slider input::-moz-range-progress {
+		background: var(--peri);
+		border-radius: 999px;
+		height: 12px;
+	}
+
+	.bpm-slider input::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		background: var(--paper);
+		border: 1px solid var(--hairline);
+		border-radius: 999px;
+		box-shadow: var(--shadow-md);
+		height: 34px;
+		margin-top: -11px;
+		width: 48px;
+	}
+
+	.bpm-slider input::-moz-range-thumb {
+		background: var(--paper);
+		border: 1px solid var(--hairline);
+		border-radius: 999px;
+		box-shadow: var(--shadow-md);
+		height: 32px;
+		width: 48px;
+	}
+
+	.bpm-slider__limits {
 		color: var(--ink-3);
-		display: block;
+		display: flex;
 		font-family: var(--font-mono);
-		font-size: 12px;
-		font-weight: 400;
-		letter-spacing: 0.15em;
-		text-transform: uppercase;
+		font-size: 14px;
+		justify-content: space-between;
 	}
 
 	@keyframes pulse-downbeat {
@@ -446,9 +603,9 @@
 		}
 	}
 
-	@keyframes wave-travel {
-		to {
-			transform: translateX(-50%);
+	@keyframes wave-beat {
+		50% {
+			transform: scaleY(1.1);
 		}
 	}
 
@@ -463,8 +620,7 @@
 			width: 170px;
 		}
 
-		.mode-readout,
-		.bpm-big {
+		.mode-readout {
 			font-size: 64px;
 		}
 	}

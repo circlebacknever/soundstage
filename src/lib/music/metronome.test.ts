@@ -4,6 +4,7 @@ import { describe, it } from 'vitest';
 import {
 	adjustMetronomeBpm,
 	beatCountForTimeSignature,
+	clampMetronomeBpm,
 	METRONOME_BPM_BOUNDS,
 	METRONOME_TIME_SIGNATURES,
 	tempoWordForBpm
@@ -41,6 +42,9 @@ describe('metronome tempo facts', () => {
 		assert.equal(adjustMetronomeBpm(120, 1), 121);
 		assert.equal(adjustMetronomeBpm(40, -1), 40);
 		assert.equal(adjustMetronomeBpm(240, 1), 240);
+		assert.equal(clampMetronomeBpm(39), 40);
+		assert.equal(clampMetronomeBpm(132.6), 133);
+		assert.equal(clampMetronomeBpm(241), 240);
 	});
 
 	it('provides the offered time signatures and their visible beat counts', () => {

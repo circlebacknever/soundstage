@@ -71,12 +71,12 @@
 
 ## 8. Guitar Tuner
 
-- [ ] 8.1 Test first in `src/lib/content`: tuner guidance copy for each cents band.
-- [ ] 8.2 Test first in a tuner state module: active-string progression after +/- 5 cents for at least 800ms, done states, completion feedback, and reset to low E.
-- [ ] 8.3 Implement tuner state helpers behind a domain interface that accepts pitch estimates and returns UI-ready tuner state.
-- [ ] 8.4 Build the tuner route with mic gating, top bar, Auto toggle, gauge card, note readout, cents guidance, and standard tuning string row.
-- [ ] 8.5 Connect analyser buffers to the shared pitch detector and tuner state helpers, keeping Web Audio and pitch math out of the route component.
-- [ ] 8.6 Run focused tuner tests and verify the route renders from domain state rather than duplicating tuning logic.
+- [x] 8.1 Test first in `src/lib/content`: tuner guidance copy for each cents band.
+- [x] 8.2 Test first in a tuner state module: active-string progression after +/- 5 cents for at least 800ms, done states, completion feedback, and reset to low E.
+- [x] 8.3 Implement tuner state helpers behind a domain interface that accepts pitch estimates and returns UI-ready tuner state.
+- [x] 8.4 Build the tuner route with mic gating, top bar, Auto toggle, gauge card, note readout, cents guidance, and standard tuning string row.
+- [x] 8.5 Connect analyser buffers to the shared pitch detector and tuner state helpers, keeping Web Audio and pitch math out of the route component.
+- [x] 8.6 Run focused tuner tests and verify the route renders from domain state rather than duplicating tuning logic.
 
 ## 9. Scale Practice
 

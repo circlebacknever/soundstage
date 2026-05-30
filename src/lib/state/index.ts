@@ -1,4 +1,8 @@
-import { adjustMetronomeBpm, beatCountForTimeSignature } from '../music/index.ts';
+import {
+	adjustMetronomeBpm,
+	beatCountForTimeSignature,
+	clampMetronomeBpm
+} from '../music/index.ts';
 
 export type StorageLike = {
 	getItem(key: string): string | null;
@@ -179,12 +183,17 @@ export function changeMetronomeBpm(state: MetronomeState, change: -1 | 1): Metro
 	return { ...state, bpm: adjustMetronomeBpm(state.bpm, change) };
 }
 
-/** Selects a measure shape and begins a valid measure when playback is active. */
+/** Applies a directly selected tempo while preserving the selectable range. */
+export function setMetronomeBpm(state: MetronomeState, bpm: number): MetronomeState {
+	return { ...state, bpm: clampMetronomeBpm(bpm) };
+}
+
+/** Selects a measure shape and waits for its next audible downbeat. */
 export function selectMetronomeTimeSignature(
 	state: MetronomeState,
 	timeSignature: TimeSignature
 ): MetronomeState {
-	return { ...state, timeSignature, currentBeat: state.running ? 1 : 0 };
+	return { ...state, timeSignature, currentBeat: 0 };
 }
 
 export function selectMetronomeVisualMode(
@@ -199,11 +208,8 @@ export function setMetronomeRunning(state: MetronomeState, running: boolean): Me
 	return { ...state, running, currentBeat: running ? state.currentBeat : 0 };
 }
 
-/** Records a beat emitted by the audio scheduler, ignoring invalid beat numbers. */
-export function receiveScheduledMetronomeBeat(
-	state: MetronomeState,
-	currentBeat: number
-): MetronomeState {
+/** Records an audible metronome beat, ignoring beat numbers outside the selected measure. */
+export function receiveMetronomeBeat(state: MetronomeState, currentBeat: number): MetronomeState {
 	const beatCount = beatCountForTimeSignature(state.timeSignature);
 
 	return currentBeat >= 1 && currentBeat <= beatCount ? { ...state, currentBeat } : state;

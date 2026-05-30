@@ -32,7 +32,8 @@ const tempoWords = [
 	{ upToBpm: Infinity, word: 'prestissimo' }
 ] as const satisfies ReadonlyArray<{ upToBpm: number; word: TempoWord }>;
 
-function boundedBpm(bpm: number) {
+/** Clamps any requested tempo to an integer within the selectable BPM range. */
+export function clampMetronomeBpm(bpm: number) {
 	return Math.min(
 		METRONOME_BPM_BOUNDS.maximum,
 		Math.max(METRONOME_BPM_BOUNDS.minimum, Math.round(bpm))
@@ -41,14 +42,14 @@ function boundedBpm(bpm: number) {
 
 /** Returns the authored tempo label for a metronome speed in beats per minute. */
 export function tempoWordForBpm(bpm: number): TempoWord {
-	const bounded = boundedBpm(bpm);
+	const bounded = clampMetronomeBpm(bpm);
 
 	return tempoWords.find(({ upToBpm }) => bounded <= upToBpm)?.word ?? 'prestissimo';
 }
 
 /** Applies a user BPM adjustment while keeping the selectable range valid. */
 export function adjustMetronomeBpm(bpm: number, change: -1 | 1) {
-	return boundedBpm(bpm + change);
+	return clampMetronomeBpm(bpm + change);
 }
 
 /** Returns the count of displayed and scheduled beats in one measure. */

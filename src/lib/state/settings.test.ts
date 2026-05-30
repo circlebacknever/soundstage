@@ -13,11 +13,12 @@ import {
 	loadScalePreferences,
 	loadSettings,
 	metronomePreferencesFromState,
-	receiveScheduledMetronomeBeat,
+	receiveMetronomeBeat,
 	saveMetronomePreferences,
 	saveMicConsent,
 	saveScalePreferences,
 	saveSettings,
+	setMetronomeBpm,
 	selectMetronomeTimeSignature,
 	setMetronomeRunning,
 	STORAGE_KEYS
@@ -133,22 +134,27 @@ describe('SoundStage local state', () => {
 		let state = createMetronomeState({ ...DEFAULT_METRONOME_PREFERENCES, bpm: 40 });
 
 		state = changeMetronomeBpm(state, -1);
+		state = setMetronomeBpm(state, 132);
 		state = setMetronomeRunning(state, true);
-		state = receiveScheduledMetronomeBeat(state, 4);
+		state = receiveMetronomeBeat(state, 4);
 		state = selectMetronomeTimeSignature(state, '2/4');
+		assert.equal(state.currentBeat, 0);
+		state = receiveMetronomeBeat(state, 1);
 
 		assert.deepEqual(state, {
 			...DEFAULT_METRONOME_PREFERENCES,
-			bpm: 40,
+			bpm: 132,
 			timeSignature: '2/4',
 			running: true,
 			currentBeat: 1
 		});
 		assert.deepEqual(metronomePreferencesFromState(state), {
 			...DEFAULT_METRONOME_PREFERENCES,
-			bpm: 40,
+			bpm: 132,
 			timeSignature: '2/4'
 		});
+
+		assert.equal(setMetronomeBpm(state, 300).bpm, 240);
 	});
 
 	it('persists the last selected scale preference with whole-note roots only', () => {

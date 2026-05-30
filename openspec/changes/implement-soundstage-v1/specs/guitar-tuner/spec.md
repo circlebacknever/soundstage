@@ -20,7 +20,7 @@ The tuner SHALL display the handoff circular arc gauge, needle, flat/sharp label
 
 #### Scenario: Gauge visual details render
 - **WHEN** the tuner card is displayed
-- **THEN** it uses `--coral-soft` background, `--r-lg` corners, 32px padding, approximately 70 percent of vertical space, a 180-degree arc from 9 o'clock to 3 o'clock, a 10px `--paper` track, a mint in-tune zone at +/- 5 cents, a 4px `--coral` needle from center-bottom, and a center pivot with an 8px `--ink` circle plus 3px white inset
+- **THEN** it uses `--coral-soft` background, `--r-lg` corners, 32px padding, approximately 70 percent of vertical space, a 180-degree arc from 9 o'clock to 3 o'clock, a 10px `--paper` track, a mint in-tune zone at +/- 5 cents, a 4px `--coral` needle rotating from center-bottom, and a center pivot with an 8px `--ink` circle plus 3px white inset
 
 #### Scenario: Gauge labels render
 - **WHEN** the tuner gauge is displayed
@@ -29,6 +29,22 @@ The tuner SHALL display the handoff circular arc gauge, needle, flat/sharp label
 #### Scenario: Readout typography renders
 - **WHEN** pitch information is displayed
 - **THEN** the note letter uses Fraunces 600 at 104px and the cents readout uses uppercase JetBrains Mono 13px in `--coral-ink`
+
+#### Scenario: No pitch waits for input
+- **WHEN** no usable pitch estimate is available
+- **THEN** the tuner displays neutral listening copy instead of in-tune guidance for the default E target
+
+#### Scenario: Brief pitch dropout keeps the readout readable
+- **WHEN** a usable pitch estimate is followed by a brief missing estimate
+- **THEN** the tuner keeps the last readable note and cents guidance visible for approximately 900ms without advancing the active string
+
+#### Scenario: Same-string cents changes are dampened
+- **WHEN** consecutive usable pitch estimates are for the same standard string
+- **THEN** the tuner dampens the cents and needle movement so the readout remains legible while the string rings
+
+#### Scenario: Played string readout uses nearest standard string
+- **WHEN** the detector reports a pitch nearest to A, D, G, B, or high E while low E is active
+- **THEN** the large note and cents guidance describe the nearest played string instead of the active low E target
 
 #### Scenario: Sharp note updates gauge
 - **WHEN** the detector reports a note that is more than 5 cents sharp
@@ -49,6 +65,10 @@ The tuner SHALL track standard guitar tuning in order: low E, A, D, G, B, high E
 - **WHEN** string chips are displayed
 - **THEN** untouched chips use `--paper` background, `--ink-2` text, and hairline border; done chips use `--mint-soft` background, `--mint-ink` text, and `--mint` border; active chips use `--coral` background, white text, and a soft coral glow shadow
 
+#### Scenario: String chips select active target
+- **WHEN** the user selects a standard tuning string chip
+- **THEN** the tuner makes that string active, clears any current pitch hold timing, and allows that string to be tuned next
+
 #### Scenario: String labels render
 - **WHEN** low E and high E chips are displayed
 - **THEN** each chip shows the note letter in Nunito 800 at 17px and a LOW or HIGH label in JetBrains Mono 9px using `--ink-3`
@@ -56,6 +76,10 @@ The tuner SHALL track standard guitar tuning in order: low E, A, D, G, B, high E
 #### Scenario: Active string is held in tune
 - **WHEN** the active string remains within 5 cents for at least 800ms
 - **THEN** the tuner marks that string done and advances the active state to the next string
+
+#### Scenario: Other strings do not complete the active string
+- **WHEN** the user plays a different standard string in tune while low E is active
+- **THEN** the tuner shows that played string in the readout and keeps low E active
 
 #### Scenario: All strings complete
 - **WHEN** all six strings are marked done

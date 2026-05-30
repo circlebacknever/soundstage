@@ -50,9 +50,11 @@ type MetronomeAudioContext = {
 
 type MetronomeSchedulerOptions = {
 	createAudioContext?: () => MetronomeAudioContext;
-	onScheduledBeat?: (beat: ScheduledMetronomeBeat) => void;
+	onPlaybackBeat?: (beat: ScheduledMetronomeBeat) => void;
 	setInterval?: (callback: () => void, milliseconds: number) => unknown;
 	clearInterval?: (intervalId: unknown) => void;
+	setTimeout?: (callback: () => void, milliseconds: number) => unknown;
+	clearTimeout?: (timeoutId: unknown) => void;
 };
 
 export type MetronomeScheduler = {
@@ -112,36 +114,10 @@ function createBrowserMetronomeAudioContext(): MetronomeAudioContext {
 		},
 		destination: context.destination,
 		createOscillator() {
-			const oscillator = context.createOscillator();
-
-			return {
-				get type() {
-					return oscillator.type;
-				},
-				set type(type: OscillatorType) {
-					oscillator.type = type;
-				},
-				frequency: oscillator.frequency,
-				connect(destination: unknown) {
-					oscillator.connect(destination as AudioNode);
-				},
-				start(atTime: number) {
-					oscillator.start(atTime);
-				},
-				stop(atTime: number) {
-					oscillator.stop(atTime);
-				}
-			};
+			return context.createOscillator() as unknown as OscillatorLike;
 		},
 		createGain() {
-			const gain = context.createGain();
-
-			return {
-				gain: gain.gain,
-				connect(destination: unknown) {
-					gain.connect(destination as AudioNode);
-				}
-			};
+			return context.createGain() as unknown as GainLike;
 		},
 		async resume() {
 			await context.resume();
@@ -175,7 +151,7 @@ function scheduleGeneratedClick(
 }
 
 /**
- * Schedules Web Audio click events ahead of playback and reports each scheduled beat for the UI.
+ * Schedules Web Audio click events ahead of playback and reports each beat when it should be heard.
  * The returned clock owns its AudioContext and releases it when stopped.
  */
 export function createMetronomeScheduler(
@@ -183,18 +159,38 @@ export function createMetronomeScheduler(
 	options: MetronomeSchedulerOptions = {}
 ): MetronomeScheduler {
 	const createAudioContext = options.createAudioContext ?? createBrowserMetronomeAudioContext;
-	const onScheduledBeat = options.onScheduledBeat ?? (() => undefined);
+	const onPlaybackBeat = options.onPlaybackBeat;
 	const setScheduleInterval =
 		options.setInterval ??
 		((callback, milliseconds) => globalThis.setInterval(callback, milliseconds));
 	const clearScheduleInterval =
 		options.clearInterval ??
 		((intervalId) => globalThis.clearInterval(intervalId as ReturnType<typeof setInterval>));
+	const setPlaybackTimeout =
+		options.setTimeout ??
+		((callback, milliseconds) => globalThis.setTimeout(callback, milliseconds));
+	const clearPlaybackTimeout =
+		options.clearTimeout ??
+		((timeoutId) => globalThis.clearTimeout(timeoutId as ReturnType<typeof setTimeout>));
 	let settings = initialSettings;
 	let context: MetronomeAudioContext | undefined;
 	let scheduleIntervalId: unknown;
 	let nextBeat = 1;
 	let nextBeatTime = 0;
+	const playbackTimeoutIds = new Set<unknown>();
+
+	function reportAtPlaybackTime(beat: ScheduledMetronomeBeat) {
+		if (!context || !onPlaybackBeat) {
+			return;
+		}
+
+		const delayMilliseconds = Math.max(0, (beat.atTime - context.currentTime) * 1000);
+		const timeoutId = setPlaybackTimeout(() => {
+			playbackTimeoutIds.delete(timeoutId);
+			onPlaybackBeat(beat);
+		}, delayMilliseconds);
+		playbackTimeoutIds.add(timeoutId);
+	}
 
 	function refillSchedule() {
 		if (!context) {
@@ -212,7 +208,7 @@ export function createMetronomeScheduler(
 			};
 
 			scheduleGeneratedClick(context, beat, settings.clickSound);
-			onScheduledBeat(beat);
+			reportAtPlaybackTime(beat);
 			nextBeatTime += secondsPerBeat(settings.bpm);
 			nextBeat = nextBeat === measureBeatCount ? 1 : nextBeat + 1;
 		}
@@ -232,9 +228,10 @@ export function createMetronomeScheduler(
 			scheduleIntervalId = setScheduleInterval(refillSchedule, METRONOME_LOOKAHEAD_MS);
 		},
 		update(nextSettings) {
+			const meterChanged = settings.timeSignature !== nextSettings.timeSignature;
 			settings = nextSettings;
 
-			if (nextBeat > beatCountForTimeSignature(settings.timeSignature)) {
+			if (meterChanged || nextBeat > beatCountForTimeSignature(settings.timeSignature)) {
 				nextBeat = 1;
 			}
 		},
@@ -243,6 +240,11 @@ export function createMetronomeScheduler(
 				clearScheduleInterval(scheduleIntervalId);
 				scheduleIntervalId = undefined;
 			}
+
+			for (const timeoutId of playbackTimeoutIds) {
+				clearPlaybackTimeout(timeoutId);
+			}
+			playbackTimeoutIds.clear();
 
 			if (context) {
 				await context.close();

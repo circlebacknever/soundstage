@@ -20,7 +20,7 @@ Audio pitch math is currently in-process. Do not add ports, adapters, mocks, or 
 - `microphone-permission.ts` owns current-session microphone permission state and the `getUserMedia({ audio: true })` request wrapper.
 - `microphone-input-state.ts` owns mapping permission and pitch observations to microphone UI states such as unsupported browser, mic denied, silent input, and noisy input.
 - `microphone-analyser.ts` owns the live microphone source to analyser graph and exposes pitch frames without leaking Web Audio node setup to route files.
-- `metronome.ts` owns generated click voices and lookahead scheduling, exposing scheduled beats for metronome visuals.
+- `metronome.ts` owns generated click voices and lookahead scheduling, exposing playback-aligned beat events for metronome visuals.
 - `assertions.ts` owns local numeric guards shared by audio modules.
 
 Keep Web Audio analyser and scheduler modules beside these files when those tasks arrive. Do not put browser node setup into pitch math modules.

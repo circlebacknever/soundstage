@@ -17,7 +17,11 @@ The system SHALL provide a `/metronome` route with BPM controls, start/stop, vis
 
 #### Scenario: BPM controls render
 - **WHEN** the BPM control row is displayed
-- **THEN** it shows 48px circular minus and plus secondary buttons around an 80px Fraunces 600 BPM number with a JetBrains Mono 12px "bpm" label
+- **THEN** it shows 48px circular minus and plus secondary buttons around a draggable BPM range control labeled from 40 through 240
+
+#### Scenario: User drags BPM control
+- **WHEN** the user drags the BPM range control
+- **THEN** the selected BPM updates continuously within 40 through 240 and the running scheduler uses the new tempo
 
 #### Scenario: Metronome state shape is available
 - **WHEN** metronome state is represented
@@ -47,8 +51,16 @@ The metronome SHALL provide Pulse, Beats, and Wave visual modes that can be chan
 - **THEN** the app displays the BPM number and one prominent 52px beat light per beat in the current time signature
 
 #### Scenario: Wave mode displays a moving waveform
-- **WHEN** Wave mode is selected and the metronome is running
-- **THEN** the app animates the waveform at a rate derived from BPM
+- **WHEN** Wave mode is selected
+- **THEN** the app displays a rounded light panel containing one vertically centered waveform bump per beat in the selected time signature
+
+#### Scenario: Wave mode displays tempo beneath the waveform
+- **WHEN** Wave mode is selected
+- **THEN** the current BPM readout appears below the waveform instead of numbered beat-indicator circles
+
+#### Scenario: Wave mode follows audible beats
+- **WHEN** the metronome is running in Wave mode
+- **THEN** the active bump advances when its corresponding click reaches playback, wrapping after 2 clicks in 2/4 and after 6 clicks in 6/8
 
 #### Scenario: Start and stop button renders
 - **WHEN** the metronome is stopped
