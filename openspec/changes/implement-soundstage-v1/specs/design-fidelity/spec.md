@@ -59,7 +59,11 @@ The app SHALL use fixed tool colors: Tuner uses `--coral` and `--coral-soft`, Me
 - **THEN** the same assigned accent family is used consistently
 
 ### Requirement: Typography contract
-The app SHALL use Fraunces as display type, Nunito as UI type, and JetBrains Mono as mono type, with local or self-hosted font assets preferred for offline-capable operation.
+The app SHALL use Fraunces as display type, Nunito as UI type, and JetBrains Mono as mono type, served as self-hosted local font assets so the typography renders consistently and works offline with no external font requests.
+
+#### Scenario: Fonts are self-hosted
+- **WHEN** the app loads its fonts
+- **THEN** Fraunces, Nunito, and JetBrains Mono are declared with `@font-face` pointing to self-hosted `.woff2` assets on the app's own origin (no external font CDN), each with a system fallback chain and `font-display: swap` so text stays visible while the asset loads
 
 #### Scenario: Text roles render
 - **WHEN** headings, body text, labels, buttons, captions, and readouts render

@@ -1,3 +1,31 @@
+/* Self-hosted variable fonts so the typography is consistent and works offline with no external
+   requests (the app is local-first). Files live in static/fonts/ — see static/fonts/README.md.
+   font-display: swap keeps text visible on the fallback chain until the woff2 loads, so the app
+   stays usable even before the binaries are added. */
+@font-face {
+	font-family: 'Fraunces';
+	src: url('/fonts/fraunces-variable.woff2') format('woff2');
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Nunito';
+	src: url('/fonts/nunito-variable.woff2') format('woff2');
+	font-weight: 100 1000;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'JetBrains Mono';
+	src: url('/fonts/jetbrains-mono-variable.woff2') format('woff2');
+	font-weight: 100 800;
+	font-style: normal;
+	font-display: swap;
+}
+
 :root {
 	--paper: #fffbf5;
 	--paper-soft: #fff6e8;
