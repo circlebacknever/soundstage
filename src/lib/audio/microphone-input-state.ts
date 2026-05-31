@@ -28,7 +28,7 @@ export type BuildMicrophoneInputStateOptions = {
 };
 
 // Maps the mic setting, device availability, and permission to a UI state. There is no
-// quiet/noisy escalation: once listening, a silent or unclear signal simply yields no pitch,
+// quiet/noisy escalation: once listening, a silent or unclear signal yields no pitch,
 // which the tool already shows as "Play a note", so a separate advisory would be noise.
 export function buildMicrophoneInputState({
 	microphoneEnabled = true,

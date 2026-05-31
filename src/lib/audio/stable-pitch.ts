@@ -58,6 +58,7 @@ function assertStablePitchOptions({
 	}
 }
 
+/** Creates an empty smoothing window with no stable pitch yet. */
 export function createStablePitchState(): StablePitchState {
 	return createStablePitchMemory({
 		recentEstimates: [],
@@ -131,6 +132,10 @@ function keepPreviousStablePitch(
 	};
 }
 
+/**
+ * Folds one detector result into the smoothing window and returns either the current
+ * stable pitch or a collecting state. Reuse the returned state on the next frame.
+ */
 export function buildStablePitchState(
 	estimate: PitchEstimateResult,
 	previousState: StablePitchState = createStablePitchState(),

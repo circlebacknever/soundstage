@@ -1,6 +1,7 @@
 # SoundStage Agent Instructions
 
-This file is for coding agents working in this repo. The root `README.md` is for human setup and project overview. Use `AGENTS.md` files for implementation rules, module ownership, test order, and local decisions that future agents must follow.
+This file is for coding agents. The root `README.md` is for humans running the app. Scoped
+`AGENTS.md` files carry module ownership and local rules.
 
 ## Current Change
 
@@ -18,13 +19,19 @@ Mark a task complete only after its focused verification passes.
 
 ## Engineering Rules
 
-Use TDD for behavior changes. Write the focused test first, confirm the expected failure when practical, implement the smallest passing code, run the focused check, then refactor only while tests pass.
+Use TDD for behavior changes. Write the focused test first, confirm the expected failure when
+practical, implement the smallest passing code, run the focused check, then refactor while tests
+pass.
 
-Use interface-first module design, inspired by Ousterhout's "deep modules" from _A Philosophy of Software Design_. Route files are URL adapters. Tool slices assemble page views and workflows. Shared modules own formulas, browser APIs, thresholds, parsing, persistence, scheduling, state transitions, and user-visible copy.
+Use interface-first module design, inspired by Ousterhout's "deep modules" from _A Philosophy of
+Software Design_. Route files are URL adapters. Tool slices assemble page views and workflows.
+Shared modules own formulas, browser APIs, thresholds, parsing, persistence, scheduling, state
+transitions, and user-visible copy.
 
 ## Interface-First Module Design
 
-A module is deep when callers can ask for a domain result through a small interface while the module owns the mechanism.
+A module is deep when callers ask for a domain result through a small interface while the module owns
+the mechanism.
 
 Prefer:
 
@@ -39,7 +46,8 @@ Avoid:
 - pass-through wrappers that rename another function without hiding complexity.
 - many tiny files where each file exposes another piece of procedure the caller must assemble.
 
-A deep module should hide parsing, validation, defaults, ordering rules, browser quirks, thresholds, state transitions, and error cases when that makes the caller simpler.
+A deep module hides parsing, validation, defaults, ordering rules, browser quirks, thresholds, state
+transitions, and error cases when that makes the caller simpler.
 
 Before adding a shared module, ask:
 
@@ -60,26 +68,37 @@ Keep the module boundaries plain:
 - `src/lib/state`: local persistence and settings state.
 - `src/routes`: SvelteKit route adapters only.
 
-Avoid shallow pass-through wrappers. A shared function should hide real complexity or express a clearer domain boundary.
+Avoid shallow pass-through wrappers. A shared function should hide real complexity or express a
+clearer domain boundary.
 
 ## Dependency and Seam Discipline
 
-Before deepening a module, classify its dependencies. The dependency category decides how the module is tested across its seam.
+Before deepening a module, classify its dependencies. The category decides how the module is tested.
 
-- In-process: pure computation, in-memory state, and no I/O. Deepen directly, keep the seam internal, and test through the module interface. Audio pitch math and music theory helpers are in-process.
-- Local-substitutable: dependencies with local stand-ins such as an in-memory filesystem or PGLite. Deepen only when the stand-in runs in tests. Keep the stand-in seam internal rather than adding a public port.
-- Remote but owned: internal services across a network boundary. Define a port at the seam, put logic in the deep module, use an HTTP/gRPC/queue adapter in production, and use an in-memory adapter in tests.
-- True external: third-party services the project does not control. Inject a port for the external dependency and test with a mock adapter.
+- In-process: pure computation, in-memory state, and no I/O. Deepen directly and test through the
+  module interface. Audio pitch math and music theory helpers are in-process.
+- Local-substitutable: dependencies with local stand-ins such as an in-memory filesystem or PGLite.
+  Deepen only when the stand-in runs in tests. Keep the stand-in internal.
+- Remote but owned: internal services across a network boundary. Define a port, keep logic in the
+  deep module, use an HTTP/gRPC/queue adapter in production, and use an in-memory adapter in tests.
+- True external: third-party services the project does not control. Inject a port and test with a
+  mock adapter.
 
-One adapter is a hypothetical seam. Two adapters prove a real seam. Do not add a port unless at least two adapters are justified, usually production plus test. A single-adapter seam is just ceremony with a hat.
+One adapter is a hypothetical boundary. Two adapters prove a real one. A single-adapter port is
+ceremony with a hat.
 
-Internal seams may exist inside a deep module for implementation and focused tests. Do not expose those seams through the module's public interface just because tests use them. Product callers should depend on domain-level outputs, while lesson or implementation tests may import narrower internal files when OpenSpec explicitly requires teaching evidence.
+Internal boundaries may exist inside a deep module for implementation and focused tests. Product
+callers depend on domain-level outputs. Lesson or implementation tests may import narrower internal
+files when OpenSpec explicitly requires teaching evidence.
 
-When a shallow module is deepened, replace tests rather than layering them. Tests should assert observable outcomes through the deep module interface. Keep tests on internal seams only when that seam is a deliberate teaching artifact, diagnostic boundary, or independently meaningful pure computation.
+When a shallow module is deepened, replace tests instead of layering them. Tests assert observable
+outcomes through the deep module interface.
 
 ## Naming Decisions
 
-`src/lib/content` exports its catalog as `WORDS`. The screaming case is intentional: mildly deranged and still readable. This is the correct flavor for SoundStage copy because human-facing language deserves a little voltage while the call site stays obvious.
+`src/lib/content` exports its catalog as `WORDS`. The screaming case is intentional: mildly deranged
+and still readable. Human-facing language deserves a little voltage while the call site stays
+obvious.
 
 Prefer names that are plain, specific, and alive. `WORDS.home.heading` is better than timid aliases like `uiCopy`, `text`, `strings`, or `contentMap`, because it says what the module owns without wearing a committee badge. The secret of elegance in this repo is controlled strangeness: a name may be odd when it remains easy to read, easy to search, and anchored to a real boundary.
 
@@ -89,7 +108,10 @@ To create this vocabulary, use a three-step test:
 2. Choose the shortest concrete word that a human would say aloud.
 3. Add one degree of character only when the call site stays obvious.
 
-Good names feel inevitable after one second of reading. They may be slightly strange, as `WORDS` is, but the strangeness must clarify ownership rather than decorate it. Avoid committee paste such as `uiContentRegistry`, `copyManagementService`, `textResourceMap`, or `contentAbstractionLayer`; these names sound careful while hiding the actual object in fog.
+Good names feel inevitable after one second of reading. They may be slightly strange, as `WORDS` is,
+but the strangeness must clarify ownership. Avoid committee paste such as `uiContentRegistry`,
+`copyManagementService`, `textResourceMap`, or `contentAbstractionLayer`; these names sound careful
+while hiding the actual object in fog.
 
 ## Pitch Detection
 

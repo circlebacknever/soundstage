@@ -68,6 +68,7 @@ function estimateFrequencyWithConfidence(
 	};
 }
 
+/** Estimates frequency in hertz from a usable time-domain buffer. */
 export function estimateFrequency(
 	samples: Float32Array,
 	sampleRate: number
@@ -85,6 +86,10 @@ export function estimateFrequency(
 	};
 }
 
+/**
+ * Converts time-domain samples into a pitch estimate with confidence, note name,
+ * octave, target frequency, and cents offset, or returns the rejection reason.
+ */
 export function estimatePitch(
 	samples: Float32Array,
 	sampleRate: number,

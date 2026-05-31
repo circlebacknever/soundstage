@@ -91,13 +91,13 @@ function spellScaleNote(
 }
 
 export type ScaleStep = {
-	name: string; // how the note is spelled, e.g. "F#"
-	chromaticIndex: number; // its pitch class, 0 = C … 11 = B
+	name: string;
+	chromaticIndex: number;
 };
 
 /**
  * Notes of the scale run, each spelling paired with the pitch class used to match
- * a played note. Paired in one call so the two can't drift out of step. Throws
+ * a played note. `chromaticIndex` is the pitch class, C=0 through B=11. Throws
  * RangeError on an unsupported root key or scale type.
  */
 export function buildScaleSteps(rootKey: RootKey, scaleType: ScaleType): ScaleStep[] {
@@ -112,6 +112,7 @@ export function buildScaleSteps(rootKey: RootKey, scaleType: ScaleType): ScaleSt
 	}));
 }
 
+/** Returns the spelled ascending scale sequence, including the octave root. */
 export function buildScaleSequence(rootKey: RootKey, scaleType: ScaleType): string[] {
 	return buildScaleSteps(rootKey, scaleType).map((step) => step.name);
 }
@@ -146,6 +147,10 @@ function scaleChromaticIndexes(rootKey: RootKey, scaleType: ScaleType) {
 	);
 }
 
+/**
+ * Builds visible fretboard rows for the selected scale. Each cell carries both display
+ * spelling and pitch class so practice scoring and preview rendering stay aligned.
+ */
 export function buildScaleFretboard(
 	rootKey: RootKey,
 	scaleType: ScaleType,

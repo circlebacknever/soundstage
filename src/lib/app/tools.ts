@@ -154,6 +154,7 @@ export const desktopNavItems: DesktopNavItem[] = [
 	{ name: WORDS.tools.settings.label, route: '/settings', icon: 'settings', placement: 'footer' }
 ];
 
+/** Returns whether a nav route should be treated as active for the current pathname. */
 export function isRouteActive(route: AppRoute, pathname: string) {
 	if (route === '/') {
 		return pathname === '/';
@@ -166,6 +167,7 @@ export function isRouteActive(route: AppRoute, pathname: string) {
 	return pathname === route;
 }
 
+/** Returns the document title for a pathname, including the SoundStage suffix for tool pages. */
 export function getDocumentTitle(pathname: string) {
 	const route = Object.values(routeMetadata).find((metadata) => metadata.path === pathname);
 	const title = route?.title ?? WORDS.app.document.defaultTitle;
@@ -175,10 +177,12 @@ export function getDocumentTitle(pathname: string) {
 		: `${title}${WORDS.app.document.separator}${WORDS.app.brand.full}`;
 }
 
+/** Finds a launcher tool by route, returning undefined for non-tool routes such as settings. */
 export function getToolByRoute(route: AppRoute) {
 	return toolCatalog.find((tool) => tool.route === route);
 }
 
+/** Finds a launcher tool by route and throws if the route has no tool metadata. */
 export function getRequiredToolByRoute(route: AppRoute) {
 	const tool = getToolByRoute(route);
 

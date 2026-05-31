@@ -84,56 +84,56 @@ Record each lesson result here during implementation. Include the focused test, 
 
 ### Lesson 1: Waveform samples and generated sine buffers
 
-- Focused test: `src/lib/audio/waveform.test.ts`
+- Focused test: `src/lib/audio/__tests__/waveform.test.ts`
 - What passed: `generateSineWave(...)` returns a deterministic time-domain buffer with the requested `frequency`, `sampleRate`, and `sampleCount`. The test proves a 1 Hz wave sampled 4 times per second produces the expected first-cycle shape: `0`, `1`, `0`, `-1`.
 - What the code proves: a sample index can be converted to seconds with `index / sampleRate`, seconds can be converted to completed cycles with `frequency * seconds`, and cycles can be converted to radians with `cycles * 2 * Math.PI`.
 - Next signal problem: real microphone input may be silent or too weak, so Lesson 2 measures RMS input level before attempting period detection.
 
 ### Lesson 2: RMS input level
 
-- Focused test: `src/lib/audio/input-level.test.ts`
+- Focused test: `src/lib/audio/__tests__/input-level.test.ts`
 - What passed: `measureRms(...)` returns `0` for empty or silent buffers, measures `[1, -1, 1, -1]` as a strong signal with RMS `1`, and measures `[0.1, -0.1, 0.1, -0.1]` as RMS `0.1` without positive and negative samples canceling out.
 - What the code proves: signal strength needs square, mean, then square root. `evaluateInputLevel(...)` uses that RMS value internally to reject input below a configured quiet threshold before later pitch stages try to find a waveform period, while callers receive only `usable-input` or `quiet-input` so the measurement technique can change later.
 - Next signal problem: an audible signal can still be the wrong shape or too ambiguous, so Lesson 3 looks for a repeated period in generated buffers.
 
 ### Lesson 3: Period length
 
-- Focused test: `src/lib/audio/period.test.ts`
+- Focused test: `src/lib/audio/__tests__/period.test.ts`
 - What passed: `estimatePeriodLength(...)` detects clean generated sine buffers with 4-sample and 8-sample periods, and rejects a short buffer that does not contain enough repeated waveform to compare cycles.
 - What the code proves: one period is the shift where the waveform best matches itself again. The first estimator compares samples against shifted copies of the same buffer and returns the smallest clear repeating period with a domain reason.
 - Next signal problem: a period length is still measured in samples, so Lesson 4 converts period length into hertz with `frequency = sampleRate / periodLength`.
 
 ### Lesson 4: Frequency conversion
 
-- Focused test: `src/lib/audio/frequency.test.ts`
+- Focused test: `src/lib/audio/__tests__/frequency.test.ts`
 - What passed: `periodLengthToFrequency(...)` converts period length and sample rate into hertz, and `estimateFrequency(...)` returns expected 1 Hz and 2 Hz estimates from clean generated sine buffers while preserving period rejection reasons.
 - What the code proves: frequency is cycles per second, so `sampleRate / periodLength` converts samples-per-second divided by samples-per-cycle into cycles-per-second. The estimator now chooses the smallest clear repeating period so larger repeated copies do not halve the detected frequency in clean generated buffers.
 - Next signal problem: frequency is still raw hertz, so Lesson 5 maps accepted frequencies to musical note names and cents offsets.
 
 ### Lesson 5: Note and cents mapping
 
-- Focused tests: `src/lib/music/notes.test.ts` and `src/lib/audio/pitch.test.ts`
+- Focused tests: `src/lib/music/__tests__/notes.test.ts` and `src/lib/audio/__tests__/pitch.test.ts`
 - What passed: `nearestNoteFromFrequency(...)` maps 440 Hz to A4 with 0 cents, maps slightly sharp A4 input to positive cents, and maps slightly flat A4 input to negative cents. `estimatePitch(...)` now turns accepted clean generated samples into A4 pitch feedback and preserves quiet or period rejection reasons.
 - What the code proves: hertz becomes musical feedback through `src/lib/music`, where note names, target frequencies, and cents math belong. `src/lib/audio` owns the detector sequence and hands accepted frequency estimates to the music boundary rather than duplicating note formulas.
 - Next signal problem: an accepted note can still be a bad guess when the waveform is noisy or ambiguous, so Lesson 6 adds confidence scoring and ambiguous-input rejection.
 
 ### Lesson 6: Confidence scoring
 
-- Focused test: `src/lib/audio/confidence.test.ts`
+- Focused test: `src/lib/audio/__tests__/confidence.test.ts`
 - What passed: `estimatePitch(...)` reports high confidence for a clean generated A4 buffer, rejects audible unclear input with `unclear-pitch`, and keeps the smallest clear period so a clean repeated wave does not drop an octave.
 - What the code proves: confidence is shape agreement, not loudness. The detector compares a shifted copy of the waveform against the original, normalizes the shift error by signal power, and accepts a candidate period only when it is a confidence peak rather than a tiny nearby slide that merely looks similar.
 - Next signal problem: accepted estimates can still jump around frame to frame, so Lesson 7 adds smoothing and hysteresis before UI tools treat a note as stable.
 
 ### Lesson 7: Smoothing and hysteresis
 
-- Focused test: `src/lib/audio/stable-pitch.test.ts`
+- Focused test: `src/lib/audio/__tests__/stable-pitch.test.ts`
 - What passed: `buildStablePitchState(...)` withholds stable output until enough recent estimates agree, keeps the current stable note through a jittery outlier, changes to a new note only after that note settles, clears stable output after repeated rejected estimates, and lets tools choose faster or stricter stability rules through `StablePitchOptions`.
 - What the code proves: smoothing is a state rule over pitch estimates, not another waveform detector. A moving window counts recent agreement, while hysteresis keeps the previous stable note during short bursts of disagreement so tuner and scale practice UI do not twitch at every buffer.
 - Next signal problem: the detector is still fed by generated buffers or synthetic estimates, so Lesson 8 connects browser analyser buffers to the same tested detector boundary.
 
 ### Lesson 8: Live microphone integration
 
-- Focused test: `src/lib/audio/analyser.test.ts`
+- Focused test: `src/lib/audio/__tests__/analyser.test.ts`
 - Text diagram:
 
 ```text

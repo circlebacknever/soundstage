@@ -26,6 +26,7 @@ export type LivePitchFrame = {
 	stable: StablePitchState;
 };
 
+/** Copies the analyser's current time-domain frame into a fresh Float32Array. */
 export function readAnalyserSamples(analyser: TimeDomainAnalyser): Float32Array {
 	assertPositiveInteger(analyser.fftSize, 'analyser.fftSize');
 
@@ -35,6 +36,10 @@ export function readAnalyserSamples(analyser: TimeDomainAnalyser): Float32Array 
 	return samples;
 }
 
+/**
+ * Reads one analyser frame, estimates pitch, and folds it through stable-note smoothing.
+ * Reuse the returned stable state on the next frame to preserve hysteresis.
+ */
 export function readLivePitchFrame({
 	analyser,
 	sampleRate,

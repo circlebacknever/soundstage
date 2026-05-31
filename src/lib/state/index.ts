@@ -136,12 +136,14 @@ function clampStoredBpm(value: unknown) {
 		: DEFAULT_METRONOME_PREFERENCES.bpm;
 }
 
+/** Reads the remembered microphone consent hint, falling back to unknown on missing or bad data. */
 export function loadMicConsent(storage: StorageLike | undefined = browserStorage()): MicConsent {
 	const stored = storage?.getItem(STORAGE_KEYS.micConsent);
 
 	return includes(micConsentValues, stored) ? stored : DEFAULT_MIC_CONSENT;
 }
 
+/** Persists the local microphone consent hint; browser permission remains the authority. */
 export function saveMicConsent(
 	consent: MicConsent,
 	storage: StorageLike | undefined = browserStorage()
@@ -149,6 +151,7 @@ export function saveMicConsent(
 	storage?.setItem(STORAGE_KEYS.micConsent, consent);
 }
 
+/** Reads metronome preferences and repairs malformed fields with v1 defaults. */
 export function loadMetronomePreferences(
 	storage: StorageLike | undefined = browserStorage()
 ): MetronomePreferences {
@@ -172,6 +175,7 @@ export function loadMetronomePreferences(
 	};
 }
 
+/** Persists only user-selectable metronome preferences, not live playback state. */
 export function saveMetronomePreferences(
 	preferences: MetronomePreferences,
 	storage: StorageLike | undefined = browserStorage()
@@ -204,6 +208,7 @@ export function selectMetronomeTimeSignature(
 	return { ...state, timeSignature, currentBeat: 0 };
 }
 
+/** Selects the metronome visual mode without touching tempo or playback state. */
 export function selectMetronomeVisualMode(
 	state: MetronomeState,
 	visualMode: MetronomeVisualMode
@@ -233,6 +238,7 @@ export function metronomePreferencesFromState(state: MetronomeState): MetronomeP
 	};
 }
 
+/** Reads the last scale setup choice, repairing malformed fields with v1 defaults. */
 export function loadScalePreferences(
 	storage: StorageLike | undefined = browserStorage()
 ): ScalePreferences {
@@ -253,6 +259,7 @@ export function loadScalePreferences(
 	};
 }
 
+/** Persists the selected scale setup state for the next visit. */
 export function saveScalePreferences(
 	preferences: ScalePreferences,
 	storage: StorageLike | undefined = browserStorage()
@@ -260,6 +267,7 @@ export function saveScalePreferences(
 	writeJson(storage, STORAGE_KEYS.scalesLast, preferences);
 }
 
+/** Reads settings while forcing v1-only instrument and tuning values back to their fixed defaults. */
 export function loadSettings(storage: StorageLike | undefined = browserStorage()): Settings {
 	const stored = readJson(storage, STORAGE_KEYS.settings);
 
@@ -280,6 +288,7 @@ export function loadSettings(storage: StorageLike | undefined = browserStorage()
 	};
 }
 
+/** Persists settings with fixed v1 instrument and tuning values. */
 export function saveSettings(
 	settings: Settings,
 	storage: StorageLike | undefined = browserStorage()

@@ -27,6 +27,7 @@ export type GuitarStringEstimate = {
 	cents: number;
 };
 
+/** Finds the standard-tuning string nearest to a frequency and reports its signed cents offset. */
 export function nearestGuitarStringTarget(frequency: number): GuitarStringEstimate {
 	const [firstTarget, ...remainingTargets] = STANDARD_GUITAR_TUNING;
 	let nearest = firstTarget;

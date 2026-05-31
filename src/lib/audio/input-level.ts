@@ -14,6 +14,7 @@ export type InputLevelResult =
 			reason: 'quiet-input';
 	  };
 
+/** Returns root-mean-square amplitude for a time-domain sample buffer. */
 export function measureRms(samples: Float32Array): number {
 	if (samples.length === 0) {
 		return 0;
@@ -29,6 +30,7 @@ export function measureRms(samples: Float32Array): number {
 	return Math.sqrt(sumOfSquares / samples.length);
 }
 
+/** Rejects buffers below the configured RMS threshold before period search runs. */
 export function evaluateInputLevel(
 	samples: Float32Array,
 	{ quietThreshold }: InputLevelOptions

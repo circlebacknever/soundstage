@@ -39,18 +39,21 @@ function browserMediaDevices(): MediaDevicesLike | undefined {
 	return navigator.mediaDevices;
 }
 
+/** Creates the current-session permission state before any browser prompt has opened. */
 export function createMicrophonePermissionState(): MicrophonePermissionState {
 	return {
 		status: 'unknown'
 	};
 }
 
+/** Marks that the browser permission prompt is open. */
 export function beginMicrophonePermissionRequest(): MicrophonePermissionState {
 	return {
 		status: 'pending'
 	};
 }
 
+/** Stores the granted stream returned by getUserMedia. */
 export function grantMicrophonePermission(stream: MediaStream): MicrophonePermissionState {
 	return {
 		status: 'granted',
@@ -58,6 +61,7 @@ export function grantMicrophonePermission(stream: MediaStream): MicrophonePermis
 	};
 }
 
+/** Stores the browser error that blocked microphone access. */
 export function denyMicrophonePermission(error: unknown): MicrophonePermissionState {
 	return {
 		status: 'denied',
@@ -65,6 +69,10 @@ export function denyMicrophonePermission(error: unknown): MicrophonePermissionSt
 	};
 }
 
+/**
+ * Requests microphone audio with voice-call processing disabled so sustained guitar notes
+ * reach the detector. Missing mediaDevices is treated as denied/unavailable state.
+ */
 export async function requestMicrophonePermission(
 	mediaDevices: MediaDevicesLike | undefined = browserMediaDevices()
 ): Promise<MicrophonePermissionState> {

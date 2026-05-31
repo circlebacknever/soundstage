@@ -107,6 +107,7 @@ function isConfidencePeak(candidates: PeriodCandidate[], index: number) {
 	);
 }
 
+/** Finds the first confident repeating period in sample frames and returns its confidence. */
 export function estimatePeriodMatch(samples: Float32Array): PeriodMatchResult {
 	if (samples.length < MIN_PERIOD_LENGTH * MIN_CYCLES_FOR_PERIOD_COMPARISON) {
 		return {
@@ -141,6 +142,7 @@ export function estimatePeriodMatch(samples: Float32Array): PeriodMatchResult {
 	};
 }
 
+/** Finds the repeating period length in sample frames, omitting confidence from the result. */
 export function estimatePeriodLength(samples: Float32Array): PeriodLengthResult {
 	const period = estimatePeriodMatch(samples);
 
@@ -155,6 +157,7 @@ export function estimatePeriodLength(samples: Float32Array): PeriodLengthResult 
 	};
 }
 
+/** Converts a period length in sample frames to hertz with frequency = sampleRate / periodLength. */
 export function periodLengthToFrequency(periodLength: number, sampleRate: number): number {
 	assertFinitePositive(periodLength, 'periodLength');
 	assertFinitePositive(sampleRate, 'sampleRate');

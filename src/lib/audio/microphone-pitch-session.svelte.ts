@@ -151,7 +151,7 @@ export function createMicrophonePitchSession(
 
 			started = true;
 
-			// Honour a prior decision so the pre-prompt only greets genuinely new users: a
+			// Honour a prior decision so the pre-prompt only greets first-time users: a
 			// previously granted mic re-acquires its stream right away (the browser won't prompt
 			// again), and a previously denied mic opens in the denied state, ready to retry.
 			if (options.initialConsent === 'granted') {

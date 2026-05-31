@@ -46,10 +46,12 @@ function assertPositiveFrequency(frequency: number) {
 	}
 }
 
+/** Wraps any integer-like pitch class into C=0 through B=11. */
 export function wrapChromaticIndex(value: number) {
 	return ((value % 12) + 12) % 12;
 }
 
+/** Returns the frequency in hertz for a MIDI note number, using concertA as A4. */
 export function frequencyForMidiNote(midi: number, concertA = 440) {
 	assertFiniteNumber(midi, 'midi');
 	assertPositiveFrequency(concertA);
@@ -57,6 +59,7 @@ export function frequencyForMidiNote(midi: number, concertA = 440) {
 	return concertA * 2 ** ((midi - 69) / 12);
 }
 
+/** Returns note name, octave, label, and frequency for an integer MIDI note number. */
 export function noteFromMidi(midi: number, concertA = 440): MidiNote {
 	assertFiniteNumber(midi, 'midi');
 
@@ -76,6 +79,7 @@ export function noteFromMidi(midi: number, concertA = 440): MidiNote {
 	};
 }
 
+/** Returns the signed cents offset from targetFrequency; positive means sharp. */
 export function centsBetweenFrequencies(frequency: number, targetFrequency: number) {
 	assertPositiveFrequency(frequency);
 	assertPositiveFrequency(targetFrequency);
@@ -87,6 +91,7 @@ export function centsBetweenFrequencies(frequency: number, targetFrequency: numb
 	return 1200 * Math.log2(frequency / targetFrequency);
 }
 
+/** Maps a frequency in hertz to the nearest chromatic note and signed cents offset. */
 export function nearestNoteFromFrequency(frequency: number, concertA = 440): FrequencyNoteEstimate {
 	assertPositiveFrequency(frequency);
 	assertPositiveFrequency(concertA);

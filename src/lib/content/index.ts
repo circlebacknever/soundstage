@@ -1,7 +1,7 @@
-// The click-sound names are authored once here: the metronome lists them as options and
-// the settings row describes the choice, so a rename can't leave the two spellings adrift.
+// The metronome options and settings row share these labels, so a rename happens once.
 const CLICK_SOUND_LABELS = ['Wood', 'Beep', 'Cowbell'] as const;
 
+/** Authored interface copy for SoundStage screens, controls, labels, and status prose. */
 export const WORDS = {
 	app: {
 		brand: {

@@ -9,10 +9,12 @@
 		backHref?: AppRoute;
 		backLabel?: string;
 		right?: Snippet;
-		rightLabel?: string; // Renders an interactive button (needs rightHref or rightOnclick).
+		/** Renders an interactive button; pair with rightHref or rightOnclick. */
+		rightLabel?: string;
 		rightHref?: AppRoute;
 		rightOnclick?: () => void;
-		rightBadge?: string; // Renders a non-interactive status pill, e.g. an always-on mode indicator.
+		/** Renders a non-interactive status pill, such as the tuner Auto indicator. */
+		rightBadge?: string;
 	};
 
 	let {

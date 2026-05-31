@@ -66,6 +66,10 @@ function createBrowserAudioContext(): AudioContextLike {
 	};
 }
 
+/**
+ * Connects a microphone stream to an analyser and exposes pitch frames without leaking
+ * Web Audio node setup to tool pages. `stop()` closes the context and stops stream tracks.
+ */
 export function createMicrophonePitchSource({
 	stream,
 	audioContext = createBrowserAudioContext()

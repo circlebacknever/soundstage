@@ -15,7 +15,8 @@
 
 	type Props = {
 		rows: readonly FretRow[];
-		celebrate?: boolean; // Pulses the board border in mint to mark a completed run.
+		/** Pulses the board border in mint to mark a completed run. */
+		celebrate?: boolean;
 	};
 
 	// Per-fret cells arrive low E (0) → high e (5). Rows render top-down as high e →

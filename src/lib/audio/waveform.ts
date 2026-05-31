@@ -28,6 +28,10 @@ function sampleSineAt(
 	return amplitude * Math.sin(radians);
 }
 
+/**
+ * Builds a deterministic time-domain sine buffer for tests and lessons. Frequency and
+ * sampleRate are in hertz; sampleCount is the number of frames in the returned buffer.
+ */
 export function generateSineWave({
 	frequency,
 	sampleRate,

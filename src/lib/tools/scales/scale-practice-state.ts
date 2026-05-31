@@ -18,28 +18,31 @@ export type ScalePracticeCellState = 'empty' | 'scale' | 'hit' | 'next';
 export type ScalePracticeFeedback = 'idle' | 'wrong' | 'complete';
 
 export type ScalePracticeCell = {
-	label?: string; // absent on out-of-scale cells
+	label?: string;
 	state: ScalePracticeCellState;
 };
 
+/** One fret row for Fretboard; cells are low E to high e because the UI flips them for TAB order. */
 export type ScalePracticeRow = {
 	fret: string;
-	cells: ScalePracticeCell[]; // low E (0) to high e (5)
+	cells: ScalePracticeCell[];
 };
 
 declare const scalePracticeStateBrand: unique symbol;
 
-// Build only through createScalePracticeState / buildScalePracticeState /
-// restartScalePractice. They carry hold-timing the view never sees, so a
-// hand-rolled object would silently fail to track progress.
+/**
+ * Opaque live scale-practice state. Build it only through createScalePracticeState,
+ * buildScalePracticeState, or restartScalePractice because the hidden timing fields
+ * decide whether a sounded note has held long enough to count.
+ */
 export type ScalePracticeState = {
 	readonly [scalePracticeStateBrand]: true;
 	scaleType: ScaleType;
 	rootKey: RootKey;
 	mode: 'practice';
-	sequence: readonly string[]; // includes the octave: G major is G…G (8 entries)
-	progressIndex: number; // equals sequence.length when the run is complete
-	nextNote?: string; // undefined once complete
+	sequence: readonly string[];
+	progressIndex: number;
+	nextNote?: string;
 	progressLabel: string;
 	progressRatio: number;
 	rows: readonly ScalePracticeRow[];
@@ -47,9 +50,9 @@ export type ScalePracticeState = {
 };
 
 type ScalePracticeMemory = ScalePracticeState & {
-	steps: readonly ScaleStep[]; // sequence notes with pitch classes, for matching
-	fretboard: ScaleFretboard; // built once per scale, reused every frame
-	matchSinceMs?: number; // when the current in-tolerance note began sounding
+	steps: readonly ScaleStep[];
+	fretboard: ScaleFretboard;
+	matchSinceMs?: number;
 };
 
 type ScalePracticeSource = Pick<
@@ -167,7 +170,7 @@ export function buildScalePracticeState(
 	const previous = previousState as ScalePracticeMemory;
 
 	if (previous.feedback === 'complete') {
-		return previousState; // frozen until restartScalePractice
+		return previousState;
 	}
 
 	if (!pitch) {

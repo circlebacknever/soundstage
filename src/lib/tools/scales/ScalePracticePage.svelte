@@ -50,6 +50,10 @@
 		session.togglePause();
 	}
 
+	function backToHome() {
+		void goto(resolve('/'));
+	}
+
 	function backToSetup() {
 		void goto(resolve('/scales'));
 	}
@@ -124,7 +128,7 @@
 	</ToolCanvas>
 
 	{#if showPrompt}
-		<MicrophonePrePrompt onAllow={requestMicrophone} onDecline={backToSetup} />
+		<MicrophonePrePrompt onAllow={requestMicrophone} onDecline={backToHome} />
 	{/if}
 {/if}
 

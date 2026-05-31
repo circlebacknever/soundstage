@@ -11,10 +11,10 @@ import {
 export const TUNER_HOLD_MS = 800;
 /** How long "Tuned ✓" lingers after the last string before resetting to low E (ms). */
 export const TUNER_COMPLETION_FEEDBACK_MS = 1_500;
-/** How long the last reading stays on screen after the detector drops out (ms).
- *  Generous on purpose: a plucked string decays and the detector blinks out between
- *  notes and while a peg turns, so a short hold strobes the readout back to neutral.
- *  Riding the last reading through those gaps keeps the gauge calm and legible. */
+/**
+ * How long the last reading stays on screen after the detector drops out (ms).
+ * Long enough for a player to adjust the peg and pluck again without losing the readout.
+ */
 export const TUNER_PITCH_HOLD_MS = 4_000;
 /** Half-width of the in-tune window (cents); within ±this the hold timer runs. */
 export const TUNER_IN_TUNE_CENTS = 5;
@@ -36,19 +36,23 @@ export type TunerFeedback = 'idle' | 'tuned';
 /** One standard-tuning string as the strings row renders it. */
 export type TunerStringView = {
 	id: GuitarStringId;
-	note: NoteName; // Open-string note letter, e.g. "E".
-	octaveLabel?: 'low' | 'high'; // Set only for the two E strings; drives the LOW/HIGH sublabel.
+	note: NoteName;
+	octaveLabel?: 'low' | 'high';
 	status: TunerStringStatus;
 };
 
-/** Pitch readout for the gauge and note display, derived from one estimate. */
+/**
+ * Pitch readout for the gauge and note display. `cents` is the signed offset from
+ * the active string after damping; `centsLabel` is empty once the played note rolls
+ * past the target; `needleAngleDegrees` is clamped gauge rotation, positive sharp.
+ */
 export type TunerPitchView = {
-	note: NoteName; // Nearest chromatic note the player is closest to, e.g. "E" or "F#".
-	cents: number; // Signed offset from the active string, rounded and dampened; positive is sharp.
-	centsLabel: string; // `cents` formatted for display, e.g. "+12¢"; empty once the note rolls past ±50.
-	guidance: TunerGuidance; // Band `cents` falls into, relative to the active string; keys WORDS.tuner.guidance.
-	targetString: GuitarStringId; // The string this reading is measured against (the active tuning target).
-	needleAngleDegrees: number; // Gauge rotation: 0 in tune with the target, positive sharp, clamped to ±TUNER_NEEDLE_MAX_DEGREES.
+	note: NoteName;
+	cents: number;
+	centsLabel: string;
+	guidance: TunerGuidance;
+	targetString: GuitarStringId;
+	needleAngleDegrees: number;
 };
 
 declare const tunerStateBrand: unique symbol;
@@ -59,9 +63,9 @@ declare const tunerStateBrand: unique symbol;
  */
 export type TunerState = {
 	readonly [tunerStateBrand]: true;
-	activeString: GuitarStringId; // String the user is currently asked to tune.
-	strings: readonly TunerStringView[]; // All six strings, low-to-high order.
-	currentPitch?: TunerPitchView; // Latest readable pitch; undefined while listening or just reset.
+	activeString: GuitarStringId;
+	strings: readonly TunerStringView[];
+	currentPitch?: TunerPitchView;
 	feedback: TunerFeedback;
 };
 

@@ -1,7 +1,4 @@
-/* Self-hosted variable fonts so the typography is consistent and works offline with no external
-   requests (the app is local-first). Files live in static/fonts/ — see static/fonts/README.md.
-   font-display: swap keeps text visible on the fallback chain until the woff2 loads, so the app
-   stays usable even before the binaries are added. */
+/* Self-hosted variable fonts keep the app local-first and avoid external font requests. */
 @font-face {
 	font-family: 'Fraunces';
 	src: url('/fonts/fraunces-variable.woff2') format('woff2');
