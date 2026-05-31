@@ -98,24 +98,15 @@ describe('WORDS', () => {
 			primaryAction: 'Browse the chord library'
 		});
 
-		assert.deepEqual(WORDS.microphone.errors.silent, {
-			title: "We can't hear anything",
-			body: "Your mic is on but it's silent. Try moving closer or checking your input.",
-			primaryAction: 'Keep listening',
-			ghostAction: 'Switch input device'
-		});
-
-		assert.deepEqual(WORDS.microphone.errors.noisy, {
-			title: "It's a bit noisy",
-			body: "We're picking up background noise. Try a quieter spot or get closer to your instrument.",
-			primaryAction: 'Keep trying',
-			ghostAction: 'Practice without mic'
-		});
-
 		assert.deepEqual(WORDS.microphone.errors.disabled, {
 			title: 'Microphone is off',
 			body: 'Turn microphone access back on in Settings to use the tuner and scale practice.',
 			primaryAction: 'Open settings'
+		});
+
+		assert.deepEqual(WORDS.microphone.hints, {
+			silent: "We can't hear anything — check your mic isn't muted",
+			noisy: 'Too noisy to read a pitch — try a quieter spot'
 		});
 	});
 

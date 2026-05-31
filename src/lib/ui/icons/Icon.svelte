@@ -17,21 +17,18 @@
 	const style = $derived(`--icon-size: ${size}px; --tone: var(--${resolvedTone});`);
 </script>
 
-{#if label}
-	<span class={`ss-icon ${className}`} {style} role="img" aria-label={label}>
-		<svg width={size} height={size} viewBox={icon.viewBox} fill="none">
-			<!-- eslint-disable-next-line svelte/no-at-html-tags -- first-party icon path data from the static registry -->
-			{@html icon.markup}
-		</svg>
-	</span>
-{:else}
-	<span class={`ss-icon ${className}`} {style} aria-hidden="true">
-		<svg width={size} height={size} viewBox={icon.viewBox} fill="none">
-			<!-- eslint-disable-next-line svelte/no-at-html-tags -- first-party icon path data from the static registry -->
-			{@html icon.markup}
-		</svg>
-	</span>
-{/if}
+<span
+	class={`ss-icon ${className}`}
+	{style}
+	role={label ? 'img' : undefined}
+	aria-label={label}
+	aria-hidden={label ? undefined : 'true'}
+>
+	<svg width={size} height={size} viewBox={icon.viewBox} fill="none">
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- first-party icon path data from the static registry -->
+		{@html icon.markup}
+	</svg>
+</span>
 
 <style>
 	.ss-icon {

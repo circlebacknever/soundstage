@@ -178,6 +178,17 @@ describe('tuner state', () => {
 		assert.equal(state.currentPitch?.needleAngleDegrees, -14);
 	});
 
+	it('rolls the readout to the nearest chromatic note past fifty cents', () => {
+		// 60 cents above low E sits closer to F than E, so the readout names F with a small
+		// offset rather than E +60. Playing F still must not complete the active low E string.
+		const state = buildTunerState(pitchForString('E_low', 60), createTunerState(), 16_000);
+
+		assert.equal(state.currentPitch?.note, 'F');
+		assert.ok(Math.abs(state.currentPitch?.cents ?? 999) <= 50);
+		assert.equal(state.activeString, 'E_low');
+		assert.equal(statusByString(state).E_low, 'active');
+	});
+
 	it('holds the last readable pitch through brief detector dropouts', () => {
 		let state = buildTunerState(pitchForString('A', 11), createTunerState(), 11_000);
 

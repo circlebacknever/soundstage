@@ -42,9 +42,13 @@ The tuner SHALL display the handoff circular arc gauge, needle, flat/sharp label
 - **WHEN** consecutive usable pitch estimates are for the same standard string
 - **THEN** the tuner dampens the cents and needle movement so the readout remains legible while the string rings
 
-#### Scenario: Played string readout uses nearest standard string
-- **WHEN** the detector reports a pitch nearest to A, D, G, B, or high E while low E is active
-- **THEN** the large note and cents guidance describe the nearest played string instead of the active low E target
+#### Scenario: Readout names the nearest chromatic note
+- **WHEN** the detector reports a usable pitch
+- **THEN** the large note letter and cents describe the nearest chromatic note to that pitch, so the cents reading stays within ±50 and the note letter rolls over to the next note (for example E to F) once the pitch passes the halfway point, rather than showing a large offset from a fixed string
+
+#### Scenario: Readout position stays stable as values change
+- **WHEN** the cents value or guidance band changes between frames
+- **THEN** the large note letter stays centered and the readout does not shift horizontally or vertically, using tabular figures and reserving space for the guidance line
 
 #### Scenario: Sharp note updates gauge
 - **WHEN** the detector reports a note that is more than 5 cents sharp
@@ -70,8 +74,12 @@ The tuner SHALL track standard guitar tuning in order: low E, A, D, G, B, high E
 - **THEN** the tuner makes that string active, clears any current pitch hold timing, and allows that string to be tuned next
 
 #### Scenario: String labels render
-- **WHEN** low E and high E chips are displayed
+- **WHEN** low E and high E chips are displayed in the untouched state
 - **THEN** each chip shows the note letter in Nunito 800 at 17px and a LOW or HIGH label in JetBrains Mono 9px using `--ink-3`
+
+#### Scenario: String labels stay legible when selected or done
+- **WHEN** the low E or high E chip is the active (coral) or done (mint) chip
+- **THEN** its LOW or HIGH sublabel uses the chip's own ink (`--on-primary` on the active coral chip, `--mint-ink` on the done chip) so it keeps sufficient contrast rather than the muted `--ink-3` that is illegible on those backgrounds
 
 #### Scenario: Active string is held in tune
 - **WHEN** the active string remains within 5 cents for at least 800ms
@@ -79,7 +87,7 @@ The tuner SHALL track standard guitar tuning in order: low E, A, D, G, B, high E
 
 #### Scenario: Other strings do not complete the active string
 - **WHEN** the user plays a different standard string in tune while low E is active
-- **THEN** the tuner shows that played string in the readout and keeps low E active
+- **THEN** the tuner shows the played note in the readout and keeps low E active
 
 #### Scenario: All strings complete
 - **WHEN** all six strings are marked done

@@ -1,24 +1,12 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import {
-		beginMicrophonePermissionRequest,
-		buildMicrophoneInputState,
-		createMicrophonePermissionState,
-		createMicrophonePitchSource,
-		createStablePitchState,
-		requestMicrophonePermission,
-		type MicrophonePermissionState,
-		type MicrophonePitchSource,
-		type PitchEstimateOptions,
-		type PitchEstimateResult,
-		type StablePitchOptions,
-		type StablePitchState
-	} from '$lib/audio';
+	import type { PitchEstimateOptions, StablePitchOptions } from '$lib/audio';
+	import { createMicrophonePitchSession } from '../../audio/microphone-pitch-session.svelte.ts';
 	import { WORDS } from '$lib/content';
-	import { loadSettings, saveMicConsent } from '$lib/state';
+	import { loadMicConsent, loadSettings, saveMicConsent } from '$lib/state';
 	import MicrophoneErrorState from '$lib/ui/MicrophoneErrorState.svelte';
+	import MicrophoneHint from '$lib/ui/MicrophoneHint.svelte';
 	import MicrophonePrePrompt from '$lib/ui/MicrophonePrePrompt.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
 	import TopBar from '$lib/ui/TopBar.svelte';
@@ -44,32 +32,24 @@
 		maxUnstableEstimates: 6
 	} satisfies StablePitchOptions;
 
-	let permission = $state<MicrophonePermissionState>(createMicrophonePermissionState());
-	let tuner = $state<TunerState>(createTunerState());
-	let pitchSource: MicrophonePitchSource | undefined;
-	let stablePitch: StablePitchState = createStablePitchState();
-	let latestPitch = $state<PitchEstimateResult | undefined>();
-	let quietInputStartedAtMs = $state<number | undefined>();
-	let unclearPitchStartedAtMs = $state<number | undefined>();
-	let quietInputDurationMs = $state(0);
-	let unclearPitchDurationMs = $state(0);
-	let animationFrameId: number | undefined;
-
 	const microphoneEnabled = loadSettings().microphoneEnabled;
-	const mediaDevicesAvailable = $derived(!browser || Boolean(navigator.mediaDevices?.getUserMedia));
-	const inputState = $derived(
-		buildMicrophoneInputState({
-			microphoneEnabled,
-			mediaDevicesAvailable,
-			permission,
-			pitch: latestPitch,
-			quietInputDurationMs,
-			unclearPitchDurationMs
-		})
-	);
-	const showPrompt = $derived(
-		inputState.status === 'permission-required' || inputState.status === 'permission-pending'
-	);
+
+	let tuner = $state<TunerState>(createTunerState());
+
+	const session = createMicrophonePitchSession({
+		microphoneEnabled,
+		initialConsent: loadMicConsent(),
+		pitchOptions: TUNER_PITCH_OPTIONS,
+		stablePitchOptions: TUNER_STABLE_PITCH_OPTIONS,
+		onConsent: saveMicConsent,
+		onFrame: (pitch, observedAtMs) => {
+			tuner = buildTunerState(pitch, tuner, observedAtMs);
+		}
+	});
+
+	const inputState = $derived(session.inputState);
+	const showPrompt = $derived(session.showPrompt);
+
 	const currentPitch = $derived<TunerPitchView | undefined>(tuner.currentPitch);
 	const activeString = $derived(tuner.strings.find((string) => string.id === tuner.activeString));
 	const readoutNote = $derived(currentPitch?.note ?? activeString?.note ?? 'E');
@@ -117,96 +97,8 @@
 		);
 	});
 
-	function resetInputTimers() {
-		quietInputStartedAtMs = undefined;
-		unclearPitchStartedAtMs = undefined;
-		quietInputDurationMs = 0;
-		unclearPitchDurationMs = 0;
-	}
-
-	function recordPitchInput(pitch: PitchEstimateResult, observedAtMs: number) {
-		latestPitch = pitch;
-
-		quietInputStartedAtMs =
-			!pitch.ok && pitch.reason === 'quiet-input'
-				? (quietInputStartedAtMs ?? observedAtMs)
-				: undefined;
-		quietInputDurationMs =
-			quietInputStartedAtMs === undefined ? 0 : observedAtMs - quietInputStartedAtMs;
-		unclearPitchStartedAtMs =
-			!pitch.ok && pitch.reason === 'unclear-pitch'
-				? (unclearPitchStartedAtMs ?? observedAtMs)
-				: undefined;
-		unclearPitchDurationMs =
-			unclearPitchStartedAtMs === undefined ? 0 : observedAtMs - unclearPitchStartedAtMs;
-	}
-
-	function stopPitchLoop() {
-		if (animationFrameId !== undefined) {
-			cancelAnimationFrame(animationFrameId);
-			animationFrameId = undefined;
-		}
-	}
-
-	function startPitchLoop() {
-		stopPitchLoop();
-
-		const readNextFrame = (observedAtMs: number) => {
-			if (!pitchSource) {
-				return;
-			}
-
-			const frame = pitchSource.readPitchFrame({
-				previousState: stablePitch,
-				pitchOptions: TUNER_PITCH_OPTIONS,
-				stablePitchOptions: TUNER_STABLE_PITCH_OPTIONS
-			});
-			stablePitch = frame.stable;
-			recordPitchInput(frame.pitch, observedAtMs);
-			tuner = buildTunerState(
-				frame.stable.output.ok ? frame.stable.output.pitch : undefined,
-				tuner,
-				observedAtMs
-			);
-			animationFrameId = requestAnimationFrame(readNextFrame);
-		};
-
-		animationFrameId = requestAnimationFrame(readNextFrame);
-	}
-
-	async function stopPitchDetection() {
-		stopPitchLoop();
-		const activeSource = pitchSource;
-		pitchSource = undefined;
-		await activeSource?.stop();
-	}
-
-	async function startPitchDetection(stream: MediaStream) {
-		await stopPitchDetection();
-		pitchSource = createMicrophonePitchSource({ stream });
-		stablePitch = createStablePitchState();
-		latestPitch = undefined;
-		resetInputTimers();
-		startPitchLoop();
-	}
-
-	async function allowMicrophone() {
-		permission = beginMicrophonePermissionRequest();
-		const nextPermission = await requestMicrophonePermission();
-		permission = nextPermission;
-
-		if (nextPermission.status === 'granted') {
-			saveMicConsent('granted');
-			await startPitchDetection(nextPermission.stream);
-			return;
-		}
-
-		saveMicConsent('denied');
-		await stopPitchDetection();
-	}
-
 	function requestMicrophone() {
-		void allowMicrophone();
+		session.requestMicrophone();
 	}
 
 	function declineMicrophone() {
@@ -225,16 +117,8 @@
 		tuner = selectTunerString(tuner, stringId);
 	}
 
-	function keepListening() {
-		resetInputTimers();
-	}
-
-	function practiceWithoutMic() {
-		void goto(resolve('/scales'));
-	}
-
 	onDestroy(() => {
-		void stopPitchDetection();
+		void session.dispose();
 	});
 </script>
 
@@ -253,19 +137,11 @@
 		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
 		<MicrophoneErrorState kind="denied" onPrimary={requestMicrophone} onGhost={declineMicrophone} />
 	</ToolCanvas>
-{:else if inputState.status === 'silent-input'}
-	<ToolCanvas>
-		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
-		<MicrophoneErrorState kind="silent" onPrimary={keepListening} onGhost={requestMicrophone} />
-	</ToolCanvas>
-{:else if inputState.status === 'noisy-input'}
-	<ToolCanvas>
-		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
-		<MicrophoneErrorState kind="noisy" onPrimary={keepListening} onGhost={practiceWithoutMic} />
-	</ToolCanvas>
 {:else}
 	<ToolCanvas>
 		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
+
+		<MicrophoneHint status={inputState.status} />
 
 		<section class="tuner-card" aria-label={WORDS.tuner.readoutLabel}>
 			<svg class="arc-svg" viewBox="0 0 260 160" fill="none" aria-hidden="true">
@@ -399,7 +275,11 @@
 	}
 
 	.readout {
+		/* Full width so the note and the guidance line each center independently. Otherwise
+		   the readout shrink-wraps to the guidance text and the big note slides sideways every
+		   time the cents or band changes width. */
 		text-align: center;
+		width: 100%;
 	}
 
 	.note-xxl {
@@ -411,10 +291,18 @@
 	}
 
 	.note-sub {
+		align-items: center;
 		color: var(--coral-ink);
+		display: flex;
 		font-family: var(--font-mono);
+		/* Tabular figures keep the cents number a fixed width, and the reserved two-line height
+		   stops the gauge above from jumping when the guidance wraps on narrow screens. */
 		font-size: 13px;
+		font-variant-numeric: tabular-nums;
+		justify-content: center;
 		letter-spacing: 0.12em;
+		line-height: 1.4;
+		min-height: 2.8em;
 		text-transform: uppercase;
 	}
 
@@ -462,6 +350,16 @@
 		background: var(--coral);
 		box-shadow: 0 2px 8px oklch(0.72 0.15 35 / 0.4);
 		color: var(--on-primary);
+	}
+
+	/* The default --ink-3 sublabel is illegible on the coral active chip and weak on the mint
+	   done chip, so the LOW/HIGH label takes each state's own ink for a readable contrast. */
+	.string-chip.is-active small {
+		color: var(--on-primary);
+	}
+
+	.string-chip.is-done small {
+		color: var(--mint-ink);
 	}
 
 	@media (max-width: 720px) {

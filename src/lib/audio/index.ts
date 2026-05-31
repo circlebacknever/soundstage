@@ -22,12 +22,15 @@ export type {
 } from './metronome.ts';
 export {
 	buildMicrophoneInputState,
+	createMicrophoneInputTracker,
 	MICROPHONE_NOISY_INPUT_MS,
 	MICROPHONE_SILENT_INPUT_MS
 } from './microphone-input-state.ts';
 export type {
 	BuildMicrophoneInputStateOptions,
-	MicrophoneInputState
+	MicrophoneInputDurations,
+	MicrophoneInputState,
+	MicrophoneInputTracker
 } from './microphone-input-state.ts';
 export {
 	beginMicrophonePermissionRequest,

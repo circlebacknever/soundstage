@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { WORDS } from '$lib/content';
-	import { NATURAL_ROOT_KEYS, type RootKey, type ScaleType } from '$lib/music';
+	import {
+		NATURAL_ROOT_KEYS,
+		SCALE_INTERVALS_BY_TYPE,
+		type RootKey,
+		type ScaleType
+	} from '$lib/music';
 	import { loadScalePreferences, saveScalePreferences } from '$lib/state';
 	import Button from '$lib/ui/Button.svelte';
 	import Chip from '$lib/ui/Chip.svelte';
@@ -9,14 +14,9 @@
 	import TopBar from '$lib/ui/TopBar.svelte';
 	import { buildScalePreviewRows } from './scale-practice-state.ts';
 
-	// Order must line up with WORDS.scales.scaleTypes so each value gets its label.
-	const SCALE_TYPE_VALUES = [
-		'major',
-		'minor',
-		'pentatonic',
-		'blues',
-		'dorian'
-	] as const satisfies readonly ScaleType[];
+	// Scale types come from the music module; its key order lines up with the
+	// WORDS.scales.scaleTypes labels, zipped by index below.
+	const SCALE_TYPE_VALUES = Object.keys(SCALE_INTERVALS_BY_TYPE) as readonly ScaleType[];
 	const scaleOptions = SCALE_TYPE_VALUES.map((value, index) => ({
 		value,
 		label: WORDS.scales.scaleTypes[index]

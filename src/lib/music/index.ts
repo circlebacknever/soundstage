@@ -1,10 +1,10 @@
 export {
 	CHROMATIC_NOTE_NAMES,
 	centsBetweenFrequencies,
-	chromaticIndexForMidi,
 	frequencyForMidiNote,
 	nearestNoteFromFrequency,
-	noteFromMidi
+	noteFromMidi,
+	wrapChromaticIndex
 } from './notes.ts';
 export type { FrequencyNoteEstimate, MidiNote, NoteName } from './notes.ts';
 export { nearestGuitarStringTarget, STANDARD_GUITAR_TUNING } from './guitar.ts';

@@ -29,21 +29,17 @@ describe('scale setup page boundary', () => {
 });
 
 describe('scale practice page boundary', () => {
-	it('consumes microphone, pitch-source, and practice-state boundaries', () => {
-		assert.match(practicePage, /createMicrophonePermissionState/);
-		assert.match(practicePage, /requestMicrophonePermission/);
-		assert.match(practicePage, /createMicrophonePitchSource/);
-		assert.match(practicePage, /buildMicrophoneInputState/);
-		assert.match(practicePage, /createStablePitchState/);
+	it('drives practice through the shared mic session and practice-state boundaries', () => {
+		assert.match(practicePage, /createMicrophonePitchSession/);
 		assert.match(practicePage, /createScalePracticeState/);
 		assert.match(practicePage, /buildScalePracticeState/);
 		assert.match(practicePage, /restartScalePractice/);
 		assert.match(practicePage, /loadScalePreferences/);
-		assert.match(practicePage, /readPitchFrame/);
-		assert.match(practicePage, /requestAnimationFrame/);
+		// The live-mic machinery (permission handshake, pitch source, frame loop, input
+		// timers) now lives behind the session, so the page must not re-own any of it.
 		assert.doesNotMatch(
 			practicePage,
-			/getFloatTimeDomainData|estimatePitch|new AudioContext|createAnalyser/
+			/getFloatTimeDomainData|estimatePitch|new AudioContext|createAnalyser|createMicrophonePitchSource|readPitchFrame|requestAnimationFrame|requestMicrophonePermission|createMicrophonePermissionState|buildMicrophoneInputState|createStablePitchState/
 		);
 		// Scale formulas stay in the music module; the page never recomputes them.
 		assert.doesNotMatch(practicePage, /buildScaleSequence|buildScaleFretboard|SCALE_INTERVALS/);
@@ -61,6 +57,9 @@ describe('scale practice page boundary', () => {
 		assert.match(practicePage, /MicrophoneErrorState/);
 		assert.match(practicePage, /inputState\.status === 'mic-denied'/);
 		assert.match(practicePage, /inputState\.status === 'unsupported-browser'/);
+		// Silent and noisy inputs surface as an inline hint instead of taking over the screen.
+		assert.match(practicePage, /<MicrophoneHint status=\{inputState\.status\}/);
+		assert.doesNotMatch(practicePage, /kind="silent"|kind="noisy"/);
 	});
 
 	it('renders the next note, progress, and fretboard from practice state', () => {

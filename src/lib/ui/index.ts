@@ -6,6 +6,7 @@ export { default as PlannedToolPlaceholder } from './PlannedToolPlaceholder.svel
 export { default as Fretboard } from './Fretboard.svelte';
 export { default as LauncherTile } from './LauncherTile.svelte';
 export { default as MicrophoneErrorState } from './MicrophoneErrorState.svelte';
+export { default as MicrophoneHint } from './MicrophoneHint.svelte';
 export { default as MicrophonePrePrompt } from './MicrophonePrePrompt.svelte';
 export { default as ModalFrame } from './ModalFrame.svelte';
 export { default as SegmentedControl } from './SegmentedControl.svelte';

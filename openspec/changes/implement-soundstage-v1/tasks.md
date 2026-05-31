@@ -102,7 +102,7 @@
 - [ ] 11.2 Run Svelte type and compiler checks.
 - [ ] 11.3 Inspect the implementation diff for unrelated file churn, broad formatting, accidental pitch-detection dependencies, weakened tests, and shallow pass-through modules.
 - [ ] 11.4 Verify mobile, tablet, and desktop layouts against the OpenSpec visual contract and available handoff references with screenshots.
-- [ ] 11.5 Verify mic-denied, unsupported browser, silent microphone, and noisy environment states.
+- [ ] 11.5 Verify mic-denied, unsupported browser, and microphone-off blocking states, plus the inline quiet/noisy input hints.
 - [ ] 11.6 Review the pitch-detection lesson note and confirm each lesson checkpoint has its explanation, test evidence, and remaining question recorded.
 - [ ] 11.7 Decide whether v1 ships local/self-hosted Fraunces, Nunito, and JetBrains Mono font assets or accepts system fallbacks, then update the design-fidelity spec and CSS to match that decision.
 

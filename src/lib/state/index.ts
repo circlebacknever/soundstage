@@ -1,8 +1,13 @@
 import {
 	adjustMetronomeBpm,
 	beatCountForTimeSignature,
-	clampMetronomeBpm
+	clampMetronomeBpm,
+	METRONOME_BPM_BOUNDS,
+	METRONOME_TIME_SIGNATURES,
+	NATURAL_ROOT_KEYS,
+	SCALE_INTERVALS_BY_TYPE
 } from '../music/index.ts';
+import type { MetronomeTimeSignature, RootKey, ScaleType } from '../music/index.ts';
 
 export type StorageLike = {
 	getItem(key: string): string | null;
@@ -17,12 +22,14 @@ export const STORAGE_KEYS = {
 } as const;
 
 export type MicConsent = 'unknown' | 'granted' | 'denied';
-export type TimeSignature = '2/4' | '3/4' | '4/4' | '6/8';
+export type TimeSignature = MetronomeTimeSignature;
 export type MetronomeVisualMode = 'pulse' | 'beats' | 'wave';
 export type ClickSound = 'wood' | 'beep' | 'cowbell';
-export type ScaleType = 'major' | 'minor' | 'pentatonic' | 'blues' | 'dorian';
-export type RootKey = 'C' | 'D' | 'E' | 'F' | 'G' | 'A' | 'B';
 export type ScaleMode = 'setup' | 'practice';
+
+// Scale, root-key, and time-signature domains are owned by music theory. Persistence
+// re-exports them so stored values validate against the same source the calculators use.
+export type { RootKey, ScaleType };
 
 export type MetronomePreferences = {
 	bpm: number;
@@ -72,18 +79,16 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 const micConsentValues = ['unknown', 'granted', 'denied'] as const satisfies readonly MicConsent[];
-const timeSignatures = ['2/4', '3/4', '4/4', '6/8'] as const satisfies readonly TimeSignature[];
-const visualModes = ['pulse', 'beats', 'wave'] as const satisfies readonly MetronomeVisualMode[];
 const clickSounds = ['wood', 'beep', 'cowbell'] as const satisfies readonly ClickSound[];
-const scaleTypes = [
-	'major',
-	'minor',
-	'pentatonic',
-	'blues',
-	'dorian'
-] as const satisfies readonly ScaleType[];
-const rootKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const satisfies readonly RootKey[];
+const scaleTypes = Object.keys(SCALE_INTERVALS_BY_TYPE) as readonly ScaleType[];
 const scaleModes = ['setup', 'practice'] as const satisfies readonly ScaleMode[];
+
+/** Metronome visual modes, ordered to line up with `WORDS.metronome.visualModes` labels. */
+export const METRONOME_VISUAL_MODES = [
+	'pulse',
+	'beats',
+	'wave'
+] as const satisfies readonly MetronomeVisualMode[];
 
 function browserStorage(): StorageLike | undefined {
 	if (typeof localStorage === 'undefined') {
@@ -123,7 +128,10 @@ function writeJson(storage: StorageLike | undefined, key: string, value: unknown
 }
 
 function clampStoredBpm(value: unknown) {
-	return typeof value === 'number' && Number.isInteger(value) && value >= 40 && value <= 240
+	return typeof value === 'number' &&
+		Number.isInteger(value) &&
+		value >= METRONOME_BPM_BOUNDS.minimum &&
+		value <= METRONOME_BPM_BOUNDS.maximum
 		? value
 		: DEFAULT_METRONOME_PREFERENCES.bpm;
 }
@@ -152,10 +160,10 @@ export function loadMetronomePreferences(
 
 	return {
 		bpm: clampStoredBpm(stored.bpm),
-		timeSignature: includes(timeSignatures, stored.timeSignature)
+		timeSignature: includes(METRONOME_TIME_SIGNATURES, stored.timeSignature)
 			? stored.timeSignature
 			: DEFAULT_METRONOME_PREFERENCES.timeSignature,
-		visualMode: includes(visualModes, stored.visualMode)
+		visualMode: includes(METRONOME_VISUAL_MODES, stored.visualMode)
 			? stored.visualMode
 			: DEFAULT_METRONOME_PREFERENCES.visualMode,
 		clickSound: includes(clickSounds, stored.clickSound)
@@ -238,7 +246,7 @@ export function loadScalePreferences(
 		scaleType: includes(scaleTypes, stored.scaleType)
 			? stored.scaleType
 			: DEFAULT_SCALE_PREFERENCES.scaleType,
-		rootKey: includes(rootKeys, stored.rootKey)
+		rootKey: includes(NATURAL_ROOT_KEYS, stored.rootKey)
 			? stored.rootKey
 			: DEFAULT_SCALE_PREFERENCES.rootKey,
 		mode: includes(scaleModes, stored.mode) ? stored.mode : DEFAULT_SCALE_PREFERENCES.mode

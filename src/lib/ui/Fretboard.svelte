@@ -14,7 +14,7 @@
 	};
 
 	type Props = {
-		rows?: readonly FretRow[];
+		rows: readonly FretRow[];
 		celebrate?: boolean; // Pulses the board border in mint to mark a completed run.
 	};
 
@@ -29,33 +29,7 @@
 		next: WORDS.fretboard.states.next
 	};
 
-	const defaultRows: FretRow[] = [
-		{
-			fret: '0',
-			cells: [
-				{ label: 'E', state: 'scale' },
-				{ label: 'A', state: 'scale' },
-				{},
-				{ label: 'G', state: 'scale' },
-				{},
-				{ label: 'E', state: 'scale' }
-			]
-		},
-		{
-			fret: '2',
-			cells: [{}, { label: 'B', state: 'scale' }, {}, { label: 'A', state: 'scale' }, {}, {}]
-		},
-		{
-			fret: '3',
-			cells: [{ label: 'G', state: 'scale' }, {}, {}, {}, { label: 'D', state: 'scale' }, {}]
-		},
-		{
-			fret: '5',
-			cells: [{ label: 'A', state: 'scale' }, {}, { label: 'G', state: 'scale' }, {}, {}, {}]
-		}
-	];
-
-	let { rows = defaultRows, celebrate = false }: Props = $props();
+	let { rows, celebrate = false }: Props = $props();
 
 	const frets = $derived(rows.map((row) => row.fret));
 	// Input has one entry per fret; pivot to one row per string so frets become columns.

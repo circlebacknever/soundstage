@@ -1,24 +1,13 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import {
-		beginMicrophonePermissionRequest,
-		buildMicrophoneInputState,
-		createMicrophonePermissionState,
-		createMicrophonePitchSource,
-		createStablePitchState,
-		requestMicrophonePermission,
-		type MicrophonePermissionState,
-		type MicrophonePitchSource,
-		type PitchEstimateResult,
-		type StablePitchState
-	} from '$lib/audio';
+	import { createMicrophonePitchSession } from '../../audio/microphone-pitch-session.svelte.ts';
 	import { WORDS } from '$lib/content';
-	import { loadScalePreferences, loadSettings, saveMicConsent } from '$lib/state';
+	import { loadMicConsent, loadScalePreferences, loadSettings, saveMicConsent } from '$lib/state';
 	import Button from '$lib/ui/Button.svelte';
 	import Fretboard from '$lib/ui/Fretboard.svelte';
 	import MicrophoneErrorState from '$lib/ui/MicrophoneErrorState.svelte';
+	import MicrophoneHint from '$lib/ui/MicrophoneHint.svelte';
 	import MicrophonePrePrompt from '$lib/ui/MicrophonePrePrompt.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
 	import TopBar from '$lib/ui/TopBar.svelte';
@@ -34,126 +23,32 @@
 	const microphoneEnabled = loadSettings().microphoneEnabled;
 	const title = `${preferences.rootKey} ${preferences.scaleType}`;
 
-	let permission = $state<MicrophonePermissionState>(createMicrophonePermissionState());
 	let practice = $state<ScalePracticeState>(
 		createScalePracticeState(preferences.rootKey, preferences.scaleType)
 	);
-	let pitchSource: MicrophonePitchSource | undefined;
-	let stablePitch: StablePitchState = createStablePitchState();
-	let latestPitch = $state<PitchEstimateResult | undefined>();
-	let quietInputStartedAtMs = $state<number | undefined>();
-	let unclearPitchStartedAtMs = $state<number | undefined>();
-	let quietInputDurationMs = $state(0);
-	let unclearPitchDurationMs = $state(0);
-	let paused = $state(false);
-	let animationFrameId: number | undefined;
 
-	const mediaDevicesAvailable = $derived(!browser || Boolean(navigator.mediaDevices?.getUserMedia));
-	const inputState = $derived(
-		buildMicrophoneInputState({
-			microphoneEnabled,
-			mediaDevicesAvailable,
-			permission,
-			pitch: latestPitch,
-			quietInputDurationMs,
-			unclearPitchDurationMs
-		})
-	);
-	const showPrompt = $derived(
-		inputState.status === 'permission-required' || inputState.status === 'permission-pending'
-	);
+	const session = createMicrophonePitchSession({
+		microphoneEnabled,
+		initialConsent: loadMicConsent(),
+		onConsent: saveMicConsent,
+		onFrame: (pitch, observedAtMs) => {
+			practice = buildScalePracticeState(pitch, practice, observedAtMs);
+		}
+	});
+
+	const inputState = $derived(session.inputState);
+	const showPrompt = $derived(session.showPrompt);
 
 	// The next-note readout changes every frame, so it can't sit in a live region;
 	// announce only the completion line to screen readers instead.
 	const announcement = $derived(practice.feedback === 'complete' ? WORDS.scales.completion : '');
 
-	function resetInputTimers() {
-		quietInputStartedAtMs = undefined;
-		unclearPitchStartedAtMs = undefined;
-		quietInputDurationMs = 0;
-		unclearPitchDurationMs = 0;
-	}
-
-	function recordPitchInput(pitch: PitchEstimateResult, observedAtMs: number) {
-		latestPitch = pitch;
-
-		quietInputStartedAtMs =
-			!pitch.ok && pitch.reason === 'quiet-input'
-				? (quietInputStartedAtMs ?? observedAtMs)
-				: undefined;
-		quietInputDurationMs =
-			quietInputStartedAtMs === undefined ? 0 : observedAtMs - quietInputStartedAtMs;
-		unclearPitchStartedAtMs =
-			!pitch.ok && pitch.reason === 'unclear-pitch'
-				? (unclearPitchStartedAtMs ?? observedAtMs)
-				: undefined;
-		unclearPitchDurationMs =
-			unclearPitchStartedAtMs === undefined ? 0 : observedAtMs - unclearPitchStartedAtMs;
-	}
-
-	function stopPitchLoop() {
-		if (animationFrameId !== undefined) {
-			cancelAnimationFrame(animationFrameId);
-			animationFrameId = undefined;
-		}
-	}
-
-	function startPitchLoop() {
-		stopPitchLoop();
-
-		const readNextFrame = (observedAtMs: number) => {
-			if (!pitchSource) {
-				return;
-			}
-
-			const frame = pitchSource.readPitchFrame({ previousState: stablePitch });
-			stablePitch = frame.stable;
-			recordPitchInput(frame.pitch, observedAtMs);
-			practice = buildScalePracticeState(
-				frame.stable.output.ok ? frame.stable.output.pitch : undefined,
-				practice,
-				observedAtMs
-			);
-			animationFrameId = requestAnimationFrame(readNextFrame);
-		};
-
-		animationFrameId = requestAnimationFrame(readNextFrame);
-	}
-
-	async function stopPitchDetection() {
-		stopPitchLoop();
-		const activeSource = pitchSource;
-		pitchSource = undefined;
-		await activeSource?.stop();
-	}
-
-	async function startPitchDetection(stream: MediaStream) {
-		await stopPitchDetection();
-		pitchSource = createMicrophonePitchSource({ stream });
-		stablePitch = createStablePitchState();
-		latestPitch = undefined;
-		paused = false;
-		resetInputTimers();
-		startPitchLoop();
-	}
-
-	async function allowMicrophone() {
-		permission = beginMicrophonePermissionRequest();
-		const nextPermission = await requestMicrophonePermission();
-		permission = nextPermission;
-
-		if (nextPermission.status === 'granted') {
-			saveMicConsent('granted');
-			await startPitchDetection(nextPermission.stream);
-			return;
-		}
-
-		saveMicConsent('denied');
-		await stopPitchDetection();
-	}
-
 	function requestMicrophone() {
-		void allowMicrophone();
+		session.requestMicrophone();
+	}
+
+	function togglePause() {
+		session.togglePause();
 	}
 
 	function backToSetup() {
@@ -168,26 +63,12 @@
 		void goto(resolve('/settings'));
 	}
 
-	function keepListening() {
-		resetInputTimers();
-	}
-
-	function togglePause() {
-		paused = !paused;
-
-		if (paused) {
-			stopPitchLoop();
-		} else if (pitchSource) {
-			startPitchLoop();
-		}
-	}
-
 	function restartPractice() {
 		practice = restartScalePractice(practice);
 	}
 
 	onDestroy(() => {
-		void stopPitchDetection();
+		void session.dispose();
 	});
 </script>
 
@@ -206,16 +87,6 @@
 		<TopBar {title} backHref="/scales" backLabel={WORDS.navigation.backToScales} />
 		<MicrophoneErrorState kind="denied" onPrimary={requestMicrophone} onGhost={backToSetup} />
 	</ToolCanvas>
-{:else if inputState.status === 'silent-input'}
-	<ToolCanvas wide>
-		<TopBar {title} backHref="/scales" backLabel={WORDS.navigation.backToScales} />
-		<MicrophoneErrorState kind="silent" onPrimary={keepListening} onGhost={requestMicrophone} />
-	</ToolCanvas>
-{:else if inputState.status === 'noisy-input'}
-	<ToolCanvas wide>
-		<TopBar {title} backHref="/scales" backLabel={WORDS.navigation.backToScales} />
-		<MicrophoneErrorState kind="noisy" onPrimary={keepListening} onGhost={backToSetup} />
-	</ToolCanvas>
 {:else}
 	<ToolCanvas wide>
 		<TopBar {title} backHref="/scales" backLabel={WORDS.navigation.backToScales}>
@@ -223,6 +94,8 @@
 				<span class="rec-pill"><span class="rec-pill__dot"></span>{WORDS.scales.rec}</span>
 			{/snippet}
 		</TopBar>
+
+		<MicrophoneHint status={inputState.status} />
 
 		<section class="next-card" aria-label={WORDS.scales.nextNote}>
 			{#if practice.feedback === 'complete'}

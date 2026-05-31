@@ -111,3 +111,48 @@ export function buildMicrophoneInputState({
 		status: 'listening'
 	};
 }
+
+export type MicrophoneInputDurations = {
+	quietInputDurationMs: number;
+	unclearPitchDurationMs: number;
+};
+
+export type MicrophoneInputTracker = {
+	/** Folds one frame's raw estimate into how long the current rejection has lasted. */
+	observe(pitch: PitchEstimateResult, observedAtMs: number): MicrophoneInputDurations;
+	/** Forgets the current dwell, so the next rejection starts timing from scratch. */
+	reset(): void;
+};
+
+// A quiet or unclear signal only earns a silent/noisy gate once it persists. The tracker
+// remembers when the current run of quiet (or unclear) frames began and reports how long
+// it has lasted, so buildMicrophoneInputState can compare against its thresholds. A frame
+// that isn't quiet (or unclear) clears that timer, so a single good frame resets the dwell.
+export function createMicrophoneInputTracker(): MicrophoneInputTracker {
+	let quietInputStartedAtMs: number | undefined;
+	let unclearPitchStartedAtMs: number | undefined;
+
+	return {
+		observe(pitch, observedAtMs) {
+			quietInputStartedAtMs =
+				!pitch.ok && pitch.reason === 'quiet-input'
+					? (quietInputStartedAtMs ?? observedAtMs)
+					: undefined;
+			unclearPitchStartedAtMs =
+				!pitch.ok && pitch.reason === 'unclear-pitch'
+					? (unclearPitchStartedAtMs ?? observedAtMs)
+					: undefined;
+
+			return {
+				quietInputDurationMs:
+					quietInputStartedAtMs === undefined ? 0 : observedAtMs - quietInputStartedAtMs,
+				unclearPitchDurationMs:
+					unclearPitchStartedAtMs === undefined ? 0 : observedAtMs - unclearPitchStartedAtMs
+			};
+		},
+		reset() {
+			quietInputStartedAtMs = undefined;
+			unclearPitchStartedAtMs = undefined;
+		}
+	};
+}

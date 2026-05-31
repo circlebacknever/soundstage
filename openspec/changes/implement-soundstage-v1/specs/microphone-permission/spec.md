@@ -46,6 +46,14 @@ The system SHALL track microphone permission as unknown, pending, granted, or de
 - **WHEN** local storage says microphone access was granted previously
 - **THEN** the app still relies on the browser permission request or stream result before starting mic-driven detection
 
+#### Scenario: Returning granted user skips the pre-prompt
+- **WHEN** local storage records prior granted consent and the microphone setting is on
+- **THEN** the app does not show the pre-prompt again and re-acquires the microphone directly, showing the tool's listening view while the stream is acquired
+
+#### Scenario: Pre-prompt is shown only before consent is recorded
+- **WHEN** no microphone consent has been recorded yet (unknown)
+- **THEN** the pre-prompt is shown, and granting or denying persists the outcome locally so later visits do not show the pre-prompt again (a previously denied mic opens directly in the Mic Denied state)
+
 ### Requirement: Microphone flow copy ownership
 The microphone flow SHALL source pre-prompt and error-state copy from `src/lib/content` through `WORDS`.
 
@@ -53,8 +61,8 @@ The microphone flow SHALL source pre-prompt and error-state copy from `src/lib/c
 - **WHEN** the pre-prompt or any microphone error state is displayed
 - **THEN** headings, body prose, trust items, step text, button labels, and action labels match the OpenSpec strings represented in `WORDS`
 
-### Requirement: Microphone and browser error states
-The system SHALL provide error states for denied microphone access, silent microphone input, unsupported browser APIs, and noisy input.
+### Requirement: Blocking microphone error states
+The system SHALL provide full-screen states that replace the tool when the microphone cannot be used: denied access, an unsupported browser, and a microphone turned off in settings.
 
 #### Scenario: Mic denied copy renders
 - **WHEN** microphone access is denied
@@ -64,14 +72,25 @@ The system SHALL provide error states for denied microphone access, silent micro
 - **WHEN** `navigator.mediaDevices.getUserMedia` is unavailable
 - **THEN** the app displays title "This browser can't listen", body "Mic features need a modern browser. Try Chrome, Safari, or Firefox to use the tuner and scales.", and primary action "Browse the chord library"
 
-#### Scenario: Silent microphone
-- **WHEN** microphone access is granted and input level stays below threshold for at least 5 seconds
-- **THEN** the app displays title "We can't hear anything", body "Your mic is on but it's silent. Try moving closer or checking your input.", primary action "Keep listening", and ghost action "Switch input device" where supported
-
-#### Scenario: Noisy input
-- **WHEN** input level is present but no clear fundamental is detected for at least 8 seconds
-- **THEN** the app displays title "It's a bit noisy", body "We're picking up background noise. Try a quieter spot or get closer to your instrument.", primary action "Keep trying", and ghost action "Practice without mic"
+#### Scenario: Microphone turned off in settings
+- **WHEN** the microphone setting is turned off
+- **THEN** the app displays title "Microphone is off", body "Turn microphone access back on in Settings to use the tuner and scale practice.", and primary action "Open settings"
 
 #### Scenario: Error illustration style
-- **WHEN** an error state is displayed
-- **THEN** it uses a centered 120px illustration circle, with rose styling for mic denied, peri styling for silent input, paper-sink styling for unsupported browser, and sun styling for noisy environment
+- **WHEN** a blocking error state is displayed
+- **THEN** it uses a centered 120px illustration circle, with rose styling for mic denied, paper-sink styling for unsupported browser, and peri styling for the microphone-off state
+
+### Requirement: Quiet and noisy input advisories
+While the microphone is granted and listening, the system SHALL surface sustained quiet or noisy input as a small inline hint inside the tool rather than a full-screen state, with no blocking actions, and SHALL keep listening so the hint clears on its own once a clear signal returns.
+
+#### Scenario: Sustained quiet input shows an inline hint
+- **WHEN** microphone access is granted and input level stays below threshold for at least 5 seconds
+- **THEN** the tool keeps its listening view and shows a small inline hint "We can't hear anything — check your mic isn't muted" with no buttons
+
+#### Scenario: Sustained unclear input shows an inline hint
+- **WHEN** input is present but no clear fundamental is detected for at least 8 seconds
+- **THEN** the tool keeps its listening view and shows a small inline hint "Too noisy to read a pitch — try a quieter spot" with no buttons
+
+#### Scenario: Inline hint clears when input recovers
+- **WHEN** a clear pitch returns, or input falls back below the dwell, after a quiet or noisy hint
+- **THEN** the inline hint disappears without any user action

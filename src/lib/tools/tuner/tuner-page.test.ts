@@ -42,22 +42,16 @@ function mintZoneHalfAngleDegrees() {
 }
 
 describe('tuner page boundary', () => {
-	it('consumes microphone, pitch-source, and tuner-state boundaries', () => {
-		assert.match(page, /createMicrophonePermissionState/);
-		assert.match(page, /requestMicrophonePermission/);
-		assert.match(page, /createMicrophonePitchSource/);
-		assert.match(page, /buildMicrophoneInputState/);
-		assert.match(page, /createStablePitchState/);
+	it('drives the tuner through the shared mic session and tuner-state boundaries', () => {
+		assert.match(page, /createMicrophonePitchSession/);
 		assert.match(page, /createTunerState/);
 		assert.match(page, /buildTunerState/);
 		assert.match(page, /selectTunerString/);
-		assert.match(page, /readPitchFrame/);
-		assert.match(page, /requestAnimationFrame/);
-		assert.match(page, /quietInputDurationMs\s*=/);
-		assert.match(page, /unclearPitchDurationMs\s*=/);
+		// The live-mic machinery (permission handshake, pitch source, frame loop, input
+		// timers) now lives behind the session, so the page must not re-own any of it.
 		assert.doesNotMatch(
 			page,
-			/getFloatTimeDomainData|estimatePitch|new AudioContext|createAnalyser/
+			/getFloatTimeDomainData|estimatePitch|new AudioContext|createAnalyser|createMicrophonePitchSource|readPitchFrame|requestAnimationFrame|requestMicrophonePermission|createMicrophonePermissionState|buildMicrophoneInputState|createStablePitchState/
 		);
 	});
 
@@ -81,11 +75,12 @@ describe('tuner page boundary', () => {
 	it('renders microphone gates and error states around the tuner UI', () => {
 		assert.match(page, /MicrophonePrePrompt/);
 		assert.match(page, /MicrophoneErrorState/);
-		assert.match(page, /inputState\.status === 'permission-required'/);
+		assert.match(page, /\{#if showPrompt\}/);
 		assert.match(page, /inputState\.status === 'mic-denied'/);
-		assert.match(page, /inputState\.status === 'silent-input'/);
-		assert.match(page, /inputState\.status === 'noisy-input'/);
 		assert.match(page, /inputState\.status === 'unsupported-browser'/);
+		// Silent and noisy inputs no longer take over the screen; they show as an inline hint.
+		assert.match(page, /<MicrophoneHint status=\{inputState\.status\}/);
+		assert.doesNotMatch(page, /kind="silent"|kind="noisy"/);
 	});
 
 	it('renders dynamic string progress, pitch guidance, and needle angle from tuner state', () => {

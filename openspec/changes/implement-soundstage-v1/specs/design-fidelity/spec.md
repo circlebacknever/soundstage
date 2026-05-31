@@ -132,7 +132,7 @@ The app SHALL preserve the settled v1 decisions: responsive web app, anonymous l
 - **THEN** the choice is treated as outside the approved v1 design contract unless the OpenSpec change is explicitly updated
 
 ### Requirement: v1 out-of-scope areas
-The v1 app SHALL keep full chord detail screens, full ear-training screens, onboarding, manual per-string tuner mode, sharp and flat root picker entries, fully designed time-signature picker UI, fully designed click-sound picker UI, and bespoke tablet/desktop variants for silent/noisy/unsupported error states outside the required design scope.
+The v1 app SHALL keep full chord detail screens, full ear-training screens, onboarding, manual per-string tuner mode, sharp and flat root picker entries, fully designed time-signature picker UI, fully designed click-sound picker UI, and bespoke tablet/desktop variants for the unsupported-browser error state outside the required design scope.
 
 #### Scenario: Out-of-scope route is opened
 - **WHEN** the user opens an out-of-scope area during v1

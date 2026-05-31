@@ -1,3 +1,7 @@
+// The click-sound names are authored once here: the metronome lists them as options and
+// the settings row describes the choice, so a rename can't leave the two spellings adrift.
+const CLICK_SOUND_LABELS = ['Wood', 'Beep', 'Cowbell'] as const;
+
 export const WORDS = {
 	app: {
 		brand: {
@@ -81,23 +85,17 @@ export const WORDS = {
 				body: 'Mic features need a modern browser. Try Chrome, Safari, or Firefox to use the tuner and scales.',
 				primaryAction: 'Browse the chord library'
 			},
-			silent: {
-				title: "We can't hear anything",
-				body: "Your mic is on but it's silent. Try moving closer or checking your input.",
-				primaryAction: 'Keep listening',
-				ghostAction: 'Switch input device'
-			},
-			noisy: {
-				title: "It's a bit noisy",
-				body: "We're picking up background noise. Try a quieter spot or get closer to your instrument.",
-				primaryAction: 'Keep trying',
-				ghostAction: 'Practice without mic'
-			},
 			disabled: {
 				title: 'Microphone is off',
 				body: 'Turn microphone access back on in Settings to use the tuner and scale practice.',
 				primaryAction: 'Open settings'
 			}
+		},
+		// Non-blocking advisories shown inline while listening continues — the tool keeps
+		// running, so these stay a quiet one-liner rather than taking over the screen.
+		hints: {
+			silent: "We can't hear anything — check your mic isn't muted",
+			noisy: 'Too noisy to read a pitch — try a quieter spot'
 		}
 	},
 	tuner: {
@@ -141,7 +139,7 @@ export const WORDS = {
 		increaseBpm: 'Increase BPM',
 		bpmUnit: 'bpm',
 		actions: { start: 'Start', stop: 'Stop' },
-		clickSounds: ['Wood', 'Beep', 'Cowbell']
+		clickSounds: CLICK_SOUND_LABELS
 	},
 	scales: {
 		setupTitle: 'Scales',
@@ -171,7 +169,7 @@ export const WORDS = {
 		sections: { audio: 'Audio', instrument: 'Instrument', about: 'About' },
 		rows: {
 			microphone: { title: 'Microphone', subtitle: 'Used by tuner & scales' },
-			clickSound: { title: 'Click sound', subtitle: 'Wood · Beep · Cowbell', value: 'Wood' },
+			clickSound: { title: 'Click sound', subtitle: CLICK_SOUND_LABELS.join(' · '), value: 'Wood' },
 			instrument: { title: 'Instrument', subtitle: 'v1 is guitar-only', value: 'Guitar' },
 			tuning: { title: 'Tuning', subtitle: 'E A D G B E · standard', value: 'Standard' },
 			localOnly: { title: 'Local-only', subtitle: 'Nothing leaves this device' },

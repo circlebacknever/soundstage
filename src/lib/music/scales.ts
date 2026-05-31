@@ -1,5 +1,5 @@
 import { STANDARD_GUITAR_TUNING, type GuitarStringTarget } from './guitar.ts';
-import { chromaticIndexForMidi, noteFromMidi, wrapChromaticIndex } from './notes.ts';
+import { noteFromMidi, wrapChromaticIndex } from './notes.ts';
 
 export const NATURAL_ROOT_KEYS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const;
 export type RootKey = (typeof NATURAL_ROOT_KEYS)[number];
@@ -172,7 +172,7 @@ export function buildScaleFretboard(
 			fret,
 			cells: STANDARD_GUITAR_TUNING.map((string) => {
 				const midi = string.midi + fret;
-				const chromaticIndex = chromaticIndexForMidi(midi);
+				const chromaticIndex = wrapChromaticIndex(midi);
 				const scaleDegree = scaleChromaticIndexesForRoot.findIndex(
 					(entry) => entry === chromaticIndex
 				);

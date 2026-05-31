@@ -46,23 +46,31 @@ describe('microphone flow UI contract', () => {
 		const source = componentSource('./MicrophoneErrorState.svelte');
 
 		assert.match(source, /import \{ WORDS \} from '\$lib\/content';/);
-		assert.match(
-			source,
-			/type MicrophoneErrorKind = 'denied' \| 'unsupported' \| 'silent' \| 'noisy' \| 'disabled';/
-		);
+		assert.match(source, /type MicrophoneErrorKind = 'denied' \| 'unsupported' \| 'disabled';/);
 		assert.match(source, /WORDS\.microphone\.errors/);
 		assert.match(source, /width:\s*120px/);
 		assert.match(source, /height:\s*120px/);
 		assert.match(source, /\.microphone-error--denied[\s\S]*--error-soft:\s*var\(--rose-soft\)/);
 		assert.match(source, /\.microphone-error--denied[\s\S]*--error-tone:\s*var\(--rose\)/);
-		assert.match(source, /\.microphone-error--silent[\s\S]*--error-soft:\s*var\(--peri-soft\)/);
-		assert.match(source, /\.microphone-error--silent[\s\S]*--error-tone:\s*var\(--peri\)/);
 		assert.match(source, /\.microphone-error--disabled[\s\S]*--error-soft:\s*var\(--peri-soft\)/);
 		assert.match(
 			source,
 			/\.microphone-error--unsupported[\s\S]*--error-soft:\s*var\(--paper-sink\)/
 		);
-		assert.match(source, /\.microphone-error--noisy[\s\S]*--error-soft:\s*var\(--sun-soft\)/);
-		assert.match(source, /\.microphone-error--noisy[\s\S]*--error-tone:\s*var\(--sun\)/);
+		// Silent and noisy are no longer full-screen error states; they surface as an inline hint.
+		assert.doesNotMatch(source, /microphone-error--silent|microphone-error--noisy/);
+	});
+
+	it('shows silent and noisy input as a small inline hint rather than a takeover', () => {
+		const source = componentSource('./MicrophoneHint.svelte');
+
+		assert.match(source, /import \{ WORDS \} from '\$lib\/content';/);
+		assert.match(source, /WORDS\.microphone\.hints\.silent/);
+		assert.match(source, /WORDS\.microphone\.hints\.noisy/);
+		assert.match(source, /status === 'silent-input'/);
+		assert.match(source, /status === 'noisy-input'/);
+		// A passive status line, not a blocking dialog with actions.
+		assert.match(source, /role="status"/);
+		assert.doesNotMatch(source, /<button|onPrimary|onGhost/);
 	});
 });

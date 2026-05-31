@@ -11,6 +11,7 @@
 		changeMetronomeBpm,
 		createMetronomeState,
 		loadMetronomePreferences,
+		METRONOME_VISUAL_MODES,
 		metronomePreferencesFromState,
 		receiveMetronomeBeat,
 		saveMetronomePreferences,
@@ -19,7 +20,6 @@
 		setMetronomeBpm,
 		setMetronomeRunning,
 		type MetronomeState,
-		type MetronomeVisualMode,
 		type TimeSignature
 	} from '$lib/state';
 	import Button from '$lib/ui/Button.svelte';
@@ -28,9 +28,9 @@
 	import TopBar from '$lib/ui/TopBar.svelte';
 	import { onDestroy } from 'svelte';
 
-	const visualModes = WORDS.metronome.visualModes.map((label) => ({
-		label,
-		value: label.toLowerCase() as MetronomeVisualMode
+	const visualModes = METRONOME_VISUAL_MODES.map((value, index) => ({
+		value,
+		label: WORDS.metronome.visualModes[index]
 	}));
 	const waveBumpBars = [34, 58, 84, 108, 84, 58, 34] as const;
 

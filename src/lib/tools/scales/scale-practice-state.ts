@@ -2,7 +2,7 @@ import type { AcceptedPitchEstimate } from '$lib/audio';
 import {
 	buildScaleFretboard,
 	buildScaleSteps,
-	chromaticIndexForMidi,
+	wrapChromaticIndex,
 	type RootKey,
 	type ScaleFretboard,
 	type ScaleStep,
@@ -174,11 +174,11 @@ export function buildScalePracticeState(
 		return rebuild(previous, previous.progressIndex, 'idle');
 	}
 
-	// No tolerance check is needed: chromaticIndexForMidi rounds to the nearest note,
+	// No tolerance check is needed: pitch.note.midi is already rounded to the nearest note,
 	// so a pitch up to half a semitone (50 cents) off still resolves to the target's
 	// pitch class, and anything further rounds to a neighbour — correctly a wrong note.
 	const expectedPitchClass = previous.steps[previous.progressIndex].chromaticIndex;
-	if (chromaticIndexForMidi(pitch.note.midi) !== expectedPitchClass) {
+	if (wrapChromaticIndex(pitch.note.midi) !== expectedPitchClass) {
 		return rebuild(previous, previous.progressIndex, 'wrong');
 	}
 

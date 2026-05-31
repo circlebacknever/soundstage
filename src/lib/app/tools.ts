@@ -25,13 +25,12 @@ export type ToolMetadata = {
 	placeholderBody?: string;
 };
 
+// Per-route document title lookup. Accent, icon, and canvas width belong to a route too,
+// but the UI reads those from `toolCatalog`/`desktopNavItems` and the `ToolCanvas` `wide`
+// prop, so this table stays as just what `getDocumentTitle` consumes.
 export type RouteMetadata = {
 	path: AppRoute;
 	title: string;
-	subtitle?: string;
-	accent?: ToolAccent;
-	icon?: IconName;
-	canvas: 'standard' | 'wide';
 };
 
 export type DesktopNavItem = {
@@ -103,56 +102,14 @@ export const toolCatalog: ToolMetadata[] = [
 export const homeTools = toolCatalog;
 
 export const routeMetadata = {
-	home: { path: '/', title: WORDS.app.document.defaultTitle, canvas: 'wide' },
-	tuner: {
-		path: '/tuner',
-		title: WORDS.tools.tuner.documentTitle,
-		accent: 'coral',
-		icon: 'tuner',
-		canvas: 'standard'
-	},
-	metronome: {
-		path: '/metronome',
-		title: WORDS.tools.metronome.documentTitle,
-		accent: 'sun',
-		icon: 'metronome',
-		canvas: 'standard'
-	},
-	scales: {
-		path: '/scales',
-		title: WORDS.tools.scales.documentTitle,
-		accent: 'peri',
-		icon: 'scale',
-		canvas: 'wide'
-	},
-	scalePractice: {
-		path: '/scales/practice',
-		title: WORDS.tools.scalePractice.documentTitle,
-		accent: 'coral',
-		icon: 'mic',
-		canvas: 'wide'
-	},
-	chords: {
-		path: '/chords',
-		title: WORDS.tools.chords.documentTitle,
-		accent: 'mint',
-		icon: 'chord',
-		canvas: 'standard'
-	},
-	ear: {
-		path: '/ear',
-		title: WORDS.tools.ear.documentTitle,
-		accent: 'rose',
-		icon: 'ear',
-		canvas: 'standard'
-	},
-	settings: {
-		path: '/settings',
-		title: WORDS.tools.settings.documentTitle,
-		accent: 'peri',
-		icon: 'settings',
-		canvas: 'standard'
-	}
+	home: { path: '/', title: WORDS.app.document.defaultTitle },
+	tuner: { path: '/tuner', title: WORDS.tools.tuner.documentTitle },
+	metronome: { path: '/metronome', title: WORDS.tools.metronome.documentTitle },
+	scales: { path: '/scales', title: WORDS.tools.scales.documentTitle },
+	scalePractice: { path: '/scales/practice', title: WORDS.tools.scalePractice.documentTitle },
+	chords: { path: '/chords', title: WORDS.tools.chords.documentTitle },
+	ear: { path: '/ear', title: WORDS.tools.ear.documentTitle },
+	settings: { path: '/settings', title: WORDS.tools.settings.documentTitle }
 } as const satisfies Record<string, RouteMetadata>;
 
 export const desktopNavItems: DesktopNavItem[] = [

@@ -43,11 +43,11 @@ export type TunerStringView = {
 
 /** Pitch readout for the gauge and note display, derived from one estimate. */
 export type TunerPitchView = {
-	note: NoteName; // Nearest standard-string note letter — not the nearest chromatic note.
-	cents: number; // Signed offset from that string, rounded and dampened; positive is sharp.
+	note: NoteName; // Nearest chromatic note the player is closest to, e.g. "E" or "F#".
+	cents: number; // Signed offset from that note, within ±50, rounded and dampened; positive is sharp.
 	centsLabel: string; // `cents` formatted for display, e.g. "+12¢" or "0¢".
 	guidance: TunerGuidance; // Band `cents` falls into; keys WORDS.tuner.guidance.
-	targetString: GuitarStringId; // Nearest string; may differ from the active tuning target.
+	targetString: GuitarStringId; // Nearest standard string; gates which string the flow can complete.
 	needleAngleDegrees: number; // Gauge rotation: 0 in tune, positive sharp, clamped to ±TUNER_NEEDLE_MAX_DEGREES.
 };
 
@@ -148,8 +148,8 @@ function clamp(value: number, minimum: number, maximum: number) {
 	return Math.min(Math.max(value, minimum), maximum);
 }
 
-function dampenCents(cents: number, targetString: GuitarStringId, previousPitch?: TunerPitchView) {
-	if (previousPitch?.targetString !== targetString) {
+function dampenCents(cents: number, note: NoteName, previousPitch?: TunerPitchView) {
+	if (previousPitch?.note !== note) {
 		return cents;
 	}
 
@@ -216,16 +216,20 @@ function pitchViewForEstimate(
 	pitch: AcceptedPitchEstimate,
 	previousPitch?: TunerPitchView
 ): TunerPitchView {
-	const nearestString = nearestGuitarStringTarget(pitch.frequency);
-	const cents = dampenCents(nearestString.cents, nearestString.target.id, previousPitch);
+	// Name the note the player is actually closest to, so the readout rolls E→F at the
+	// halfway point instead of reporting a huge offset from a fixed string. The estimate's
+	// note is already the nearest chromatic note, with cents within ±50 by construction.
+	// The nearest standard string is tracked separately, only to gate which string the
+	// tuning flow may complete.
+	const cents = dampenCents(pitch.note.cents, pitch.note.name, previousPitch);
 	const roundedCents = Math.round(cents);
 
 	return {
-		note: nearestString.target.name,
+		note: pitch.note.name,
 		cents: roundedCents,
 		centsLabel: centsLabel(roundedCents),
 		guidance: guidanceBandForCents(roundedCents),
-		targetString: nearestString.target.id,
+		targetString: nearestGuitarStringTarget(pitch.frequency).target.id,
 		needleAngleDegrees: Math.round(
 			(clamp(cents, -TUNER_NEEDLE_MAX_CENTS, TUNER_NEEDLE_MAX_CENTS) / TUNER_NEEDLE_MAX_CENTS) *
 				TUNER_NEEDLE_MAX_DEGREES

@@ -46,12 +46,8 @@ function assertPositiveFrequency(frequency: number) {
 	}
 }
 
-export function chromaticIndexForMidi(midi: number) {
-	return ((midi % 12) + 12) % 12;
-}
-
-export function wrapChromaticIndex(chromaticIndex: number) {
-	return ((chromaticIndex % 12) + 12) % 12;
+export function wrapChromaticIndex(value: number) {
+	return ((value % 12) + 12) % 12;
 }
 
 export function frequencyForMidiNote(midi: number, concertA = 440) {
@@ -68,7 +64,7 @@ export function noteFromMidi(midi: number, concertA = 440): MidiNote {
 		throw new RangeError('midi must be an integer');
 	}
 
-	const name = CHROMATIC_NOTE_NAMES[chromaticIndexForMidi(midi)];
+	const name = CHROMATIC_NOTE_NAMES[wrapChromaticIndex(midi)];
 	const octave = Math.floor(midi / 12) - 1;
 
 	return {
