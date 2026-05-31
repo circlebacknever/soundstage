@@ -10,10 +10,20 @@
 		subtitle: string;
 		value?: string;
 		switchOn?: boolean;
+		onToggle?: () => void;
 		success?: boolean;
 	};
 
-	let { icon, tone = 'peri', title, subtitle, value, switchOn, success = false }: Props = $props();
+	let {
+		icon,
+		tone = 'peri',
+		title,
+		subtitle,
+		value,
+		switchOn,
+		onToggle,
+		success = false
+	}: Props = $props();
 </script>
 
 <div class="settings-row">
@@ -33,6 +43,7 @@
 			role="switch"
 			aria-checked={switchOn}
 			aria-label={`${title}: ${switchOn ? WORDS.settings.switch.on : WORDS.settings.switch.off}`}
+			onclick={onToggle}
 		></button>
 	{:else if value}
 		<div class="settings-row__value">{value}</div>

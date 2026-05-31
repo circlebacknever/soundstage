@@ -61,6 +61,23 @@ describe('tuner page boundary', () => {
 		);
 	});
 
+	it('keeps the readout steady with forgiving detector options and hides the idle needle', () => {
+		assert.match(page, /pitchOptions: TUNER_PITCH_OPTIONS/);
+		assert.match(page, /stablePitchOptions: TUNER_STABLE_PITCH_OPTIONS/);
+		assert.match(page, /quietThreshold/);
+		assert.match(page, /maxUnstableEstimates/);
+		// The needle only renders when there's a reading, so a resting needle never
+		// sits in the green in-tune zone implying the string is tuned.
+		assert.match(page, /\{#if currentPitch\}[\s\S]*class="needle"/);
+	});
+
+	it('gates the tuner through the shared mic setting when it is turned off', () => {
+		assert.match(page, /loadSettings/);
+		assert.match(page, /microphoneEnabled/);
+		assert.match(page, /inputState\.status === 'microphone-off'/);
+		assert.match(page, /<MicrophoneErrorState kind="disabled" onPrimary=\{openSettings\}/);
+	});
+
 	it('renders microphone gates and error states around the tuner UI', () => {
 		assert.match(page, /MicrophonePrePrompt/);
 		assert.match(page, /MicrophoneErrorState/);

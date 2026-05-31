@@ -11,7 +11,7 @@ describe('SoundStage UI primitive exports', () => {
 			'Button',
 			'Card',
 			'Chip',
-			'DeferredToolPlaceholder',
+			'PlannedToolPlaceholder',
 			'Fretboard',
 			'LauncherTile',
 			'MicrophoneErrorState',

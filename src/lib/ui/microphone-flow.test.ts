@@ -48,7 +48,7 @@ describe('microphone flow UI contract', () => {
 		assert.match(source, /import \{ WORDS \} from '\$lib\/content';/);
 		assert.match(
 			source,
-			/type MicrophoneErrorKind = 'denied' \| 'unsupported' \| 'silent' \| 'noisy';/
+			/type MicrophoneErrorKind = 'denied' \| 'unsupported' \| 'silent' \| 'noisy' \| 'disabled';/
 		);
 		assert.match(source, /WORDS\.microphone\.errors/);
 		assert.match(source, /width:\s*120px/);
@@ -57,6 +57,7 @@ describe('microphone flow UI contract', () => {
 		assert.match(source, /\.microphone-error--denied[\s\S]*--error-tone:\s*var\(--rose\)/);
 		assert.match(source, /\.microphone-error--silent[\s\S]*--error-soft:\s*var\(--peri-soft\)/);
 		assert.match(source, /\.microphone-error--silent[\s\S]*--error-tone:\s*var\(--peri\)/);
+		assert.match(source, /\.microphone-error--disabled[\s\S]*--error-soft:\s*var\(--peri-soft\)/);
 		assert.match(
 			source,
 			/\.microphone-error--unsupported[\s\S]*--error-soft:\s*var\(--paper-sink\)/

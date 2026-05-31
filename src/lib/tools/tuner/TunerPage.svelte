@@ -11,11 +11,13 @@
 		requestMicrophonePermission,
 		type MicrophonePermissionState,
 		type MicrophonePitchSource,
+		type PitchEstimateOptions,
 		type PitchEstimateResult,
+		type StablePitchOptions,
 		type StablePitchState
 	} from '$lib/audio';
 	import { WORDS } from '$lib/content';
-	import { saveMicConsent } from '$lib/state';
+	import { loadSettings, saveMicConsent } from '$lib/state';
 	import MicrophoneErrorState from '$lib/ui/MicrophoneErrorState.svelte';
 	import MicrophonePrePrompt from '$lib/ui/MicrophonePrePrompt.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
@@ -30,6 +32,18 @@
 		type TunerStringView
 	} from './tuner-state.ts';
 
+	// Tuner-specific detector tuning. A plucked string is quiet and decays, so accept
+	// a lower level than the default; and while a peg turns the pitch slides, so widen
+	// the agreement window and ride out more shaky frames before dropping the lock —
+	// otherwise the readout strobes while the player is actively tuning.
+	const TUNER_PITCH_OPTIONS = { quietThreshold: 0.01 } satisfies PitchEstimateOptions;
+	const TUNER_STABLE_PITCH_OPTIONS = {
+		windowSize: 6,
+		minimumStableEstimates: 3,
+		centsTolerance: 20,
+		maxUnstableEstimates: 6
+	} satisfies StablePitchOptions;
+
 	let permission = $state<MicrophonePermissionState>(createMicrophonePermissionState());
 	let tuner = $state<TunerState>(createTunerState());
 	let pitchSource: MicrophonePitchSource | undefined;
@@ -41,9 +55,11 @@
 	let unclearPitchDurationMs = $state(0);
 	let animationFrameId: number | undefined;
 
+	const microphoneEnabled = loadSettings().microphoneEnabled;
 	const mediaDevicesAvailable = $derived(!browser || Boolean(navigator.mediaDevices?.getUserMedia));
 	const inputState = $derived(
 		buildMicrophoneInputState({
+			microphoneEnabled,
 			mediaDevicesAvailable,
 			permission,
 			pitch: latestPitch,
@@ -140,7 +156,11 @@
 				return;
 			}
 
-			const frame = pitchSource.readPitchFrame({ previousState: stablePitch });
+			const frame = pitchSource.readPitchFrame({
+				previousState: stablePitch,
+				pitchOptions: TUNER_PITCH_OPTIONS,
+				stablePitchOptions: TUNER_STABLE_PITCH_OPTIONS
+			});
 			stablePitch = frame.stable;
 			recordPitchInput(frame.pitch, observedAtMs);
 			tuner = buildTunerState(
@@ -197,6 +217,10 @@
 		void goto(resolve('/chords'));
 	}
 
+	function openSettings() {
+		void goto(resolve('/settings'));
+	}
+
 	function selectString(stringId: TunerState['activeString']) {
 		tuner = selectTunerString(tuner, stringId);
 	}
@@ -214,7 +238,12 @@
 	});
 </script>
 
-{#if inputState.status === 'unsupported-browser'}
+{#if inputState.status === 'microphone-off'}
+	<ToolCanvas>
+		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
+		<MicrophoneErrorState kind="disabled" onPrimary={openSettings} />
+	</ToolCanvas>
+{:else if inputState.status === 'unsupported-browser'}
 	<ToolCanvas>
 		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
 		<MicrophoneErrorState kind="unsupported" onPrimary={browseChords} />
@@ -254,17 +283,21 @@
 					stroke-width="10"
 					stroke-linecap="round"
 				/>
-				<line
-					class="needle"
-					x1="130"
-					y1="140"
-					x2="130"
-					y2="44"
-					stroke="var(--coral)"
-					stroke-width="4"
-					stroke-linecap="round"
-					style={`transform: rotate(${needleAngleDegrees}deg)`}
-				/>
+				<!-- Only show the needle when there's a reading; a resting needle sits at 0°
+				     inside the mint zone, which would falsely read as "in tune". -->
+				{#if currentPitch}
+					<line
+						class="needle"
+						x1="130"
+						y1="140"
+						x2="130"
+						y2="44"
+						stroke="var(--coral)"
+						stroke-width="4"
+						stroke-linecap="round"
+						style={`transform: rotate(${needleAngleDegrees}deg)`}
+					/>
+				{/if}
 				<circle cx="130" cy="140" r="8" fill="var(--ink)" />
 				<circle cx="130" cy="140" r="3" fill="var(--paper)" />
 				<text class="arc-label" x="22" y="156" font-size="10" fill="var(--coral-ink)">

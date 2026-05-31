@@ -15,16 +15,16 @@
 - [x] 2.5 Build shared UI primitives under `src/lib/ui` for buttons, top bars, tool canvas, launcher tiles, sidebar navigation, modals, sheets, segmented controls, chips, cards, fretboards, and settings rows.
 - [x] 2.6 Build SvelteKit routes for home, tuner, metronome, scales, scales practice, chords, ear, and settings, keeping route files as thin URL adapters and putting page implementation in `src/lib/tools`.
 - [x] 2.7 Verify the home launcher on mobile, tablet, and desktop against the design-fidelity specs, including desktop left sidebar navigation.
-- [x] 2.8 Add placeholder pages for Chords and Ear Training using the v1 visual style and deferred-scope copy.
+- [x] 2.8 Add placeholder pages for Chords and Ear Training using the v1 visual style and planned-scope copy.
 
 ## 3. UI Copy Catalog
 
 - [x] 3.1 Test first in `src/lib/content`: exact v1 labels, headings, button text, document titles, helper text, ARIA labels, placeholder prose, and status copy match the OpenSpec strings.
 - [x] 3.2 Implement a first-party `WORDS` boundary in `src/lib/content` that exposes grouped UI copy through a small typed interface.
-- [x] 3.3 Move tool labels, subtitles, document titles, nav labels, deferred placeholder copy, screen headings, button labels, ARIA labels, and status prose behind `WORDS`.
+- [x] 3.3 Move tool labels, subtitles, document titles, nav labels, planned placeholder copy, screen headings, button labels, ARIA labels, and status prose behind `WORDS`.
 - [x] 3.4 Keep route paths, icon IDs, accent tokens, CSS tokens, numeric readouts, note letters, cents values, BPM values, scale formulas, and generated music facts outside `WORDS`, with generated music facts owned by `src/lib/music`.
 - [x] 3.5 Update app, tool, and UI implementation guidance so agents know `src/lib/content` owns user-visible copy and `src/lib/app` owns route/tool structure.
-- [x] 3.6 Update existing app metadata tests so launcher, sidebar, route title, and deferred placeholder behavior still match the specs after consuming `WORDS`.
+- [x] 3.6 Update existing app metadata tests so launcher, sidebar, route title, and planned placeholder behavior still match the specs after consuming `WORDS`.
 - [x] 3.7 Run focused content and app tests, Svelte checks, and `openspec validate implement-soundstage-v1`.
 
 ## 4. Local State and Music Math
@@ -90,11 +90,11 @@
 
 ## 10. Settings
 
-- [ ] 10.1 Test first in `src/lib/state`: settings persistence, microphone gate behavior, fixed Guitar value, fixed Standard tuning value, and click sound preference.
-- [ ] 10.2 Implement settings state helpers and defaults in `src/lib/state`.
-- [ ] 10.3 Build the settings route with Audio, Instrument, and About sections matching the handoff grouping.
-- [ ] 10.4 Implement microphone toggle behavior that gates Tuner and Scale Practice through shared state rather than per-route conditionals.
-- [ ] 10.5 Run focused settings tests and inspect the settings route for direct localStorage access.
+- [x] 10.1 Test first in `src/lib/state`: settings persistence, microphone gate behavior, fixed Guitar value, fixed Standard tuning value, and click sound preference.
+- [x] 10.2 Implement settings state helpers and defaults in `src/lib/state`.
+- [x] 10.3 Build the settings route with Audio, Instrument, and About sections matching the handoff grouping.
+- [x] 10.4 Implement microphone toggle behavior that gates Tuner and Scale Practice through shared state rather than per-route conditionals.
+- [x] 10.5 Run focused settings tests and inspect the settings route for direct localStorage access.
 
 ## 11. Visual QA and Final Verification
 
@@ -105,3 +105,10 @@
 - [ ] 11.5 Verify mic-denied, unsupported browser, silent microphone, and noisy environment states.
 - [ ] 11.6 Review the pitch-detection lesson note and confirm each lesson checkpoint has its explanation, test evidence, and remaining question recorded.
 - [ ] 11.7 Decide whether v1 ships local/self-hosted Fraunces, Nunito, and JetBrains Mono font assets or accepts system fallbacks, then update the design-fidelity spec and CSS to match that decision.
+
+## 12. Planned Tool De-emphasis
+
+- [x] 12.1 Test first in `src/lib/app`: planned tools carry a de-emphasis signal the launcher and sidebar consume, and available tools do not.
+- [x] 12.2 Render planned launcher tiles with a muted neutral treatment, dimmed icon/labels, and a "Coming later" marker, leaving available tiles unchanged.
+- [x] 12.3 Render planned desktop sidebar items with muted text and a dimmed icon.
+- [x] 12.4 Keep planned tools reachable through their v1 placeholder pages and verify the de-emphasis across breakpoints.

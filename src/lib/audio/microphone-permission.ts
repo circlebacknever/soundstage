@@ -20,8 +20,15 @@ export type MediaDevicesLike = {
 	getUserMedia(constraints: MediaStreamConstraints): Promise<MediaStream>;
 };
 
+// The browser's voice-call DSP fights a tuner: noise suppression gates a sustained
+// string as "noise", auto-gain pumps the level, and echo cancellation smears the
+// waveform — all of which make pitch detection blink out. Ask for the raw signal.
 const MICROPHONE_CONSTRAINTS = {
-	audio: true
+	audio: {
+		echoCancellation: false,
+		noiseSuppression: false,
+		autoGainControl: false
+	}
 } as const satisfies MediaStreamConstraints;
 
 function browserMediaDevices(): MediaDevicesLike | undefined {

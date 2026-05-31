@@ -20,7 +20,7 @@
 		<Icon name={tool.icon} tone={tool.accent} size={44} />
 	</div>
 	<div>
-		<div class="eyebrow">{WORDS.navigation.deferredEyebrow}</div>
+		<div class="eyebrow">{WORDS.navigation.plannedEyebrow}</div>
 		<h2 class="display-title" id="placeholder-title">{tool.placeholderTitle ?? tool.name}</h2>
 	</div>
 	<p class="placeholder-copy">{tool.placeholderBody}</p>

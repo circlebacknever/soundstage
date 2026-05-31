@@ -6,6 +6,9 @@ export const MICROPHONE_NOISY_INPUT_MS = 8_000;
 
 export type MicrophoneInputState =
 	| {
+			status: 'microphone-off';
+	  }
+	| {
 			status: 'unsupported-browser';
 	  }
 	| {
@@ -29,6 +32,7 @@ export type MicrophoneInputState =
 	  };
 
 export type BuildMicrophoneInputStateOptions = {
+	microphoneEnabled?: boolean;
 	mediaDevicesAvailable: boolean;
 	permission: MicrophonePermissionState;
 	pitch?: PitchEstimateResult;
@@ -37,12 +41,21 @@ export type BuildMicrophoneInputStateOptions = {
 };
 
 export function buildMicrophoneInputState({
+	microphoneEnabled = true,
 	mediaDevicesAvailable,
 	permission,
 	pitch,
 	quietInputDurationMs = 0,
 	unclearPitchDurationMs = 0
 }: BuildMicrophoneInputStateOptions): MicrophoneInputState {
+	// Honour the user's choice before touching the browser: if they switched the mic
+	// off, don't probe devices or request permission — point them back to Settings.
+	if (!microphoneEnabled) {
+		return {
+			status: 'microphone-off'
+		};
+	}
+
 	if (!mediaDevicesAvailable) {
 		return {
 			status: 'unsupported-browser'

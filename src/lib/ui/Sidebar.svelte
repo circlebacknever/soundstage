@@ -23,6 +23,7 @@
 			{@const active = isRouteActive(item.route, pathname)}
 			<a
 				class={`nav-item ${active ? 'is-active' : ''}`}
+				class:is-planned={item.planned}
 				href={resolve(item.route)}
 				aria-current={active ? 'page' : undefined}
 			>
@@ -94,6 +95,15 @@
 		background: var(--paper);
 		box-shadow: var(--shadow-sm);
 		color: var(--ink);
+	}
+
+	/* Planned tools sit in the nav muted so they read as planned, not available. */
+	.nav-item.is-planned {
+		color: var(--ink-3);
+	}
+
+	.nav-item.is-planned :global(svg) {
+		opacity: 0.4;
 	}
 
 	@media (min-width: 1200px) {

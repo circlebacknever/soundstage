@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getRequiredToolByRoute } from '$lib/app';
-	import DeferredToolPlaceholder from '$lib/ui/DeferredToolPlaceholder.svelte';
+	import PlannedToolPlaceholder from '$lib/ui/PlannedToolPlaceholder.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
 	import TopBar from '$lib/ui/TopBar.svelte';
 
@@ -9,5 +9,5 @@
 
 <ToolCanvas>
 	<TopBar title={tool.name} />
-	<DeferredToolPlaceholder {tool} />
+	<PlannedToolPlaceholder {tool} />
 </ToolCanvas>

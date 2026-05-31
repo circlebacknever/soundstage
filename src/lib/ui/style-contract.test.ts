@@ -133,6 +133,20 @@ describe('SoundStage global style contract', () => {
 		assert.match(settingsRow, /aria-checked=\{switchOn\}/);
 	});
 
+	it('de-emphasizes planned tools in the launcher and sidebar', () => {
+		const launcherTile = componentSource('./LauncherTile.svelte');
+		const sidebar = componentSource('./Sidebar.svelte');
+
+		assert.match(launcherTile, /class:launcher-tile--planned=\{tool\.planned\}/);
+		assert.match(launcherTile, /\{WORDS\.navigation\.plannedEyebrow\}/);
+		assert.match(
+			launcherTile,
+			/\.launcher-tile--planned\s*{[\s\S]*background:\s*var\(--paper-soft\)/
+		);
+		assert.match(sidebar, /class:is-planned=\{item\.planned\}/);
+		assert.match(sidebar, /\.nav-item\.is-planned\s*{[\s\S]*color:\s*var\(--ink-3\)/);
+	});
+
 	it('keeps fretboard states readable and separated by screen purpose', () => {
 		const fretboard = componentSource('./Fretboard.svelte');
 		const scalesPage = componentSource('../tools/scales/ScalesPage.svelte');

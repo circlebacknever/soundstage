@@ -49,7 +49,7 @@ export const WORDS = {
 		home: 'Home',
 		backToTools: 'Back to tools',
 		backToScales: 'Back to scales',
-		deferredEyebrow: 'Coming later'
+		plannedEyebrow: 'Coming later'
 	},
 	microphone: {
 		prePrompt: {
@@ -92,6 +92,11 @@ export const WORDS = {
 				body: "We're picking up background noise. Try a quieter spot or get closer to your instrument.",
 				primaryAction: 'Keep trying',
 				ghostAction: 'Practice without mic'
+			},
+			disabled: {
+				title: 'Microphone is off',
+				body: 'Turn microphone access back on in Settings to use the tuner and scale practice.',
+				primaryAction: 'Open settings'
 			}
 		}
 	},

@@ -27,11 +27,15 @@
 	.home-screen {
 		display: flex;
 		flex-direction: column;
-		gap: 18px;
+		gap: 16px;
 	}
 
 	.home-header {
 		padding: 0 4px;
+	}
+
+	.home-header .eyebrow {
+		margin-bottom: 8px;
 	}
 
 	.home-grid {

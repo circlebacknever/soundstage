@@ -20,7 +20,7 @@ function collectStrings(value: unknown): string[] {
 }
 
 describe('WORDS', () => {
-	it('keeps app shell, launcher, navigation, and deferred tool copy exact', () => {
+	it('keeps app shell, launcher, navigation, and planned tool copy exact', () => {
 		assert.equal(WORDS.app.brand.full, 'SoundStage');
 		assert.deepEqual(WORDS.app.brand.parts, { sound: 'Sound', stage: 'Stage' });
 		assert.equal(WORDS.app.document.defaultTitle, 'SoundStage');
@@ -66,7 +66,7 @@ describe('WORDS', () => {
 			home: 'Home',
 			backToTools: 'Back to tools',
 			backToScales: 'Back to scales',
-			deferredEyebrow: 'Coming later'
+			plannedEyebrow: 'Coming later'
 		});
 	});
 
@@ -110,6 +110,12 @@ describe('WORDS', () => {
 			body: "We're picking up background noise. Try a quieter spot or get closer to your instrument.",
 			primaryAction: 'Keep trying',
 			ghostAction: 'Practice without mic'
+		});
+
+		assert.deepEqual(WORDS.microphone.errors.disabled, {
+			title: 'Microphone is off',
+			body: 'Turn microphone access back on in Settings to use the tuner and scale practice.',
+			primaryAction: 'Open settings'
 		});
 	});
 

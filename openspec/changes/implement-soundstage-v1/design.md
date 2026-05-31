@@ -11,7 +11,7 @@ The OpenSpec specs must be sufficient to recreate v1 if the external handoff dir
 **Goals:**
 
 - Recreate the mid-fi handoff in SvelteKit using native Svelte components, shared tokens, self-hosted or local font assets, and responsive layouts.
-- Preserve the full v1 design contract inside OpenSpec: breakpoints, component geometry, token values, typography, motion, copy, state keys, and deferred scope.
+- Preserve the full v1 design contract inside OpenSpec: breakpoints, component geometry, token values, typography, motion, copy, state keys, and out-of-scope areas.
 - Expose exact v1 user-visible copy through a first-party `src/lib/content` boundary so page and UI components consume named copy rather than embedding repeated strings.
 - Make the work executable by a junior engineer through explicit file placement, module boundaries, focused tests, and teaching checkpoints.
 - Keep the app local-first, anonymous, offline-friendly, and browser-only.
@@ -50,7 +50,7 @@ Alternative considered: keep the handoff files as the only detailed design sourc
 
 ### Add a UI Copy Catalog boundary
 
-User-visible copy should live under `src/lib/content` and be exposed through a small typed `WORDS` interface. This includes tool labels, subtitles, document titles, navigation labels, home headings, button labels, helper text, ARIA labels, deferred placeholder copy, microphone/error prose, tuner guidance, metronome control labels, scale practice labels, and settings row text.
+User-visible copy should live under `src/lib/content` and be exposed through a small typed `WORDS` interface. This includes tool labels, subtitles, document titles, navigation labels, home headings, button labels, helper text, ARIA labels, planned-tool placeholder copy, microphone/error prose, tuner guidance, metronome control labels, scale practice labels, and settings row text.
 
 The copy catalog excludes route paths, icon IDs, accent tokens, CSS tokens, numeric readouts, note letters, cents values, BPM values, scale formulas, and generated music facts. Those values stay with their existing domain modules, especially `src/lib/app` for route/tool structure and `src/lib/music` for generated musical facts.
 
@@ -93,7 +93,7 @@ The teaching sequence is part of the design:
 
 Each stage should pause for a short explanation before coding, then name the test that captures the concept. After the test passes, the engineer should summarize what the stage proved and which signal problem remains. This makes teaching a planned part of the implementation rather than a commentary track added after the mathematics has already fled the room.
 
-Alternative considered: Kalman filtering. It is deferred because v1 needs clear waveform-period learning first, and a state estimator would mostly smooth detector output after the hard work has already happened.
+Alternative considered: Kalman filtering. It is left for later because v1 needs clear waveform-period learning first, and a state estimator would mostly smooth detector output after the hard work has already happened.
 
 ### Share music theory helpers across tools
 

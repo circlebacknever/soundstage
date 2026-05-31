@@ -1,8 +1,16 @@
 <script lang="ts">
 	import { WORDS } from '$lib/content';
+	import { loadSettings, saveSettings, type Settings } from '$lib/state';
 	import SettingsRow from '$lib/ui/SettingsRow.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
 	import TopBar from '$lib/ui/TopBar.svelte';
+
+	let settings = $state<Settings>(loadSettings());
+
+	function toggleMicrophone() {
+		settings = { ...settings, microphoneEnabled: !settings.microphoneEnabled };
+		saveSettings(settings);
+	}
 </script>
 
 <ToolCanvas>
@@ -16,7 +24,8 @@
 				tone="coral"
 				title={WORDS.settings.rows.microphone.title}
 				subtitle={WORDS.settings.rows.microphone.subtitle}
-				switchOn
+				switchOn={settings.microphoneEnabled}
+				onToggle={toggleMicrophone}
 			/>
 			<SettingsRow
 				icon="metronome"

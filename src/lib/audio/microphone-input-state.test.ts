@@ -14,6 +14,31 @@ const grantedPermission: MicrophonePermissionState = {
 };
 
 describe('microphone input UI state', () => {
+	it('blocks mic tools when the microphone setting is off, before any browser probe', () => {
+		assert.deepEqual(
+			buildMicrophoneInputState({
+				microphoneEnabled: false,
+				mediaDevicesAvailable: false,
+				permission: { status: 'unknown' }
+			}),
+			{
+				status: 'microphone-off'
+			}
+		);
+	});
+
+	it('treats the microphone as enabled when the setting is omitted', () => {
+		assert.deepEqual(
+			buildMicrophoneInputState({
+				mediaDevicesAvailable: true,
+				permission: { status: 'unknown' }
+			}),
+			{
+				status: 'permission-required'
+			}
+		);
+	});
+
 	it('maps unavailable media devices to the unsupported browser state', () => {
 		assert.deepEqual(
 			buildMicrophoneInputState({

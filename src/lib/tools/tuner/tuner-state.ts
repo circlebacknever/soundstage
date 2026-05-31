@@ -11,8 +11,11 @@ import {
 export const TUNER_HOLD_MS = 800;
 /** How long "Tuned ✓" lingers after the last string before resetting to low E (ms). */
 export const TUNER_COMPLETION_FEEDBACK_MS = 1_500;
-/** How long the last reading stays on screen through a detector dropout (ms). */
-export const TUNER_PITCH_HOLD_MS = 900;
+/** How long the last reading stays on screen after the detector drops out (ms).
+ *  Generous on purpose: a plucked string decays and the detector blinks out between
+ *  notes and while a peg turns, so a short hold strobes the readout back to neutral.
+ *  Riding the last reading through those gaps keeps the gauge calm and legible. */
+export const TUNER_PITCH_HOLD_MS = 4_000;
 /** Half-width of the in-tune window (cents); within ±this the hold timer runs. */
 export const TUNER_IN_TUNE_CENTS = 5;
 // Absorbs floating-point drift when comparing |cents| against the ±5 edge.
@@ -246,9 +249,12 @@ function withPitch(
 	);
 }
 
+// Keeps the last reading on screen through a detector dropout — between plucks or
+// while a peg turns — until TUNER_PITCH_HOLD_MS passes with nothing detected, then
+// clears to neutral. The held frame deliberately drops inTuneSinceMs, so a dropout
+// can't let a stale in-tune reading run the completion timer.
 function withHeldPitch(previousState: TunerState, observedAtMs: number): TunerState {
-	const previousMemory = previousState as TunerMemory;
-	const lastPitchSeenAtMs = previousMemory.lastPitchSeenAtMs;
+	const { lastPitchSeenAtMs } = previousState as TunerMemory;
 
 	if (
 		previousState.currentPitch &&

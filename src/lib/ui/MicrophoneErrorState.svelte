@@ -3,7 +3,7 @@
 	import Button from './Button.svelte';
 	import { Icon } from './icons/index.ts';
 
-	type MicrophoneErrorKind = 'denied' | 'unsupported' | 'silent' | 'noisy';
+	type MicrophoneErrorKind = 'denied' | 'unsupported' | 'silent' | 'noisy' | 'disabled';
 
 	type Props = {
 		kind: MicrophoneErrorKind;
@@ -14,9 +14,15 @@
 	let { kind, onPrimary = () => {}, onGhost = () => {} }: Props = $props();
 
 	const copy = $derived(WORDS.microphone.errors[kind]);
-	const iconName = $derived(kind === 'denied' ? 'mic_off' : 'mic');
+	const iconName = $derived(kind === 'denied' || kind === 'disabled' ? 'mic_off' : 'mic');
 	const tone = $derived(
-		kind === 'denied' ? 'rose' : kind === 'silent' ? 'peri' : kind === 'noisy' ? 'sun' : 'coral'
+		kind === 'denied'
+			? 'rose'
+			: kind === 'silent' || kind === 'disabled'
+				? 'peri'
+				: kind === 'noisy'
+					? 'sun'
+					: 'coral'
 	);
 	const hasSteps = $derived('steps' in copy);
 	const ghostAction = $derived('ghostAction' in copy ? copy.ghostAction : undefined);
@@ -88,6 +94,12 @@
 		--error-soft: var(--sun-soft);
 		--error-tone: var(--sun);
 		--error-ink: var(--sun-ink);
+	}
+
+	.microphone-error--disabled {
+		--error-soft: var(--peri-soft);
+		--error-tone: var(--peri);
+		--error-ink: var(--peri-ink);
 	}
 
 	.microphone-error__illustration {

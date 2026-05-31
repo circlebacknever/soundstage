@@ -53,10 +53,10 @@ Launcher tiles SHALL use these labels and subtitles: Tuner with "Get in tune", M
 - **THEN** each tile uses the specified tool name and subtitle
 
 ### Requirement: App shell copy ownership
-The app shell SHALL source home, launcher, navigation, document title, and deferred-placeholder copy from `src/lib/content` through `WORDS`.
+The app shell SHALL source home, launcher, navigation, document title, and planned-placeholder copy from `src/lib/content` through `WORDS`.
 
 #### Scenario: App shell copy is reviewed
-- **WHEN** the home launcher, desktop sidebar, route document title, or deferred placeholder is displayed
+- **WHEN** the home launcher, desktop sidebar, route document title, or planned placeholder is displayed
 - **THEN** the rendered copy matches the OpenSpec strings represented in `WORDS`
 
 ### Requirement: Design tokens and icon system
@@ -77,9 +77,24 @@ The system SHALL expose routes for `/`, `/tuner`, `/metronome`, `/scales`, `/sca
 - **WHEN** the user activates a launcher tile
 - **THEN** the app navigates to the corresponding tool route
 
-#### Scenario: Deferred tools use v1 placeholders
+#### Scenario: Planned tools use v1 placeholders
 - **WHEN** the user opens Chords or Ear Training during v1
 - **THEN** the app displays a visually consistent placeholder page that preserves navigation and explains the workflow is coming later
+
+### Requirement: Planned tools are visually de-emphasized
+Planned tools (Chords, Ear Training) SHALL appear in the launcher and desktop sidebar but visually de-emphasized, so a user can tell available tools apart from planned ones at a glance.
+
+#### Scenario: Planned launcher tiles are muted and marked
+- **WHEN** the home launcher renders a planned tool tile
+- **THEN** the tile drops its bright accent background for a muted neutral treatment, dims its icon and labels, and shows the "Coming later" marker
+
+#### Scenario: Planned sidebar items are muted
+- **WHEN** the desktop sidebar renders a planned tool item
+- **THEN** the item uses muted text and a dimmed icon rather than the standard available-tool styling
+
+#### Scenario: Planned tools stay reachable
+- **WHEN** the user activates a planned launcher tile or sidebar item
+- **THEN** the app still opens its v1 placeholder page explaining the workflow is coming later
 
 ### Requirement: Desktop sidebar contents
 The desktop sidebar SHALL contain the SoundStage brand, nav items for Home, Tuner, Metronome, Scales, Chords, and Ear Training, and a Settings item placed near the bottom.

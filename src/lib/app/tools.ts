@@ -20,7 +20,7 @@ export type ToolMetadata = {
 	subtitle: string;
 	accent: ToolAccent;
 	icon: IconName;
-	deferred?: true;
+	planned?: true;
 	placeholderTitle?: string;
 	placeholderBody?: string;
 };
@@ -40,6 +40,7 @@ export type DesktopNavItem = {
 	icon: IconName;
 	placement: NavPlacement;
 	accent?: ToolAccent;
+	planned?: true;
 };
 
 export const toolAccentTokens: Record<ToolAccent, { accent: string; soft: string; ink: string }> = {
@@ -82,7 +83,7 @@ export const toolCatalog: ToolMetadata[] = [
 		subtitle: WORDS.tools.chords.subtitle,
 		accent: 'mint',
 		icon: 'chord',
-		deferred: true,
+		planned: true,
 		placeholderTitle: WORDS.tools.chords.placeholderTitle,
 		placeholderBody: WORDS.tools.chords.placeholderBody
 	},
@@ -93,7 +94,7 @@ export const toolCatalog: ToolMetadata[] = [
 		subtitle: WORDS.tools.ear.subtitle,
 		accent: 'rose',
 		icon: 'ear',
-		deferred: true,
+		planned: true,
 		placeholderTitle: WORDS.tools.ear.placeholderTitle,
 		placeholderBody: WORDS.tools.ear.placeholderBody
 	}
@@ -182,14 +183,16 @@ export const desktopNavItems: DesktopNavItem[] = [
 		route: '/chords',
 		icon: 'chord',
 		placement: 'primary',
-		accent: 'mint'
+		accent: 'mint',
+		planned: true
 	},
 	{
 		name: WORDS.tools.ear.label,
 		route: '/ear',
 		icon: 'ear',
 		placement: 'primary',
-		accent: 'rose'
+		accent: 'rose',
+		planned: true
 	},
 	{ name: WORDS.tools.settings.label, route: '/settings', icon: 'settings', placement: 'footer' }
 ];

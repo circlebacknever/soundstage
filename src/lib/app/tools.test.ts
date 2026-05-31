@@ -108,14 +108,21 @@ describe('SoundStage tool catalog', () => {
 		});
 	});
 
-	it('marks Chords and Ear Training as deferred v1 routes', () => {
+	it('marks Chords and Ear Training as planned v1 routes', () => {
 		assert.deepEqual(
-			toolCatalog.filter((tool) => tool.deferred).map((tool) => tool.name),
+			toolCatalog.filter((tool) => tool.planned).map((tool) => tool.name),
 			[WORDS.tools.chords.label, WORDS.tools.ear.label]
 		);
 	});
 
-	it('returns required route metadata and WORDS copy for deferred placeholder pages', () => {
+	it('flags the planned tools in the sidebar so they can be de-emphasized', () => {
+		assert.deepEqual(
+			desktopNavItems.filter((item) => item.planned).map((item) => item.route),
+			['/chords', '/ear']
+		);
+	});
+
+	it('returns required route metadata and WORDS copy for planned placeholder pages', () => {
 		assert.deepEqual(
 			{
 				name: getRequiredToolByRoute('/chords').name,

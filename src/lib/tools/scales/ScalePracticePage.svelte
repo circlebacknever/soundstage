@@ -15,7 +15,7 @@
 		type StablePitchState
 	} from '$lib/audio';
 	import { WORDS } from '$lib/content';
-	import { loadScalePreferences, saveMicConsent } from '$lib/state';
+	import { loadScalePreferences, loadSettings, saveMicConsent } from '$lib/state';
 	import Button from '$lib/ui/Button.svelte';
 	import Fretboard from '$lib/ui/Fretboard.svelte';
 	import MicrophoneErrorState from '$lib/ui/MicrophoneErrorState.svelte';
@@ -31,6 +31,7 @@
 	} from './scale-practice-state.ts';
 
 	const preferences = loadScalePreferences();
+	const microphoneEnabled = loadSettings().microphoneEnabled;
 	const title = `${preferences.rootKey} ${preferences.scaleType}`;
 
 	let permission = $state<MicrophonePermissionState>(createMicrophonePermissionState());
@@ -50,6 +51,7 @@
 	const mediaDevicesAvailable = $derived(!browser || Boolean(navigator.mediaDevices?.getUserMedia));
 	const inputState = $derived(
 		buildMicrophoneInputState({
+			microphoneEnabled,
 			mediaDevicesAvailable,
 			permission,
 			pitch: latestPitch,
@@ -63,10 +65,7 @@
 
 	// The next-note readout changes every frame, so it can't sit in a live region;
 	// announce only the completion line to screen readers instead.
-	let announcement = $state('');
-	$effect(() => {
-		announcement = practice.feedback === 'complete' ? WORDS.scales.completion : '';
-	});
+	const announcement = $derived(practice.feedback === 'complete' ? WORDS.scales.completion : '');
 
 	function resetInputTimers() {
 		quietInputStartedAtMs = undefined;
@@ -165,6 +164,10 @@
 		void goto(resolve('/chords'));
 	}
 
+	function openSettings() {
+		void goto(resolve('/settings'));
+	}
+
 	function keepListening() {
 		resetInputTimers();
 	}
@@ -188,7 +191,12 @@
 	});
 </script>
 
-{#if inputState.status === 'unsupported-browser'}
+{#if inputState.status === 'microphone-off'}
+	<ToolCanvas wide>
+		<TopBar {title} backHref="/scales" backLabel={WORDS.navigation.backToScales} />
+		<MicrophoneErrorState kind="disabled" onPrimary={openSettings} />
+	</ToolCanvas>
+{:else if inputState.status === 'unsupported-browser'}
 	<ToolCanvas wide>
 		<TopBar {title} backHref="/scales" backLabel={WORDS.navigation.backToScales} />
 		<MicrophoneErrorState kind="unsupported" onPrimary={browseChords} />

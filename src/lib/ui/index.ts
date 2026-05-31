@@ -2,7 +2,7 @@ export { default as AppShell } from './AppShell.svelte';
 export { default as Button } from './Button.svelte';
 export { default as Card } from './Card.svelte';
 export { default as Chip } from './Chip.svelte';
-export { default as DeferredToolPlaceholder } from './DeferredToolPlaceholder.svelte';
+export { default as PlannedToolPlaceholder } from './PlannedToolPlaceholder.svelte';
 export { default as Fretboard } from './Fretboard.svelte';
 export { default as LauncherTile } from './LauncherTile.svelte';
 export { default as MicrophoneErrorState } from './MicrophoneErrorState.svelte';

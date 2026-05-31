@@ -49,6 +49,13 @@ describe('scale practice page boundary', () => {
 		assert.doesNotMatch(practicePage, /buildScaleSequence|buildScaleFretboard|SCALE_INTERVALS/);
 	});
 
+	it('gates scale practice through the shared mic setting when it is turned off', () => {
+		assert.match(practicePage, /loadSettings/);
+		assert.match(practicePage, /microphoneEnabled/);
+		assert.match(practicePage, /inputState\.status === 'microphone-off'/);
+		assert.match(practicePage, /<MicrophoneErrorState kind="disabled" onPrimary=\{openSettings\}/);
+	});
+
 	it('renders microphone gates and error states around the practice UI', () => {
 		assert.match(practicePage, /MicrophonePrePrompt/);
 		assert.match(practicePage, /MicrophoneErrorState/);

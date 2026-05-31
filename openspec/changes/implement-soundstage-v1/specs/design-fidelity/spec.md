@@ -131,9 +131,9 @@ The app SHALL preserve the settled v1 decisions: responsive web app, anonymous l
 - **WHEN** an implementation choice would replace one of the settled v1 decisions
 - **THEN** the choice is treated as outside the approved v1 design contract unless the OpenSpec change is explicitly updated
 
-### Requirement: v1 deferred areas
+### Requirement: v1 out-of-scope areas
 The v1 app SHALL keep full chord detail screens, full ear-training screens, onboarding, manual per-string tuner mode, sharp and flat root picker entries, fully designed time-signature picker UI, fully designed click-sound picker UI, and bespoke tablet/desktop variants for silent/noisy/unsupported error states outside the required design scope.
 
-#### Scenario: Deferred route is opened
-- **WHEN** the user opens a deferred area during v1
+#### Scenario: Out-of-scope route is opened
+- **WHEN** the user opens an out-of-scope area during v1
 - **THEN** the app presents either a placeholder or a scaled pattern from the existing design contract rather than inventing a complete new workflow

@@ -57,7 +57,9 @@ describe('microphone permission state', () => {
 
 		const permission = await requestMicrophonePermission(mediaDevices);
 
-		assert.deepEqual(requestedConstraints, [{ audio: true }]);
+		assert.deepEqual(requestedConstraints, [
+			{ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }
+		]);
 		assert.deepEqual(permission, {
 			status: 'granted',
 			stream
