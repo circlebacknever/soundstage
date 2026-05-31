@@ -57,9 +57,8 @@ describe('scale practice page boundary', () => {
 		assert.match(practicePage, /MicrophoneErrorState/);
 		assert.match(practicePage, /inputState\.status === 'mic-denied'/);
 		assert.match(practicePage, /inputState\.status === 'unsupported-browser'/);
-		// Silent and noisy inputs surface as an inline hint instead of taking over the screen.
-		assert.match(practicePage, /<MicrophoneHint status=\{inputState\.status\}/);
-		assert.doesNotMatch(practicePage, /kind="silent"|kind="noisy"/);
+		// Silent and noisy inputs are no longer surfaced as states; "Play a note" already says it.
+		assert.doesNotMatch(practicePage, /kind="silent"|kind="noisy"|MicrophoneHint/);
 	});
 
 	it('renders the next note, progress, and fretboard from practice state', () => {

@@ -90,12 +90,6 @@ export const WORDS = {
 				body: 'Turn microphone access back on in Settings to use the tuner and scale practice.',
 				primaryAction: 'Open settings'
 			}
-		},
-		// Non-blocking advisories shown inline while listening continues — the tool keeps
-		// running, so these stay a quiet one-liner rather than taking over the screen.
-		hints: {
-			silent: "We can't hear anything — check your mic isn't muted",
-			noisy: 'Too noisy to read a pitch — try a quieter spot'
 		}
 	},
 	tuner: {
@@ -118,11 +112,11 @@ export const WORDS = {
 		},
 		allTunedAnnouncement: 'All six strings tuned',
 		guidance: {
-			waySharp: 'way sharp · tune down',
-			sharp: 'sharp · tune down a touch',
+			waySharp: 'way sharp',
+			sharp: 'sharp',
 			inTune: 'in tune ✓',
-			flat: 'flat · tune up a touch',
-			wayFlat: 'way flat · tune up'
+			flat: 'flat',
+			wayFlat: 'way flat'
 		}
 	},
 	metronome: {

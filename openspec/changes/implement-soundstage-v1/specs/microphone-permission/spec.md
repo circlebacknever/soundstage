@@ -54,6 +54,10 @@ The system SHALL track microphone permission as unknown, pending, granted, or de
 - **WHEN** no microphone consent has been recorded yet (unknown)
 - **THEN** the pre-prompt is shown, and granting or denying persists the outcome locally so later visits do not show the pre-prompt again (a previously denied mic opens directly in the Mic Denied state)
 
+#### Scenario: First paint shows the listening view, not the prompt
+- **WHEN** a mic-required tool first renders, including server-side, before stored consent is resolved on the client
+- **THEN** it shows the listening view ("Play a note") and resolves consent on mount, so the pre-prompt or a silent re-acquire only happens client-side after the first paint and the prompt never flashes during initial render
+
 ### Requirement: Microphone flow copy ownership
 The microphone flow SHALL source pre-prompt and error-state copy from `src/lib/content` through `WORDS`.
 
@@ -80,17 +84,6 @@ The system SHALL provide full-screen states that replace the tool when the micro
 - **WHEN** a blocking error state is displayed
 - **THEN** it uses a centered 120px illustration circle, with rose styling for mic denied, paper-sink styling for unsupported browser, and peri styling for the microphone-off state
 
-### Requirement: Quiet and noisy input advisories
-While the microphone is granted and listening, the system SHALL surface sustained quiet or noisy input as a small inline hint inside the tool rather than a full-screen state, with no blocking actions, and SHALL keep listening so the hint clears on its own once a clear signal returns.
-
-#### Scenario: Sustained quiet input shows an inline hint
-- **WHEN** microphone access is granted and input level stays below threshold for at least 5 seconds
-- **THEN** the tool keeps its listening view and shows a small inline hint "We can't hear anything — check your mic isn't muted" with no buttons
-
-#### Scenario: Sustained unclear input shows an inline hint
-- **WHEN** input is present but no clear fundamental is detected for at least 8 seconds
-- **THEN** the tool keeps its listening view and shows a small inline hint "Too noisy to read a pitch — try a quieter spot" with no buttons
-
-#### Scenario: Inline hint clears when input recovers
-- **WHEN** a clear pitch returns, or input falls back below the dwell, after a quiet or noisy hint
-- **THEN** the inline hint disappears without any user action
+#### Scenario: Quiet or noisy input is not a state
+- **WHEN** the microphone is listening but the signal is silent or too noisy to detect a pitch
+- **THEN** the tool stays on its listening view showing the "Play a note" prompt and never escalates to a separate silent or noisy state

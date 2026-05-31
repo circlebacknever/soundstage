@@ -1,9 +1,9 @@
 import type { AcceptedPitchEstimate } from '$lib/audio';
 import {
 	centsBetweenFrequencies,
-	nearestGuitarStringTarget,
 	STANDARD_GUITAR_TUNING,
 	type GuitarStringId,
+	type GuitarStringTarget,
 	type NoteName
 } from '$lib/music';
 
@@ -44,11 +44,11 @@ export type TunerStringView = {
 /** Pitch readout for the gauge and note display, derived from one estimate. */
 export type TunerPitchView = {
 	note: NoteName; // Nearest chromatic note the player is closest to, e.g. "E" or "F#".
-	cents: number; // Signed offset from that note, within ±50, rounded and dampened; positive is sharp.
-	centsLabel: string; // `cents` formatted for display, e.g. "+12¢" or "0¢".
-	guidance: TunerGuidance; // Band `cents` falls into; keys WORDS.tuner.guidance.
-	targetString: GuitarStringId; // Nearest standard string; gates which string the flow can complete.
-	needleAngleDegrees: number; // Gauge rotation: 0 in tune, positive sharp, clamped to ±TUNER_NEEDLE_MAX_DEGREES.
+	cents: number; // Signed offset from the active string, rounded and dampened; positive is sharp.
+	centsLabel: string; // `cents` formatted for display, e.g. "+12¢"; empty once the note rolls past ±50.
+	guidance: TunerGuidance; // Band `cents` falls into, relative to the active string; keys WORDS.tuner.guidance.
+	targetString: GuitarStringId; // The string this reading is measured against (the active tuning target).
+	needleAngleDegrees: number; // Gauge rotation: 0 in tune with the target, positive sharp, clamped to ±TUNER_NEEDLE_MAX_DEGREES.
 };
 
 declare const tunerStateBrand: unique symbol;
@@ -148,8 +148,8 @@ function clamp(value: number, minimum: number, maximum: number) {
 	return Math.min(Math.max(value, minimum), maximum);
 }
 
-function dampenCents(cents: number, note: NoteName, previousPitch?: TunerPitchView) {
-	if (previousPitch?.note !== note) {
+function dampenCents(cents: number, targetString: GuitarStringId, previousPitch?: TunerPitchView) {
+	if (previousPitch?.targetString !== targetString) {
 		return cents;
 	}
 
@@ -214,22 +214,26 @@ export function selectTunerString(
 
 function pitchViewForEstimate(
 	pitch: AcceptedPitchEstimate,
+	activeTarget: GuitarStringTarget,
 	previousPitch?: TunerPitchView
 ): TunerPitchView {
-	// Name the note the player is actually closest to, so the readout rolls E→F at the
-	// halfway point instead of reporting a huge offset from a fixed string. The estimate's
-	// note is already the nearest chromatic note, with cents within ±50 by construction.
-	// The nearest standard string is tracked separately, only to gate which string the
-	// tuning flow may complete.
-	const cents = dampenCents(pitch.note.cents, pitch.note.name, previousPitch);
+	// The note letter names what the player is actually closest to (so it reads "F#", not a
+	// huge offset from "E"), but the cents, needle, and guidance are all measured against the
+	// string being tuned. That's why playing F# while tuning E reads "way sharp", not a happy
+	// in-tune F# — the gauge always points the way back to the active target.
+	const centsFromTarget = centsBetweenFrequencies(pitch.frequency, activeTarget.frequency);
+	const cents = dampenCents(centsFromTarget, activeTarget.id, previousPitch);
 	const roundedCents = Math.round(cents);
+	// Past half a semitone the nearest note is no longer the target, so a cents number beside the
+	// rolled-over letter would mislead — drop it and let the band ("way sharp") carry the guidance.
+	const onTargetNote = Math.abs(roundedCents) <= TUNER_NEEDLE_MAX_CENTS;
 
 	return {
 		note: pitch.note.name,
 		cents: roundedCents,
-		centsLabel: centsLabel(roundedCents),
+		centsLabel: onTargetNote ? centsLabel(roundedCents) : '',
 		guidance: guidanceBandForCents(roundedCents),
-		targetString: nearestGuitarStringTarget(pitch.frequency).target.id,
+		targetString: activeTarget.id,
 		needleAngleDegrees: Math.round(
 			(clamp(cents, -TUNER_NEEDLE_MAX_CENTS, TUNER_NEEDLE_MAX_CENTS) / TUNER_NEEDLE_MAX_CENTS) *
 				TUNER_NEEDLE_MAX_DEGREES
@@ -337,15 +341,11 @@ export function buildTunerState(
 		return withHeldPitch(previousState, observedAtMs);
 	}
 
-	const currentPitch = pitchViewForEstimate(pitch, previousState.currentPitch);
 	const activeTarget = targetForString(previousState.activeString);
+	const currentPitch = pitchViewForEstimate(pitch, activeTarget, previousState.currentPitch);
 	const centsFromActiveTarget = centsBetweenFrequencies(pitch.frequency, activeTarget.frequency);
-	const isActiveStringPitch = currentPitch.targetString === previousState.activeString;
 
-	if (
-		!isActiveStringPitch ||
-		Math.abs(centsFromActiveTarget) - TUNER_IN_TUNE_CENTS > TUNER_CENTS_EPSILON
-	) {
+	if (Math.abs(centsFromActiveTarget) - TUNER_IN_TUNE_CENTS > TUNER_CENTS_EPSILON) {
 		return withPitch(previousState, currentPitch, { lastPitchSeenAtMs: observedAtMs });
 	}
 

@@ -1,10 +1,6 @@
 import { browser } from '$app/environment';
 import { createMicrophonePitchSource, type MicrophonePitchSource } from './microphone-analyser.ts';
-import {
-	buildMicrophoneInputState,
-	createMicrophoneInputTracker,
-	type MicrophoneInputState
-} from './microphone-input-state.ts';
+import { buildMicrophoneInputState, type MicrophoneInputState } from './microphone-input-state.ts';
 import {
 	beginMicrophonePermissionRequest,
 	createMicrophonePermissionState,
@@ -12,7 +8,7 @@ import {
 	requestMicrophonePermission,
 	type MicrophonePermissionState
 } from './microphone-permission.ts';
-import type { AcceptedPitchEstimate, PitchEstimateOptions, PitchEstimateResult } from './pitch.ts';
+import type { AcceptedPitchEstimate, PitchEstimateOptions } from './pitch.ts';
 import {
 	createStablePitchState,
 	type StablePitchOptions,
@@ -37,10 +33,13 @@ export type MicrophonePitchSessionOptions = {
 };
 
 export type MicrophonePitchSession = {
-	/** Microphone UI state: off, unsupported, prompt, denied, listening, silent, or noisy. */
+	/** Microphone UI state: off, unsupported, prompt, pending, denied, or listening. */
 	readonly inputState: MicrophoneInputState;
 	/** Whether the pre-prompt should be shown over the tool. */
 	readonly showPrompt: boolean;
+	/** Resolves stored consent and, when granted, begins acquiring. Call once from onMount so
+	 *  the first (server-rendered) paint is the listening view, not the prompt. */
+	start(): void;
 	/** Begins the permission request and, once granted, the live pitch loop. */
 	requestMicrophone(): void;
 	/** Pauses or resumes the frame loop without releasing the microphone. */
@@ -51,43 +50,34 @@ export type MicrophonePitchSession = {
 
 /**
  * A live microphone → pitch session for tool pages. Owns the permission handshake, the
- * requestAnimationFrame read loop, the pitch-source lifecycle, and the silent/noisy input
- * timers, exposing only reactive `inputState`/`showPrompt` plus a handful of intents. The
- * page supplies the per-frame fold and any detector tuning, and keeps ownership of its own
- * tool state, so the session stays agnostic to which tool it is driving.
+ * requestAnimationFrame read loop, and the pitch-source lifecycle, exposing only reactive
+ * `inputState`/`showPrompt` plus a handful of intents. The page supplies the per-frame fold
+ * and any detector tuning and keeps ownership of its own tool state, so the session stays
+ * agnostic to which tool it is driving.
  */
 export function createMicrophonePitchSession(
 	options: MicrophonePitchSessionOptions
 ): MicrophonePitchSession {
 	let permission = $state<MicrophonePermissionState>(createMicrophonePermissionState());
-	let latestPitch = $state<PitchEstimateResult | undefined>();
-	let quietInputDurationMs = $state(0);
-	let unclearPitchDurationMs = $state(0);
+	// Stays false until the page starts the session on the client, so the first server-rendered
+	// paint shows the listening view instead of flashing the pre-prompt before hydration.
+	let started = $state(false);
 
 	let pitchSource: MicrophonePitchSource | undefined;
 	let stablePitch: StablePitchState = createStablePitchState();
 	let animationFrameId: number | undefined;
 	let paused = false;
-	const tracker = createMicrophoneInputTracker();
 
-	// Optimistic during SSR (no navigator yet): assume devices exist so the tool renders its
-	// prompt rather than flashing "unsupported" for the moment before the client hydrates.
 	const mediaDevicesAvailable = !browser || Boolean(navigator.mediaDevices?.getUserMedia);
 
 	const inputState = $derived(
 		buildMicrophoneInputState({
 			microphoneEnabled: options.microphoneEnabled,
 			mediaDevicesAvailable,
-			permission,
-			pitch: latestPitch,
-			quietInputDurationMs,
-			unclearPitchDurationMs
+			permission
 		})
 	);
-	// Only the first-time ask (permission-required) shows the pre-prompt. While a request is
-	// pending — including the silent re-acquire for a previously granted mic — the tool renders
-	// its listening view instead, so a returning user never sees the prompt flash by.
-	const showPrompt = $derived(inputState.status === 'permission-required');
+	const showPrompt = $derived(started && inputState.status === 'permission-required');
 
 	function stopPitchLoop() {
 		if (animationFrameId !== undefined) {
@@ -110,10 +100,6 @@ export function createMicrophonePitchSession(
 				stablePitchOptions: options.stablePitchOptions
 			});
 			stablePitch = frame.stable;
-			const durations = tracker.observe(frame.pitch, observedAtMs);
-			latestPitch = frame.pitch;
-			quietInputDurationMs = durations.quietInputDurationMs;
-			unclearPitchDurationMs = durations.unclearPitchDurationMs;
 			options.onFrame(frame.stable.output.ok ? frame.stable.output.pitch : undefined, observedAtMs);
 			animationFrameId = requestAnimationFrame(readNextFrame);
 		};
@@ -132,11 +118,7 @@ export function createMicrophonePitchSession(
 		await stopPitchDetection();
 		pitchSource = createMicrophonePitchSource({ stream });
 		stablePitch = createStablePitchState();
-		latestPitch = undefined;
 		paused = false;
-		tracker.reset();
-		quietInputDurationMs = 0;
-		unclearPitchDurationMs = 0;
 		startPitchLoop();
 	}
 
@@ -155,23 +137,30 @@ export function createMicrophonePitchSession(
 		await stopPitchDetection();
 	}
 
-	// Honour a prior decision so the pre-prompt only greets genuinely new users: a previously
-	// granted mic re-acquires its stream right away (the browser won't prompt again), and a
-	// previously denied mic opens in the denied state, ready to retry.
-	if (options.initialConsent === 'granted') {
-		void allowMicrophone();
-	} else if (options.initialConsent === 'denied') {
-		permission = denyMicrophonePermission(
-			new Error('Microphone access was declined on a previous visit')
-		);
-	}
-
 	return {
 		get inputState() {
 			return inputState;
 		},
 		get showPrompt() {
 			return showPrompt;
+		},
+		start() {
+			if (started) {
+				return;
+			}
+
+			started = true;
+
+			// Honour a prior decision so the pre-prompt only greets genuinely new users: a
+			// previously granted mic re-acquires its stream right away (the browser won't prompt
+			// again), and a previously denied mic opens in the denied state, ready to retry.
+			if (options.initialConsent === 'granted') {
+				void allowMicrophone();
+			} else if (options.initialConsent === 'denied') {
+				permission = denyMicrophonePermission(
+					new Error('Microphone access was declined on a previous visit')
+				);
+			}
 		},
 		requestMicrophone() {
 			void allowMicrophone();

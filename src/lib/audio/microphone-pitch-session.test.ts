@@ -17,7 +17,6 @@ describe('microphone pitch session boundary', () => {
 		assert.match(session, /createMicrophonePitchSource/);
 		assert.match(session, /readPitchFrame/);
 		assert.match(session, /createStablePitchState/);
-		assert.match(session, /createMicrophoneInputTracker/);
 		assert.match(session, /buildMicrophoneInputState/);
 		assert.match(session, /requestAnimationFrame/);
 		assert.match(session, /cancelAnimationFrame/);

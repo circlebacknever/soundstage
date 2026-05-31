@@ -6,11 +6,10 @@
 	import { WORDS } from '$lib/content';
 	import { loadMicConsent, loadSettings, saveMicConsent } from '$lib/state';
 	import MicrophoneErrorState from '$lib/ui/MicrophoneErrorState.svelte';
-	import MicrophoneHint from '$lib/ui/MicrophoneHint.svelte';
 	import MicrophonePrePrompt from '$lib/ui/MicrophonePrePrompt.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
 	import TopBar from '$lib/ui/TopBar.svelte';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import {
 		buildTunerState,
 		createTunerState,
@@ -53,11 +52,6 @@
 	const currentPitch = $derived<TunerPitchView | undefined>(tuner.currentPitch);
 	const activeString = $derived(tuner.strings.find((string) => string.id === tuner.activeString));
 	const readoutNote = $derived(currentPitch?.note ?? activeString?.note ?? 'E');
-	const guidanceReadout = $derived(
-		currentPitch?.centsLabel
-			? `${currentPitch.centsLabel} · ${WORDS.tuner.guidance[currentPitch.guidance]}`
-			: WORDS.tuner.listening
-	);
 	const needleAngleDegrees = $derived(currentPitch?.needleAngleDegrees ?? 0);
 
 	// Screen-reader announcement of discrete milestones only. The visible readout
@@ -117,6 +111,8 @@
 		tuner = selectTunerString(tuner, stringId);
 	}
 
+	onMount(() => session.start());
+
 	onDestroy(() => {
 		void session.dispose();
 	});
@@ -140,8 +136,6 @@
 {:else}
 	<ToolCanvas>
 		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
-
-		<MicrophoneHint status={inputState.status} />
 
 		<section class="tuner-card" aria-label={WORDS.tuner.readoutLabel}>
 			<svg class="arc-svg" viewBox="0 0 260 160" fill="none" aria-hidden="true">
@@ -194,9 +188,14 @@
 				<div class="note-xxl">{readoutNote}</div>
 				<div class="note-sub">
 					{#if tuner.feedback === 'tuned'}
-						{WORDS.tuner.tuned}
+						<span class="note-sub__line">{WORDS.tuner.tuned}</span>
+					{:else if currentPitch?.centsLabel}
+						<span class="note-sub__cents">{currentPitch.centsLabel}</span>
+						<span class="note-sub__guidance">{WORDS.tuner.guidance[currentPitch.guidance]}</span>
+					{:else if currentPitch}
+						<span class="note-sub__line">{WORDS.tuner.guidance[currentPitch.guidance]}</span>
 					{:else}
-						{guidanceReadout}
+						<span class="note-sub__line">{WORDS.tuner.listening}</span>
 					{/if}
 				</div>
 			</div>
@@ -291,19 +290,39 @@
 	}
 
 	.note-sub {
-		align-items: center;
+		align-content: center;
 		color: var(--coral-ink);
-		display: flex;
+		column-gap: 0.4em;
+		/* Two equal columns split at the card centre: cents right-aligned up to the centre, the
+		   guidance band left-aligned from it. Tabular figures fix the cents width, so neither a
+		   per-frame digit change nor a band change can reflow the other half — the line holds still. */
+		display: grid;
 		font-family: var(--font-mono);
-		/* Tabular figures keep the cents number a fixed width, and the reserved two-line height
-		   stops the gauge above from jumping when the guidance wraps on narrow screens. */
 		font-size: 13px;
 		font-variant-numeric: tabular-nums;
-		justify-content: center;
+		grid-template-columns: 1fr 1fr;
 		letter-spacing: 0.12em;
 		line-height: 1.4;
-		min-height: 2.8em;
+		min-height: 1.5em;
 		text-transform: uppercase;
+	}
+
+	.note-sub__cents {
+		text-align: right;
+	}
+
+	.note-sub__guidance {
+		text-align: left;
+	}
+
+	.note-sub__guidance::before {
+		content: '· ';
+	}
+
+	/* "Tuned ✓" and "Play a note" have no cents partner, so they span both columns and centre. */
+	.note-sub__line {
+		grid-column: 1 / -1;
+		text-align: center;
 	}
 
 	.strings-label {

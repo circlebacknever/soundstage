@@ -103,11 +103,6 @@ describe('WORDS', () => {
 			body: 'Turn microphone access back on in Settings to use the tuner and scale practice.',
 			primaryAction: 'Open settings'
 		});
-
-		assert.deepEqual(WORDS.microphone.hints, {
-			silent: "We can't hear anything — check your mic isn't muted",
-			noisy: 'Too noisy to read a pitch — try a quieter spot'
-		});
 	});
 
 	it('keeps tuner guidance, labels, and feedback exact', () => {
@@ -131,11 +126,11 @@ describe('WORDS', () => {
 			},
 			allTunedAnnouncement: 'All six strings tuned',
 			guidance: {
-				waySharp: 'way sharp · tune down',
-				sharp: 'sharp · tune down a touch',
+				waySharp: 'way sharp',
+				sharp: 'sharp',
 				inTune: 'in tune ✓',
-				flat: 'flat · tune up a touch',
-				wayFlat: 'way flat · tune up'
+				flat: 'flat',
+				wayFlat: 'way flat'
 			}
 		});
 	});

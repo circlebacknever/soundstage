@@ -20,17 +20,10 @@ export type {
 	MetronomeScheduler,
 	ScheduledMetronomeBeat
 } from './metronome.ts';
-export {
-	buildMicrophoneInputState,
-	createMicrophoneInputTracker,
-	MICROPHONE_NOISY_INPUT_MS,
-	MICROPHONE_SILENT_INPUT_MS
-} from './microphone-input-state.ts';
+export { buildMicrophoneInputState } from './microphone-input-state.ts';
 export type {
 	BuildMicrophoneInputStateOptions,
-	MicrophoneInputDurations,
-	MicrophoneInputState,
-	MicrophoneInputTracker
+	MicrophoneInputState
 } from './microphone-input-state.ts';
 export {
 	beginMicrophonePermissionRequest,

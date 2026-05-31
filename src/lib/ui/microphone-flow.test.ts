@@ -57,20 +57,7 @@ describe('microphone flow UI contract', () => {
 			source,
 			/\.microphone-error--unsupported[\s\S]*--error-soft:\s*var\(--paper-sink\)/
 		);
-		// Silent and noisy are no longer full-screen error states; they surface as an inline hint.
+		// Silent and noisy input are no longer surfaced as states at all — "Play a note" suffices.
 		assert.doesNotMatch(source, /microphone-error--silent|microphone-error--noisy/);
-	});
-
-	it('shows silent and noisy input as a small inline hint rather than a takeover', () => {
-		const source = componentSource('./MicrophoneHint.svelte');
-
-		assert.match(source, /import \{ WORDS \} from '\$lib\/content';/);
-		assert.match(source, /WORDS\.microphone\.hints\.silent/);
-		assert.match(source, /WORDS\.microphone\.hints\.noisy/);
-		assert.match(source, /status === 'silent-input'/);
-		assert.match(source, /status === 'noisy-input'/);
-		// A passive status line, not a blocking dialog with actions.
-		assert.match(source, /role="status"/);
-		assert.doesNotMatch(source, /<button|onPrimary|onGhost/);
 	});
 });

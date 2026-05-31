@@ -42,20 +42,24 @@ The tuner SHALL display the handoff circular arc gauge, needle, flat/sharp label
 - **WHEN** consecutive usable pitch estimates are for the same standard string
 - **THEN** the tuner dampens the cents and needle movement so the readout remains legible while the string rings
 
-#### Scenario: Readout names the nearest chromatic note
-- **WHEN** the detector reports a usable pitch
-- **THEN** the large note letter and cents describe the nearest chromatic note to that pitch, so the cents reading stays within ±50 and the note letter rolls over to the next note (for example E to F) once the pitch passes the halfway point, rather than showing a large offset from a fixed string
+#### Scenario: Readout names the played note but measures against the target
+- **WHEN** the detector reports a usable pitch while a string is the active tuning target
+- **THEN** the large note letter names the nearest chromatic note actually played (rolling over, for example E to F, once the pitch passes the halfway point), while the cents, needle, and guidance band are all measured against the active string, and the cents number is hidden once the played note has rolled past the target so the readout never shows a large offset
+
+#### Scenario: A different note never reads as in tune for the target
+- **WHEN** the player sounds a note away from the active string, including a perfectly tuned but wrong note such as F# while tuning low E
+- **THEN** the needle sits away from the in-tune zone and the guidance reads sharp or flat toward the target, rather than showing the in-tune zone for the wrong note
 
 #### Scenario: Readout position stays stable as values change
 - **WHEN** the cents value or guidance band changes between frames
-- **THEN** the large note letter stays centered and the readout does not shift horizontally or vertically, using tabular figures and reserving space for the guidance line
+- **THEN** the readout does not shift: the cents number (tabular figures) is right-aligned up to the centre line and the guidance band is left-aligned from it, so neither a digit change nor a band change reflows the other half
 
 #### Scenario: Sharp note updates gauge
-- **WHEN** the detector reports a note that is more than 5 cents sharp
-- **THEN** the tuner angles the needle toward sharp and displays copy telling the user to tune down
+- **WHEN** the detector reports a pitch more than 5 cents sharp of the active string
+- **THEN** the tuner angles the needle toward sharp and labels the reading "sharp" (or "way sharp"), letting the needle and the gauge's flat/sharp labels show which way to tune
 
 #### Scenario: In-tune note updates gauge
-- **WHEN** the detector reports a note within 5 cents of target
+- **WHEN** the detected pitch is within 5 cents of the active string
 - **THEN** the tuner positions the needle in the in-tune zone and displays in-tune guidance
 
 ### Requirement: Standard tuning string progress
@@ -101,15 +105,15 @@ The tuner SHALL source labels and guidance prose from `src/lib/content` through 
 - **THEN** the rendered copy matches the OpenSpec strings represented in `WORDS`
 
 ### Requirement: Tuner status copy
-The tuner SHALL classify cents offsets into way flat, flat, in tune, sharp, and way sharp guidance bands.
+The tuner SHALL classify the cents offset from the active string into way flat, flat, in tune, sharp, and way sharp guidance bands. The band label is the concise direction word, since the needle and the gauge's flat/sharp labels already show which way to tune.
 
 #### Scenario: Large sharp offset
 - **WHEN** the cents offset is +25 or higher
-- **THEN** the tuner displays "way sharp · tune down"
+- **THEN** the tuner displays "way sharp"
 
 #### Scenario: Small flat offset
 - **WHEN** the cents offset is from -24 through -6
-- **THEN** the tuner displays "flat · tune up a touch"
+- **THEN** the tuner displays "flat"
 
 #### Scenario: In tune offset
 - **WHEN** the cents offset is from -5 through +5
@@ -117,11 +121,11 @@ The tuner SHALL classify cents offsets into way flat, flat, in tune, sharp, and 
 
 #### Scenario: Large flat offset
 - **WHEN** the cents offset is -25 or lower
-- **THEN** the tuner displays "way flat · tune up"
+- **THEN** the tuner displays "way flat"
 
 #### Scenario: Small sharp offset
 - **WHEN** the cents offset is from 6 through 24
-- **THEN** the tuner displays "sharp · tune down a touch"
+- **THEN** the tuner displays "sharp"
 
 ### Requirement: Tuner update cadence
 The tuner SHALL update the needle and note display at least 30 frames per second while usable pitch estimates are available.

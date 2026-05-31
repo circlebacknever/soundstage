@@ -78,9 +78,8 @@ describe('tuner page boundary', () => {
 		assert.match(page, /\{#if showPrompt\}/);
 		assert.match(page, /inputState\.status === 'mic-denied'/);
 		assert.match(page, /inputState\.status === 'unsupported-browser'/);
-		// Silent and noisy inputs no longer take over the screen; they show as an inline hint.
-		assert.match(page, /<MicrophoneHint status=\{inputState\.status\}/);
-		assert.doesNotMatch(page, /kind="silent"|kind="noisy"/);
+		// Silent and noisy inputs are no longer surfaced as states; "Play a note" already says it.
+		assert.doesNotMatch(page, /kind="silent"|kind="noisy"|MicrophoneHint/);
 	});
 
 	it('renders dynamic string progress, pitch guidance, and needle angle from tuner state', () => {

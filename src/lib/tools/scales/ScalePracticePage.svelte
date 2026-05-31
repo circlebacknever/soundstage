@@ -7,11 +7,10 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Fretboard from '$lib/ui/Fretboard.svelte';
 	import MicrophoneErrorState from '$lib/ui/MicrophoneErrorState.svelte';
-	import MicrophoneHint from '$lib/ui/MicrophoneHint.svelte';
 	import MicrophonePrePrompt from '$lib/ui/MicrophonePrePrompt.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
 	import TopBar from '$lib/ui/TopBar.svelte';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import {
 		buildScalePracticeState,
 		createScalePracticeState,
@@ -67,6 +66,8 @@
 		practice = restartScalePractice(practice);
 	}
 
+	onMount(() => session.start());
+
 	onDestroy(() => {
 		void session.dispose();
 	});
@@ -94,8 +95,6 @@
 				<span class="rec-pill"><span class="rec-pill__dot"></span>{WORDS.scales.rec}</span>
 			{/snippet}
 		</TopBar>
-
-		<MicrophoneHint status={inputState.status} />
 
 		<section class="next-card" aria-label={WORDS.scales.nextNote}>
 			{#if practice.feedback === 'complete'}

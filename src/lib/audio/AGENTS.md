@@ -18,9 +18,9 @@ Audio pitch math is currently in-process. Do not add ports, adapters, mocks, or 
 - `stable-pitch.ts` owns moving-window smoothing and hysteresis over accepted pitch estimates.
 - `analyser.ts` owns reading analyser time-domain frames into detector buffers.
 - `microphone-permission.ts` owns current-session microphone permission state and the `getUserMedia({ audio: true })` request wrapper.
-- `microphone-input-state.ts` owns mapping permission and pitch observations to microphone UI states such as unsupported browser, mic denied, silent input, and noisy input, plus the input-timer tracker that accumulates how long a quiet or unclear signal has persisted.
+- `microphone-input-state.ts` owns mapping the mic setting, device availability, and permission to a microphone UI state such as microphone-off, unsupported browser, mic denied, or listening.
 - `microphone-analyser.ts` owns the live microphone source to analyser graph and exposes pitch frames without leaking Web Audio node setup to route files.
-- `microphone-pitch-session.svelte.ts` owns the reactive live-microphone session for tool pages: the permission handshake, the requestAnimationFrame read loop, the pitch-source lifecycle, and the input timers, exposing reactive `inputState`/`showPrompt`. It is the one Svelte-coupled file here (it reads `$app/environment`), so tool pages import it by direct path and it is deliberately kept out of `index.ts` to keep the barrel free of framework imports.
+- `microphone-pitch-session.svelte.ts` owns the reactive live-microphone session for tool pages: the permission handshake, the requestAnimationFrame read loop, and the pitch-source lifecycle, exposing reactive `inputState`/`showPrompt` plus a `start()` the page calls on mount. It is the one Svelte-coupled file here (it reads `$app/environment`), so tool pages import it by direct path and it is deliberately kept out of `index.ts` to keep the barrel free of framework imports.
 - `metronome.ts` owns generated click voices and lookahead scheduling, exposing playback-aligned beat events for metronome visuals.
 - `assertions.ts` owns local numeric guards shared by audio modules.
 

@@ -141,16 +141,18 @@ describe('tuner state', () => {
 		assert.equal(state.currentPitch?.needleAngleDegrees, 28);
 	});
 
-	it('shows the nearest played string without advancing the active step', () => {
+	it('measures a wrong note against the active string instead of advancing', () => {
 		let state = createTunerState();
 
+		// Playing the open A string while low E is active: the letter still names what is played,
+		// but the gauge reads way sharp of E, and the cents number drops out once past ±50.
 		state = buildTunerState(pitchForString('A'), state, 10_000);
 
 		assert.equal(state.currentPitch?.note, 'A');
-		assert.equal(state.currentPitch?.cents, 0);
-		assert.equal(state.currentPitch?.centsLabel, '0¢');
-		assert.equal(state.currentPitch?.guidance, 'inTune');
-		assert.equal(state.currentPitch?.targetString, 'A');
+		assert.equal(state.currentPitch?.guidance, 'waySharp');
+		assert.equal(state.currentPitch?.centsLabel, '');
+		assert.equal(state.currentPitch?.targetString, 'E_low');
+		assert.ok((state.currentPitch?.cents ?? 0) > 50);
 		assert.equal(state.activeString, 'E_low');
 		assert.deepEqual(statusByString(state), {
 			E_low: 'active',
@@ -167,7 +169,7 @@ describe('tuner state', () => {
 		assert.equal(statusByString(state).E_low, 'active');
 	});
 
-	it('shows flat cents for the nearest played string', () => {
+	it('shows flat cents relative to the active string', () => {
 		const state = buildTunerState(pitchForString('E_low', -12), createTunerState(), 11_000);
 
 		assert.equal(state.currentPitch?.note, 'E');
@@ -178,23 +180,24 @@ describe('tuner state', () => {
 		assert.equal(state.currentPitch?.needleAngleDegrees, -14);
 	});
 
-	it('rolls the readout to the nearest chromatic note past fifty cents', () => {
-		// 60 cents above low E sits closer to F than E, so the readout names F with a small
-		// offset rather than E +60. Playing F still must not complete the active low E string.
+	it('rolls the note letter past fifty cents while the gauge stays relative to the target', () => {
+		// 60 cents above low E is closer to F, so the letter reads F — but the gauge still measures
+		// against E (way sharp), with the cents number dropped since the letter has rolled over.
 		const state = buildTunerState(pitchForString('E_low', 60), createTunerState(), 16_000);
 
 		assert.equal(state.currentPitch?.note, 'F');
-		assert.ok(Math.abs(state.currentPitch?.cents ?? 999) <= 50);
+		assert.equal(state.currentPitch?.centsLabel, '');
+		assert.equal(state.currentPitch?.guidance, 'waySharp');
 		assert.equal(state.activeString, 'E_low');
 		assert.equal(statusByString(state).E_low, 'active');
 	});
 
 	it('holds the last readable pitch through brief detector dropouts', () => {
-		let state = buildTunerState(pitchForString('A', 11), createTunerState(), 11_000);
+		let state = buildTunerState(pitchForString('E_low', 11), createTunerState(), 11_000);
 
 		state = buildTunerState(undefined, state, 11_000 + TUNER_PITCH_HOLD_MS - 1);
 
-		assert.equal(state.currentPitch?.note, 'A');
+		assert.equal(state.currentPitch?.note, 'E');
 		assert.equal(state.currentPitch?.centsLabel, '+11¢');
 		assert.equal(state.currentPitch?.guidance, 'sharp');
 
@@ -215,11 +218,11 @@ describe('tuner state', () => {
 	});
 
 	it('dampens cents and needle movement while the same string keeps sounding', () => {
-		let state = buildTunerState(pitchForString('A', 40), createTunerState(), 13_000);
+		let state = buildTunerState(pitchForString('E_low', 40), createTunerState(), 13_000);
 
-		state = buildTunerState(pitchForString('A', 10), state, 13_016);
+		state = buildTunerState(pitchForString('E_low', 10), state, 13_016);
 
-		assert.equal(state.currentPitch?.note, 'A');
+		assert.equal(state.currentPitch?.note, 'E');
 		assert.equal(state.currentPitch?.cents, 30);
 		assert.equal(state.currentPitch?.centsLabel, '+30¢');
 		assert.equal(state.currentPitch?.needleAngleDegrees, 34);
