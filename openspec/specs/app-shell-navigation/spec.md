@@ -4,7 +4,7 @@
 TBD - created by archiving change implement-soundstage-v1. Update Purpose after archive.
 ## Requirements
 ### Requirement: Responsive app shell
-The system SHALL provide a responsive SoundStage shell using the handoff breakpoints: mobile at 720px and below, tablet from 721px through 1199px, and desktop at 1200px and above.
+The system SHALL provide a responsive SoundStage shell using the handoff breakpoints: mobile below 768px, tablet from 768px through 1199px, and desktop at 1200px and above.
 
 #### Scenario: Desktop navigation appears on the left
 - **WHEN** the viewport is at least 1200px wide
@@ -105,4 +105,3 @@ The desktop sidebar SHALL contain the SoundStage brand, nav items for Home, Tune
 #### Scenario: Sidebar item is active
 - **WHEN** the user is on a desktop tool route
 - **THEN** the corresponding sidebar item uses the active paper background and shadow styling
-

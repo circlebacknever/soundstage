@@ -9,8 +9,8 @@
 	<section class="home-screen" aria-labelledby="home-title">
 		<header class="home-header">
 			<div class="eyebrow">{WORDS.home.eyebrow}</div>
-			<h1 class="display-title" id="home-title" aria-label={WORDS.home.heading}>
-				{WORDS.home.headingLine1}<br />{WORDS.home.headingLine2}
+			<h1 class="display-title" id="home-title">
+				{WORDS.home.heading}
 			</h1>
 		</header>
 
@@ -58,13 +58,7 @@
 		padding: 22px;
 	}
 
-	@media (max-width: 720px) {
-		.home-grid {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-	}
-
-	@media (min-width: 721px) and (max-width: 1199px) {
+	@media (min-width: 768px) {
 		.home-grid {
 			gap: 16px;
 			grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -79,6 +73,10 @@
 		.home-grid {
 			gap: 16px;
 			grid-template-columns: repeat(5, minmax(0, 1fr));
+		}
+
+		.home-more {
+			display: none;
 		}
 	}
 </style>

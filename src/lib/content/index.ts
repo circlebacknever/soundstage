@@ -20,9 +20,7 @@ export const WORDS = {
 	},
 	home: {
 		eyebrow: 'Good afternoon',
-		heading: "What'll we practice today?",
-		headingLine1: "What'll we",
-		headingLine2: 'practice today?',
+		heading: "It's Practice time!",
 		toolsLabel: 'Practice tools',
 		moreSoon: 'More soon'
 	},
@@ -94,8 +92,10 @@ export const WORDS = {
 	},
 	tuner: {
 		title: 'Tuner',
-		auto: 'Auto',
+		mode: { auto: 'Auto', manual: 'Manual' },
 		readoutLabel: 'Tuner readout',
+		centsReadoutLabel: 'Cents off',
+		tuneActionLabel: 'Tuning action',
 		flatLabel: '♭ flat',
 		sharpLabel: 'sharp ♯',
 		standardTuning: 'Standard tuning',
@@ -111,12 +111,10 @@ export const WORDS = {
 			done: 'tuned'
 		},
 		allTunedAnnouncement: 'All six strings tuned',
-		guidance: {
-			waySharp: 'way sharp',
-			sharp: 'sharp',
-			inTune: 'in tune ✓',
-			flat: 'flat',
-			wayFlat: 'way flat'
+		tuneAction: {
+			tuneUp: 'Tune up',
+			tuneDown: 'Tune down',
+			inTune: 'In tune'
 		}
 	},
 	metronome: {

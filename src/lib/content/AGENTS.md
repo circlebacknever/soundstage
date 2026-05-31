@@ -10,7 +10,7 @@ Keep route paths, icon IDs, accent tokens, CSS tokens, numeric readouts, note le
 
 ## Naming
 
-Prefer names with controlled strangeness when they stay readable. `WORDS.tuner.guidance.sharp` is acceptable because it is vivid and precise. Flatter aliases such as `uiCopy`, `text`, `strings`, and `contentMap` are weaker because they hide the owner behind beige vocabulary.
+Prefer names with controlled strangeness when they stay readable. `WORDS.tuner.tuneAction.tuneDown` is acceptable because it is vivid and precise. Flatter aliases such as `uiCopy`, `text`, `strings`, and `contentMap` are weaker because they hide the owner behind beige vocabulary.
 
 Use this recipe when naming content structures:
 
@@ -22,7 +22,7 @@ Examples:
 
 - `WORDS.home.heading`
 - `WORDS.metronome.actions.start`
-- `WORDS.tuner.guidance.waySharp`
+- `WORDS.tuner.tuneAction.tuneUp`
 - `WORDS.microphone.errors.denied.title`
 
 Avoid grand machinery names such as `copyManagementService`, `textResourceMap`, `uiContentRegistry`, or `messageOrchestrator`. They imply a machine larger than the job. SoundStage names should feel like a competent person named the thing after looking directly at it.

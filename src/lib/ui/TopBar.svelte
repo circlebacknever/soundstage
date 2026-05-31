@@ -13,7 +13,7 @@
 		rightLabel?: string;
 		rightHref?: AppRoute;
 		rightOnclick?: () => void;
-		/** Renders a non-interactive status pill, such as the tuner Auto indicator. */
+		/** Renders a non-interactive status pill. */
 		rightBadge?: string;
 	};
 

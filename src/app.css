@@ -1,4 +1,3 @@
-/* Self-hosted variable fonts keep the app local-first and avoid external font requests. */
 @font-face {
 	font-family: 'Fraunces';
 	src: url('/fonts/fraunces-variable.woff2') format('woff2');
@@ -114,6 +113,7 @@ button {
 	font-size: var(--fs-eyebrow);
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
+	padding: 0 0 8px;
 }
 
 .display-title {
@@ -123,6 +123,7 @@ button {
 	letter-spacing: 0;
 	line-height: 1.05;
 	margin: 0;
+	padding: 0 0 16px;
 }
 
 .display-title em {
@@ -135,7 +136,7 @@ button {
 	font-size: var(--fs-caption);
 }
 
-@media (min-width: 721px) {
+@media (min-width: 768px) {
 	.display-title {
 		font-size: 56px;
 	}

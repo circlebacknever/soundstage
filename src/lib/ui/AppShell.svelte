@@ -34,7 +34,7 @@
 		padding: 32px 20px 48px;
 	}
 
-	@media (min-width: 721px) and (max-width: 1199px) {
+	@media (min-width: 768px) {
 		.app-main {
 			padding: 48px 36px 72px;
 		}

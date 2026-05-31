@@ -33,14 +33,14 @@ The app SHALL mirror exact v1 user-visible copy from OpenSpec through `src/lib/c
 - **THEN** those generated or structural values remain owned by their domain modules rather than the UI Copy Catalog
 
 ### Requirement: Breakpoints and layout frames
-The app SHALL use three responsive frames: mobile at 720px and below, tablet from 721px through 1199px, and desktop at 1200px and above.
+The app SHALL use three mobile-first responsive frames: mobile below 768px, tablet from 768px through 1199px, and desktop at 1200px and above.
 
 #### Scenario: Mobile frame
-- **WHEN** the viewport is 720px wide or narrower
+- **WHEN** the viewport is narrower than 768px
 - **THEN** screens use a single-column layout, microphone permission appears as a bottom sheet, and the desktop sidebar is hidden
 
 #### Scenario: Tablet frame
-- **WHEN** the viewport is between 721px and 1199px wide
+- **WHEN** the viewport is between 768px and 1199px wide
 - **THEN** screens use a single-column layout with more whitespace, microphone permission appears as a centered modal, and home uses a three-column tile grid
 
 #### Scenario: Desktop frame
@@ -144,4 +144,3 @@ The v1 app SHALL keep full chord detail screens, full ear-training screens, onbo
 #### Scenario: Out-of-scope route is opened
 - **WHEN** the user opens an out-of-scope area during v1
 - **THEN** the app presents either a placeholder or a scaled pattern from the existing design contract rather than inventing a complete new workflow
-

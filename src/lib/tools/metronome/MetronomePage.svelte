@@ -331,7 +331,7 @@
 		flex-direction: column;
 		gap: 28px;
 		justify-content: center;
-		min-height: 420px;
+		min-height: 380px;
 		padding: 24px;
 	}
 
@@ -346,12 +346,12 @@
 		box-shadow: 0 8px 28px oklch(0.86 0.14 85 / 0.5);
 		display: grid;
 		font-family: var(--font-display);
-		font-size: 64px;
+		font-size: 52px;
 		font-weight: 600;
-		height: 220px;
+		height: 170px;
 		justify-items: center;
 		position: relative;
-		width: 220px;
+		width: 170px;
 	}
 
 	.pulse::before,
@@ -609,19 +609,15 @@
 		}
 	}
 
-	@media (max-width: 720px) {
+	@media (min-width: 768px) {
 		.metro-stage {
-			min-height: 380px;
+			min-height: 420px;
 		}
 
 		.pulse {
-			font-size: 52px;
-			height: 170px;
-			width: 170px;
-		}
-
-		.mode-readout {
 			font-size: 64px;
+			height: 220px;
+			width: 220px;
 		}
 	}
 </style>

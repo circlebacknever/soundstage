@@ -167,7 +167,7 @@
 		width: 100%;
 	}
 
-	@media (min-width: 721px) {
+	@media (min-width: 768px) {
 		.microphone-prompt {
 			align-items: center;
 			padding: 32px;

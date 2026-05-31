@@ -31,9 +31,7 @@ describe('WORDS', () => {
 
 		assert.deepEqual(WORDS.home, {
 			eyebrow: 'Good afternoon',
-			heading: "What'll we practice today?",
-			headingLine1: "What'll we",
-			headingLine2: 'practice today?',
+			heading: "It's Practice time!",
 			toolsLabel: 'Practice tools',
 			moreSoon: 'More soon'
 		});
@@ -105,11 +103,13 @@ describe('WORDS', () => {
 		});
 	});
 
-	it('keeps tuner guidance, labels, and feedback exact', () => {
+	it('keeps tuner actions, labels, and feedback exact', () => {
 		assert.deepEqual(WORDS.tuner, {
 			title: 'Tuner',
-			auto: 'Auto',
+			mode: { auto: 'Auto', manual: 'Manual' },
 			readoutLabel: 'Tuner readout',
+			centsReadoutLabel: 'Cents off',
+			tuneActionLabel: 'Tuning action',
 			flatLabel: '♭ flat',
 			sharpLabel: 'sharp ♯',
 			standardTuning: 'Standard tuning',
@@ -125,12 +125,10 @@ describe('WORDS', () => {
 				done: 'tuned'
 			},
 			allTunedAnnouncement: 'All six strings tuned',
-			guidance: {
-				waySharp: 'way sharp',
-				sharp: 'sharp',
-				inTune: 'in tune ✓',
-				flat: 'flat',
-				wayFlat: 'way flat'
+			tuneAction: {
+				tuneUp: 'Tune up',
+				tuneDown: 'Tune down',
+				inTune: 'In tune'
 			}
 		});
 	});

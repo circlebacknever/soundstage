@@ -1,11 +1,25 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { describe, it } from 'vitest';
 
 const css = readFileSync(new URL('../../../app.css', import.meta.url), 'utf8');
+const srcRoot = new URL('../../../', import.meta.url);
 
 const componentSource = (path: string) =>
 	readFileSync(new URL(path, new URL('../', import.meta.url)), 'utf8');
+
+const cssAndSvelteSources = (directory: URL): string[] =>
+	readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+		const child = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, directory);
+
+		if (entry.isDirectory()) {
+			return entry.name === '__tests__' ? [] : cssAndSvelteSources(child);
+		}
+
+		return entry.name.endsWith('.css') || entry.name.endsWith('.svelte')
+			? [readFileSync(child, 'utf8')]
+			: [];
+	});
 
 describe('SoundStage global style contract', () => {
 	it('defines the exact v1 color, radius, and shadow tokens', () => {
@@ -76,6 +90,7 @@ describe('SoundStage global style contract', () => {
 		const sidebar = componentSource('./Sidebar.svelte');
 		const toolCanvas = componentSource('./ToolCanvas.svelte');
 
+		assert.match(appShell, /@media\s*\(min-width:\s*768px\)/);
 		assert.match(appShell, /@media\s*\(min-width:\s*1200px\)/);
 		assert.match(appShell, /grid-template-columns:\s*220px 1fr/);
 		assert.match(sidebar, /\.app-sidebar/);
@@ -88,16 +103,32 @@ describe('SoundStage global style contract', () => {
 		const homePage = componentSource('../tools/home/HomePage.svelte');
 		const launcherTile = componentSource('./LauncherTile.svelte');
 
-		assert.match(homePage, /@media\s*\(max-width:\s*720px\)/);
-		assert.match(homePage, /@media\s*\(min-width:\s*721px\)\s*and\s*\(max-width:\s*1199px\)/);
+		assert.match(homePage, /@media\s*\(min-width:\s*768px\)/);
 		assert.match(homePage, /@media\s*\(min-width:\s*1200px\)/);
 		assert.match(homePage, /<ToolCanvas size="launcher">/);
 		assert.match(homePage, /grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
 		assert.match(homePage, /grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
 		assert.match(homePage, /grid-template-columns:\s*repeat\(5, minmax\(0, 1fr\)\)/);
+		assert.match(
+			homePage,
+			/@media\s*\(min-width:\s*768px\)[\s\S]*?\.home-more\s*{[\s\S]*?display:\s*flex/
+		);
+		assert.match(
+			homePage,
+			/@media\s*\(min-width:\s*1200px\)[\s\S]*?\.home-more\s*{[\s\S]*?display:\s*none/
+		);
 		assert.match(launcherTile, /aspect-ratio:\s*4\s*\/\s*5/);
 		assert.match(launcherTile, /\.launcher-tile__body\s*{[\s\S]*min-width:\s*0/);
+		assert.match(launcherTile, /@media\s*\(min-width:\s*768px\)[\s\S]*font-size:\s*24px/);
 		assert.match(launcherTile, /@media\s*\(min-width:\s*1200px\)[\s\S]*font-size:\s*20px/);
+	});
+
+	it('uses mobile-first media queries in runtime styles', () => {
+		const runtimeStyles = cssAndSvelteSources(srcRoot).join('\n');
+
+		assert.doesNotMatch(runtimeStyles, /@media[^{]*max-width/);
+		assert.doesNotMatch(runtimeStyles, /@media[^{]*\)\s*and\s*\(/);
+		assert.doesNotMatch(runtimeStyles, /@media[^{]*(?:720px|721px|1199px)/);
 	});
 
 	it('uses shared tool chrome for live scale practice status', () => {

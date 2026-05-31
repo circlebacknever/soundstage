@@ -18,6 +18,10 @@ The system SHALL implement pitch detection in first-party TypeScript without imp
 - **WHEN** Tuner and Scale Practice need pitch information
 - **THEN** both tools consume the same first-party detector output rather than separate pitch algorithms
 
+#### Scenario: Shared live-guitar profile feeds tools
+- **WHEN** Tuner and Scale Practice listen to a guitar through the microphone
+- **THEN** both tools use the same live-guitar detector profile for quiet-input and stable-pitch gating
+
 ### Requirement: Teaching-oriented algorithm stages
 The pitch detection implementation SHALL be organized so a maintainer can learn each stage of the algorithm from the code, tests, and implementation notes.
 
@@ -102,4 +106,3 @@ The v1 detector SHALL use confidence gates, moving windows, and hysteresis for s
 #### Scenario: Smoothing implementation is inspected
 - **WHEN** the smoothing code is reviewed
 - **THEN** it contains no Kalman filter implementation
-

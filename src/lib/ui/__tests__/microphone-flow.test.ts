@@ -17,6 +17,10 @@ describe('microphone flow UI contract', () => {
 			indexSource,
 			/export \{ default as MicrophoneErrorState \} from '\.\/MicrophoneErrorState\.svelte';/
 		);
+		assert.match(
+			indexSource,
+			/export \{ default as MicrophoneDebugPanel \} from '\.\/MicrophoneDebugPanel\.svelte';/
+		);
 	});
 
 	it('builds the microphone pre-prompt as a mobile sheet and larger-screen modal', () => {
@@ -31,7 +35,7 @@ describe('microphone flow UI contract', () => {
 		assert.match(source, /border-radius:\s*24px 24px 0 0/);
 		assert.match(source, /--microphone-illustration-size:\s*80px/);
 		assert.match(source, /backdrop-filter:\s*grayscale\(1\)/);
-		assert.match(source, /@media\s*\(min-width:\s*721px\)/);
+		assert.match(source, /@media\s*\(min-width:\s*768px\)/);
 		assert.match(source, /background:\s*rgba\(31, 27, 23, 0\.45\)/);
 		assert.match(source, /backdrop-filter:\s*blur\(3px\)/);
 		assert.match(source, /max-width:\s*440px/);

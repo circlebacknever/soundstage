@@ -68,6 +68,10 @@ The system SHALL provide `/scales/practice` for microphone-based scale progressi
 - **WHEN** the user starts practice and microphone access is granted
 - **THEN** the app navigates to live practice, starts pitch detection, and displays the next-note card
 
+#### Scenario: Live guitar profile is used
+- **WHEN** scale practice is listening through the microphone
+- **THEN** it uses the shared live-guitar pitch profile so quiet unplugged guitar notes can pass input-level and stable-note gating
+
 #### Scenario: Next-note card renders
 - **WHEN** live practice is displayed
 - **THEN** the app shows a `--coral-soft` card with 24px padding and `--r-md` corners, eyebrow "Next note", a 60px Fraunces 600 next-note letter in `--coral-ink`, progress text such as "3 / 7" in 12px mono, and a 120px by 6px progress bar with `--paper` track and `--coral` fill
@@ -115,4 +119,3 @@ The scale practicer SHALL track expected scale sequences for the selected scale 
 #### Scenario: G major sequence
 - **WHEN** the user selects G major for practice
 - **THEN** the expected ascending sequence is G, A, B, C, D, E, F#, G
-
