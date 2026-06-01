@@ -19,7 +19,11 @@ export const WORDS = {
 		}
 	},
 	home: {
-		eyebrow: 'Good afternoon',
+		greetings: {
+			morning: 'Good morning',
+			afternoon: 'Good afternoon',
+			evening: 'Good evening'
+		},
 		heading: "It's Practice time!",
 		toolsLabel: 'Practice tools',
 		moreSoon: 'More soon'

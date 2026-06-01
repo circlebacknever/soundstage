@@ -3,12 +3,15 @@
 	import { WORDS } from '$lib/content';
 	import LauncherTile from '$lib/ui/LauncherTile.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
+	import { currentGreeting } from './greeting';
+
+	const greeting = currentGreeting();
 </script>
 
 <ToolCanvas size="launcher">
 	<section class="home-screen" aria-labelledby="home-title">
 		<header class="home-header">
-			<div class="eyebrow">{WORDS.home.eyebrow}</div>
+			<div class="eyebrow">{greeting}</div>
 			<h1 class="display-title" id="home-title">
 				{WORDS.home.heading}
 			</h1>
