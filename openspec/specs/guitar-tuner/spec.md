@@ -53,9 +53,13 @@ The tuner SHALL display the handoff circular arc gauge, needle, flat/sharp label
 - **WHEN** consecutive usable pitch estimates are for the same standard string
 - **THEN** the tuner dampens the cents and needle movement so the readout remains legible while the string rings
 
-#### Scenario: Readout names the played note but measures against the target
-- **WHEN** the detector reports a usable pitch while a string is the active tuning target
-- **THEN** the large note letter names the nearest chromatic note actually played (rolling over, for example E to F, once the pitch passes the halfway point), while the cents, needle, and tuning action are all measured against the active string
+#### Scenario: Readout holds the active string's letter near the target
+- **WHEN** the detector reports a usable pitch within 150 cents of the active tuning target
+- **THEN** the large note letter shows the active string's note, so the loud, pitch-sharp pluck attack of a heavy string does not roll the letter to a neighbour, while the cents, needle, and tuning action are all measured against the active string
+
+#### Scenario: Readout names the detected note far from the target
+- **WHEN** the detector reports a usable pitch more than 150 cents from the active tuning target
+- **THEN** the large note letter names the nearest chromatic note actually played, since the player is closer to a different note, while the cents, needle, and tuning action remain measured against the active string
 
 #### Scenario: A different note never reads as in tune for the target
 - **WHEN** the player sounds a note away from the active string, including a perfectly tuned but wrong note such as F# while tuning low E

@@ -1,4 +1,8 @@
 import { browser } from '$app/environment';
+import {
+	microphonePitchDiagnosticFromFrame,
+	type MicrophonePitchDiagnostic
+} from './microphone-diagnostics.ts';
 import { createMicrophonePitchSource, type MicrophonePitchSource } from './microphone-analyser.ts';
 import { buildMicrophoneInputState, type MicrophoneInputState } from './microphone-input-state.ts';
 import {
@@ -28,6 +32,8 @@ export type MicrophonePitchSessionOptions = {
 	stablePitchOptions?: StablePitchOptions;
 	/** Folds each frame's smoothed pitch (or undefined while unsettled) into page state. */
 	onFrame: (pitch: AcceptedPitchEstimate | undefined, observedAtMs: number) => void;
+	/** Optional live detector facts for local tuning experiments and developer diagnostics. */
+	onDiagnostic?: (diagnostic: MicrophonePitchDiagnostic) => void;
 	/** Persists the permission outcome; injected so the session stays free of `state`. */
 	onConsent?: (consent: MicrophoneConsent) => void;
 };
@@ -100,6 +106,7 @@ export function createMicrophonePitchSession(
 				stablePitchOptions: options.stablePitchOptions
 			});
 			stablePitch = frame.stable;
+			options.onDiagnostic?.(microphonePitchDiagnosticFromFrame(frame));
 			options.onFrame(frame.stable.output.ok ? frame.stable.output.pitch : undefined, observedAtMs);
 			animationFrameId = requestAnimationFrame(readNextFrame);
 		};

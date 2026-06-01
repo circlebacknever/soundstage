@@ -5,6 +5,7 @@ export { default as Chip } from './Chip.svelte';
 export { default as PlannedToolPlaceholder } from './PlannedToolPlaceholder.svelte';
 export { default as Fretboard } from './Fretboard.svelte';
 export { default as LauncherTile } from './LauncherTile.svelte';
+export { default as MicrophoneDebugPanel } from './MicrophoneDebugPanel.svelte';
 export { default as MicrophoneErrorState } from './MicrophoneErrorState.svelte';
 export { default as MicrophonePrePrompt } from './MicrophonePrePrompt.svelte';
 export { default as ModalFrame } from './ModalFrame.svelte';

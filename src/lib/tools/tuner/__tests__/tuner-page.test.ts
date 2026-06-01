@@ -44,9 +44,12 @@ function mintZoneHalfAngleDegrees() {
 describe('tuner page boundary', () => {
 	it('drives the tuner through the shared mic session and tuner-state boundaries', () => {
 		assert.match(page, /createMicrophonePitchSession/);
+		assert.match(page, /MicrophoneDebugPanel/);
 		assert.match(page, /createTunerState/);
 		assert.match(page, /buildTunerState/);
 		assert.match(page, /selectTunerString/);
+		assert.match(page, /toggleTunerMode/);
+		assert.match(page, /onDiagnostic/);
 		// The live-mic machinery (permission handshake, pitch source, frame loop, input
 		// timers) now lives behind the session, so the page must not re-own any of it.
 		assert.doesNotMatch(
@@ -55,14 +58,26 @@ describe('tuner page boundary', () => {
 		);
 	});
 
+	it('renders live microphone diagnostics only in development', () => {
+		assert.match(page, /import \{ dev \} from '\$app\/environment';/);
+		assert.match(page, /\{#if dev\}/);
+		assert.match(page, /<MicrophoneDebugPanel[\s\S]*diagnostic=\{micDiagnostic\}/);
+	});
+
 	it('keeps the readout steady with forgiving detector options and hides the idle needle', () => {
-		assert.match(page, /pitchOptions: TUNER_PITCH_OPTIONS/);
-		assert.match(page, /stablePitchOptions: TUNER_STABLE_PITCH_OPTIONS/);
-		assert.match(page, /quietThreshold/);
-		assert.match(page, /maxUnstableEstimates/);
+		assert.match(page, /pitchOptions: LIVE_GUITAR_PITCH_OPTIONS/);
+		assert.match(page, /stablePitchOptions: LIVE_GUITAR_STABLE_PITCH_OPTIONS/);
 		// The needle only renders when there's a reading, so a resting needle never
 		// sits in the green in-tune zone implying the string is tuned.
 		assert.match(page, /\{#if currentPitch\}[\s\S]*class="needle"/);
+	});
+
+	it('renders auto and manual as an interactive top-bar mode control', () => {
+		assert.match(page, /modeLabel/);
+		assert.match(page, /WORDS\.tuner\.mode\[tuner\.mode\]/);
+		assert.match(page, /rightLabel=\{modeLabel\}/);
+		assert.match(page, /rightOnclick=\{toggleMode\}/);
+		assert.doesNotMatch(page, /rightBadge=\{WORDS\.tuner\.auto\}/);
 	});
 
 	it('gates the tuner through the shared mic setting when it is turned off', () => {
@@ -82,21 +97,25 @@ describe('tuner page boundary', () => {
 		assert.doesNotMatch(page, /kind="silent"|kind="noisy"|MicrophoneHint/);
 	});
 
-	it('renders dynamic string progress, pitch guidance, and needle angle from tuner state', () => {
+	it('renders dynamic string progress, fixed readout pills, and needle angle from tuner state', () => {
 		assert.match(page, /{#each tuner\.strings as string \(string\.id\)}/);
 		assert.match(page, /onclick=\{\(\) => selectString\(string\.id\)\}/);
 		assert.match(page, /aria-pressed=\{string\.status === 'active'\}/);
 		assert.match(page, /class:is-done=\{string\.status === 'done'\}/);
 		assert.match(page, /class:is-active=\{string\.status === 'active'\}/);
 		assert.match(page, /currentPitch\?\.centsLabel/);
-		assert.match(page, /WORDS\.tuner\.guidance\[currentPitch\.guidance\]/);
+		assert.match(page, /readout-pill readout-pill--cents/);
+		assert.match(page, /readout-pill readout-pill--action/);
+		assert.match(page, /WORDS\.tuner\.centsReadoutLabel/);
+		assert.match(page, /WORDS\.tuner\.tuneActionLabel/);
+		assert.match(page, /WORDS\.tuner\.tuneAction\[currentPitch\.tuneAction\]/);
 		assert.match(page, /WORDS\.tuner\.listening/);
 		assert.match(page, /needleAngleDegrees/);
 		assert.match(page, /transform-box:\s*view-box/);
 		assert.match(page, /transform-origin:\s*130px 140px/);
 		assert.doesNotMatch(page, /class="string-chip is-done"/);
 		assert.doesNotMatch(page, /\+8¢/);
-		assert.doesNotMatch(page, /: WORDS\.tuner\.guidance\.inTune/);
+		assert.doesNotMatch(page, /note-sub|WORDS\.tuner\.guidance|currentPitch\.guidance/);
 	});
 
 	it('keeps the in-tune needle swing inside the gauge mint zone', () => {

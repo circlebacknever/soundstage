@@ -17,6 +17,8 @@ export type FrequencyEstimateResult =
 export type PitchEstimateOptions = {
 	quietThreshold?: number;
 	concertA?: number;
+	minimumFrequency?: number;
+	maximumFrequency?: number;
 };
 
 export type PitchEstimateResult =
@@ -50,11 +52,21 @@ const DEFAULT_QUIET_THRESHOLD = 0.02;
 
 function estimateFrequencyWithConfidence(
 	samples: Float32Array,
-	sampleRate: number
+	sampleRate: number,
+	{ minimumFrequency, maximumFrequency }: PitchEstimateOptions = {}
 ): FrequencyMatchResult {
 	assertFinitePositive(sampleRate, 'sampleRate');
+	if (minimumFrequency !== undefined) {
+		assertFinitePositive(minimumFrequency, 'minimumFrequency');
+	}
+	if (maximumFrequency !== undefined) {
+		assertFinitePositive(maximumFrequency, 'maximumFrequency');
+	}
 
-	const period = estimatePeriodMatch(samples);
+	const period = estimatePeriodMatch(samples, {
+		minPeriodLength: maximumFrequency === undefined ? undefined : sampleRate / maximumFrequency,
+		maxPeriodLength: minimumFrequency === undefined ? undefined : sampleRate / minimumFrequency
+	});
 
 	if (!period.ok) {
 		return period;
@@ -93,7 +105,12 @@ export function estimateFrequency(
 export function estimatePitch(
 	samples: Float32Array,
 	sampleRate: number,
-	{ quietThreshold = DEFAULT_QUIET_THRESHOLD, concertA = 440 }: PitchEstimateOptions = {}
+	{
+		quietThreshold = DEFAULT_QUIET_THRESHOLD,
+		concertA = 440,
+		minimumFrequency,
+		maximumFrequency
+	}: PitchEstimateOptions = {}
 ): PitchEstimateResult {
 	const inputLevel = evaluateInputLevel(samples, { quietThreshold });
 
@@ -101,7 +118,10 @@ export function estimatePitch(
 		return inputLevel;
 	}
 
-	const frequency = estimateFrequencyWithConfidence(samples, sampleRate);
+	const frequency = estimateFrequencyWithConfidence(samples, sampleRate, {
+		minimumFrequency,
+		maximumFrequency
+	});
 
 	if (!frequency.ok) {
 		if (frequency.reason === 'not-enough-cycles') {

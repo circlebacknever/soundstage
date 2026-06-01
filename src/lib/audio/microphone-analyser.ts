@@ -12,8 +12,10 @@ export type MediaStreamAudioSourceLike = {
 
 export type AudioContextLike = {
 	sampleRate: number;
+	state?: AudioContextState;
 	createMediaStreamSource(stream: MediaStream): MediaStreamAudioSourceLike;
 	createAnalyser(): TimeDomainAnalyser;
+	resume?(): Promise<void> | void;
 	close(): Promise<void> | void;
 };
 
@@ -33,6 +35,12 @@ type AudioContextGlobal = typeof globalThis & {
 	webkitAudioContext?: typeof AudioContext;
 };
 
+// At 44.1–48 kHz this window is ~85–93ms, which holds roughly seven cycles of the
+// low E (~82 Hz) — enough repetition for a confident period — while staying short
+// enough that the readout still updates per animation frame. It also caps the
+// O(n²) period scan, whose cost grows with the square of this size.
+const LIVE_PITCH_ANALYSER_FFT_SIZE = 4096;
+
 function createBrowserAudioContext(): AudioContextLike {
 	const audioGlobal = globalThis as AudioContextGlobal;
 	const AudioContextConstructor = audioGlobal.AudioContext ?? audioGlobal.webkitAudioContext;
@@ -44,7 +52,12 @@ function createBrowserAudioContext(): AudioContextLike {
 	const context = new AudioContextConstructor();
 
 	return {
-		sampleRate: context.sampleRate,
+		get sampleRate() {
+			return context.sampleRate;
+		},
+		get state() {
+			return context.state;
+		},
 		createMediaStreamSource(stream: MediaStream): MediaStreamAudioSourceLike {
 			const source = context.createMediaStreamSource(stream);
 
@@ -60,10 +73,24 @@ function createBrowserAudioContext(): AudioContextLike {
 		createAnalyser() {
 			return context.createAnalyser();
 		},
+		resume() {
+			return context.resume();
+		},
 		close() {
 			return context.close();
 		}
 	};
+}
+
+function wakeAudioContext(audioContext: AudioContextLike) {
+	if (audioContext.state !== 'suspended') {
+		return;
+	}
+
+	// Best-effort wake: a context that can't resume yet (no user gesture) stays
+	// suspended and resumes on the next gesture, so a rejected resume is recoverable
+	// and not worth surfacing.
+	void Promise.resolve(audioContext.resume?.()).catch(() => undefined);
 }
 
 /**
@@ -74,8 +101,11 @@ export function createMicrophonePitchSource({
 	stream,
 	audioContext = createBrowserAudioContext()
 }: CreateMicrophonePitchSourceOptions): MicrophonePitchSource {
+	wakeAudioContext(audioContext);
+
 	const source = audioContext.createMediaStreamSource(stream);
 	const analyser = audioContext.createAnalyser();
+	analyser.fftSize = LIVE_PITCH_ANALYSER_FFT_SIZE;
 
 	source.connect(analyser);
 

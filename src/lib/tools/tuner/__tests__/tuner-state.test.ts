@@ -5,8 +5,9 @@ import { nearestNoteFromFrequency, STANDARD_GUITAR_TUNING, type GuitarStringId }
 import {
 	buildTunerState,
 	createTunerState,
-	guidanceBandForCents,
+	tuneActionForCents,
 	selectTunerString,
+	toggleTunerMode,
 	TUNER_COMPLETION_FEEDBACK_MS,
 	TUNER_HOLD_MS,
 	TUNER_PITCH_HOLD_MS,
@@ -40,21 +41,19 @@ function statusByString(state: TunerState) {
 }
 
 describe('tuner state', () => {
-	it('classifies cents offsets into the five tuner guidance bands', () => {
-		assert.equal(guidanceBandForCents(-25), 'wayFlat');
-		assert.equal(guidanceBandForCents(-24), 'flat');
-		assert.equal(guidanceBandForCents(-6), 'flat');
-		assert.equal(guidanceBandForCents(-5), 'inTune');
-		assert.equal(guidanceBandForCents(5), 'inTune');
-		assert.equal(guidanceBandForCents(6), 'sharp');
-		assert.equal(guidanceBandForCents(24), 'sharp');
-		assert.equal(guidanceBandForCents(25), 'waySharp');
+	it('turns cents offsets into the tuning action the player should take', () => {
+		assert.equal(tuneActionForCents(-6), 'tuneUp');
+		assert.equal(tuneActionForCents(-5), 'inTune');
+		assert.equal(tuneActionForCents(0), 'inTune');
+		assert.equal(tuneActionForCents(5), 'inTune');
+		assert.equal(tuneActionForCents(6), 'tuneDown');
 	});
 
 	it('starts on low E with untouched strings waiting their turn', () => {
 		const state = createTunerState();
 
 		assert.equal(state.activeString, 'E_low');
+		assert.equal(state.mode, 'auto');
 		assert.equal(state.feedback, 'idle');
 		assert.deepEqual(statusByString(state), {
 			E_low: 'active',
@@ -66,12 +65,28 @@ describe('tuner state', () => {
 		});
 	});
 
+	it('toggles between auto and manual tuning without losing the selected string', () => {
+		let state = createTunerState();
+
+		state = selectTunerString(state, 'D');
+		state = toggleTunerMode(state);
+
+		assert.equal(state.mode, 'manual');
+		assert.equal(state.activeString, 'D');
+		assert.equal(state.currentPitch, undefined);
+
+		state = toggleTunerMode(state);
+
+		assert.equal(state.mode, 'auto');
+		assert.equal(state.activeString, 'D');
+	});
+
 	it('advances the active string after it remains within five cents for 800ms', () => {
 		let state = createTunerState();
 
 		state = buildTunerState(pitchForString('E_low', 5), state, 1_000);
 		assert.equal(state.activeString, 'E_low');
-		assert.equal(state.currentPitch?.guidance, 'inTune');
+		assert.equal(state.currentPitch?.tuneAction, 'inTune');
 
 		state = buildTunerState(pitchForString('E_low', 5), state, 1_000 + TUNER_HOLD_MS - 1);
 		assert.equal(state.activeString, 'E_low');
@@ -84,6 +99,19 @@ describe('tuner state', () => {
 		assert.equal(statusByString(state).A, 'active');
 	});
 
+	it('keeps the active string selected in manual mode after it is held in tune', () => {
+		let state = toggleTunerMode(createTunerState());
+
+		state = buildTunerState(pitchForString('E_low'), state, 1_000);
+		state = buildTunerState(pitchForString('E_low'), state, 1_000 + TUNER_HOLD_MS);
+
+		assert.equal(state.mode, 'manual');
+		assert.equal(state.activeString, 'E_low');
+		assert.equal(statusByString(state).E_low, 'active');
+		assert.equal(statusByString(state).A, 'untouched');
+		assert.equal(state.currentPitch?.tuneAction, 'inTune');
+	});
+
 	it('resets the hold timer when the active string leaves the in-tune window', () => {
 		let state = createTunerState();
 
@@ -92,7 +120,7 @@ describe('tuner state', () => {
 		state = buildTunerState(pitchForString('E_low', 0), state, 2_800);
 
 		assert.equal(state.activeString, 'E_low');
-		assert.equal(state.currentPitch?.guidance, 'inTune');
+		assert.equal(state.currentPitch?.tuneAction, 'inTune');
 
 		state = buildTunerState(pitchForString('E_low', 0), state, 2_800 + TUNER_HOLD_MS);
 		assert.equal(state.activeString, 'A');
@@ -136,21 +164,21 @@ describe('tuner state', () => {
 		assert.equal(state.currentPitch?.note, 'E');
 		assert.equal(state.currentPitch?.cents, 24);
 		assert.equal(state.currentPitch?.centsLabel, '+24¢');
-		assert.equal(state.currentPitch?.guidance, 'sharp');
+		assert.equal(state.currentPitch?.tuneAction, 'tuneDown');
 		assert.equal(state.currentPitch?.targetString, 'E_low');
 		assert.equal(state.currentPitch?.needleAngleDegrees, 28);
 	});
 
-	it('measures a wrong note against the active string instead of advancing', () => {
+	it('measures a wrong note against the active string and keeps that string active', () => {
 		let state = createTunerState();
 
 		// Playing the open A string while low E is active: the letter still names what is played,
-		// but the gauge reads way sharp of E, and the cents number drops out once past ±50.
+		// while the readout keeps showing how far that pitch is from the low-E target.
 		state = buildTunerState(pitchForString('A'), state, 10_000);
 
 		assert.equal(state.currentPitch?.note, 'A');
-		assert.equal(state.currentPitch?.guidance, 'waySharp');
-		assert.equal(state.currentPitch?.centsLabel, '');
+		assert.equal(state.currentPitch?.tuneAction, 'tuneDown');
+		assert.equal(state.currentPitch?.centsLabel, '+500¢');
 		assert.equal(state.currentPitch?.targetString, 'E_low');
 		assert.ok((state.currentPitch?.cents ?? 0) > 50);
 		assert.equal(state.activeString, 'E_low');
@@ -175,21 +203,34 @@ describe('tuner state', () => {
 		assert.equal(state.currentPitch?.note, 'E');
 		assert.equal(state.currentPitch?.cents, -12);
 		assert.equal(state.currentPitch?.centsLabel, '-12¢');
-		assert.equal(state.currentPitch?.guidance, 'flat');
+		assert.equal(state.currentPitch?.tuneAction, 'tuneUp');
 		assert.equal(state.currentPitch?.targetString, 'E_low');
 		assert.equal(state.currentPitch?.needleAngleDegrees, -14);
 	});
 
-	it('rolls the note letter past fifty cents while the gauge stays relative to the target', () => {
-		// 60 cents above low E is closer to F, so the letter reads F — but the gauge still measures
-		// against E (way sharp), with the cents number dropped since the letter has rolled over.
+	it('keeps the active string letter within the readout band while cents stay relative', () => {
+		// 60 cents sharp of low E is well inside the ±150-cent readout band, so the big
+		// letter stays E (the string being tuned) rather than rolling to F. The gauge and
+		// cents still measure the full offset against E.
 		const state = buildTunerState(pitchForString('E_low', 60), createTunerState(), 16_000);
 
-		assert.equal(state.currentPitch?.note, 'F');
-		assert.equal(state.currentPitch?.centsLabel, '');
-		assert.equal(state.currentPitch?.guidance, 'waySharp');
+		assert.equal(state.currentPitch?.note, 'E');
+		assert.equal(state.currentPitch?.centsLabel, '+60¢');
+		assert.equal(state.currentPitch?.tuneAction, 'tuneDown');
 		assert.equal(state.activeString, 'E_low');
 		assert.equal(statusByString(state).E_low, 'active');
+	});
+
+	it('shows the detected note once the pitch leaves the active string readout band', () => {
+		// 300 cents sharp of low E is a G, past the ±150-cent band — far enough that the
+		// player is on a different note (a wrong string), so the letter reads the detected
+		// note while the cents still point all the way back to the active E.
+		const state = buildTunerState(pitchForString('E_low', 300), createTunerState(), 16_000);
+
+		assert.equal(state.currentPitch?.note, 'G');
+		assert.equal(state.currentPitch?.centsLabel, '+300¢');
+		assert.equal(state.currentPitch?.tuneAction, 'tuneDown');
+		assert.equal(state.activeString, 'E_low');
 	});
 
 	it('holds the last readable pitch through brief detector dropouts', () => {
@@ -201,7 +242,7 @@ describe('tuner state', () => {
 
 		assert.equal(state.currentPitch?.note, 'E');
 		assert.equal(state.currentPitch?.centsLabel, '+11¢');
-		assert.equal(state.currentPitch?.guidance, 'sharp');
+		assert.equal(state.currentPitch?.tuneAction, 'tuneDown');
 
 		state = buildTunerState(undefined, state, 11_000 + TUNER_PITCH_HOLD_MS);
 
@@ -227,6 +268,7 @@ describe('tuner state', () => {
 		assert.equal(state.currentPitch?.note, 'E');
 		assert.equal(state.currentPitch?.cents, 30);
 		assert.equal(state.currentPitch?.centsLabel, '+30¢');
+		assert.equal(state.currentPitch?.tuneAction, 'tuneDown');
 		assert.equal(state.currentPitch?.needleAngleDegrees, 34);
 	});
 

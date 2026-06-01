@@ -35,6 +35,8 @@ class FakeAnalyser {
 
 class FakeAudioContext implements AudioContextLike {
 	sampleRate: number;
+	state: AudioContextState = 'running';
+	resumeCount = 0;
 	source = new FakeMediaStreamAudioSource();
 	analyser: FakeAnalyser;
 	closed = false;
@@ -50,6 +52,11 @@ class FakeAudioContext implements AudioContextLike {
 
 	createAnalyser() {
 		return this.analyser;
+	}
+
+	async resume() {
+		this.resumeCount += 1;
+		this.state = 'running';
 	}
 
 	async close() {
@@ -80,10 +87,13 @@ function fakeStream() {
 
 describe('microphone analyser wrapper', () => {
 	it('builds the microphone source to analyser graph and reads pitch frames', () => {
+		// createMicrophonePitchSource forces analyser.fftSize to 4096, so the fake must
+		// hand back a full 4096-sample window — a shorter buffer reads as a tone padded
+		// with zeros and mis-detects.
 		const a4 = generateSineWave({
 			frequency: 440,
 			sampleRate: 44_000,
-			sampleCount: 800
+			sampleCount: 4096
 		});
 		const { stream } = fakeStream();
 		const audioContext = new FakeAudioContext(a4.samples, a4.sampleRate);
@@ -94,6 +104,7 @@ describe('microphone analyser wrapper', () => {
 		});
 
 		assert.equal(audioContext.source.connectedTo, audioContext.analyser);
+		assert.equal(audioContext.resumeCount, 0);
 
 		const frame = source.readPitchFrame({
 			stablePitchOptions: {
@@ -110,6 +121,25 @@ describe('microphone analyser wrapper', () => {
 			assert.equal(frame.pitch.note.label, 'A4');
 			assert.equal(frame.stable.output.pitch.note.label, 'A4');
 		}
+	});
+
+	it('wakes a suspended audio context before reading live guitar input', () => {
+		const a4 = generateSineWave({
+			frequency: 440,
+			sampleRate: 44_000,
+			sampleCount: 800
+		});
+		const { stream } = fakeStream();
+		const audioContext = new FakeAudioContext(a4.samples, a4.sampleRate);
+		audioContext.state = 'suspended';
+
+		createMicrophonePitchSource({
+			stream,
+			audioContext
+		});
+
+		assert.equal(audioContext.resumeCount, 1);
+		assert.equal(audioContext.state, 'running');
 	});
 
 	it('stops microphone tracks, disconnects the source, and closes the audio context', async () => {

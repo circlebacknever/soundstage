@@ -40,11 +40,14 @@ describe('audio frequency estimation', () => {
 			sampleCount: 32
 		});
 
-		assert.deepEqual(estimateFrequency(oneHertz.samples, oneHertz.sampleRate), {
-			ok: true,
-			reason: 'frequency-detected',
-			frequency: 1
-		});
+		// Parabolic interpolation lands the period between samples, so the one-hertz
+		// tone reads as ~1 rather than exactly 1.
+		const detectedOneHertz = estimateFrequency(oneHertz.samples, oneHertz.sampleRate);
+		assert.equal(detectedOneHertz.ok, true);
+		if (detectedOneHertz.ok) {
+			assert.equal(detectedOneHertz.reason, 'frequency-detected');
+			assertApproximately(detectedOneHertz.frequency, 1, 0.01);
+		}
 	});
 
 	it('keeps period rejection reasons when frequency cannot be estimated', () => {

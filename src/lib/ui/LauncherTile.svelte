@@ -105,7 +105,7 @@
 		grid-column: 1 / -1;
 	}
 
-	@media (min-width: 721px) {
+	@media (min-width: 768px) {
 		.launcher-tile {
 			padding: 22px;
 		}

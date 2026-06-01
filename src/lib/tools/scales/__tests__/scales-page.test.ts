@@ -31,10 +31,16 @@ describe('scale setup page boundary', () => {
 describe('scale practice page boundary', () => {
 	it('drives practice through the shared mic session and practice-state boundaries', () => {
 		assert.match(practicePage, /createMicrophonePitchSession/);
+		assert.match(practicePage, /MicrophoneDebugPanel/);
+		assert.match(practicePage, /LIVE_GUITAR_PITCH_OPTIONS/);
+		assert.match(practicePage, /LIVE_GUITAR_STABLE_PITCH_OPTIONS/);
 		assert.match(practicePage, /createScalePracticeState/);
 		assert.match(practicePage, /buildScalePracticeState/);
 		assert.match(practicePage, /restartScalePractice/);
 		assert.match(practicePage, /loadScalePreferences/);
+		assert.match(practicePage, /pitchOptions: LIVE_GUITAR_PITCH_OPTIONS/);
+		assert.match(practicePage, /stablePitchOptions: LIVE_GUITAR_STABLE_PITCH_OPTIONS/);
+		assert.match(practicePage, /onDiagnostic/);
 		// The live-mic machinery (permission handshake, pitch source, frame loop, input
 		// timers) now lives behind the session, so the page must not re-own any of it.
 		assert.doesNotMatch(
@@ -43,6 +49,12 @@ describe('scale practice page boundary', () => {
 		);
 		// Scale formulas stay in the music module; the page never recomputes them.
 		assert.doesNotMatch(practicePage, /buildScaleSequence|buildScaleFretboard|SCALE_INTERVALS/);
+	});
+
+	it('renders live microphone diagnostics only in development', () => {
+		assert.match(practicePage, /import \{ dev \} from '\$app\/environment';/);
+		assert.match(practicePage, /\{#if dev\}/);
+		assert.match(practicePage, /<MicrophoneDebugPanel[\s\S]*diagnostic=\{micDiagnostic\}/);
 	});
 
 	it('gates scale practice through the shared mic setting when it is turned off', () => {

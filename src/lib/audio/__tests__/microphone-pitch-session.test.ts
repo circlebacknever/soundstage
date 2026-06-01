@@ -25,6 +25,8 @@ describe('microphone pitch session boundary', () => {
 	it('exposes input state and a prompt flag without owning page domain state', () => {
 		assert.match(session, /get inputState\(\)/);
 		assert.match(session, /get showPrompt\(\)/);
+		assert.match(session, /onDiagnostic/);
+		assert.match(session, /microphonePitchDiagnosticFromFrame/);
 		// The per-frame fold is injected by the page, so the session stays tool-agnostic.
 		assert.doesNotMatch(session, /buildTunerState|buildScalePracticeState/);
 	});

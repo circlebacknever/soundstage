@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { nearestNoteFromFrequency } from '../../music/index.ts';
+import { LIVE_GUITAR_STABLE_PITCH_OPTIONS } from '../index.ts';
+import { frequencyForMidiNote, nearestNoteFromFrequency } from '../../music/index.ts';
 import {
 	buildStablePitchState,
 	createStablePitchState,
@@ -25,6 +26,10 @@ function pitch(frequency: number): Extract<PitchEstimateResult, { ok: true }> {
 		confidence: 0.98,
 		note: nearestNoteFromFrequency(frequency)
 	};
+}
+
+function pitchAtCents(midi: number, cents: number): Extract<PitchEstimateResult, { ok: true }> {
+	return pitch(frequencyForMidiNote(midi) * 2 ** (cents / 1200));
 }
 
 function applyEstimates(
@@ -120,5 +125,29 @@ describe('stable pitch smoothing', () => {
 			ok: false,
 			reason: 'collecting-pitch'
 		});
+	});
+
+	it('lets the live guitar profile settle while an acoustic note wobbles in tune', () => {
+		// The live profile needs minimumStableEstimates (8) agreeing frames before it
+		// settles, so feed a wobble that long. All sit on A4 within the 35-cent
+		// tolerance, the spread a real ringing string drifts through as it decays.
+		const state = applyEstimates(
+			[
+				pitchAtCents(69, -17),
+				pitchAtCents(69, 14),
+				pitchAtCents(69, -10),
+				pitchAtCents(69, 8),
+				pitchAtCents(69, -14),
+				pitchAtCents(69, 11),
+				pitchAtCents(69, -5),
+				pitchAtCents(69, 4)
+			],
+			LIVE_GUITAR_STABLE_PITCH_OPTIONS
+		);
+
+		assert.equal(state.output.ok, true);
+		if (state.output.ok) {
+			assert.equal(state.output.pitch.note.label, 'A4');
+		}
 	});
 });

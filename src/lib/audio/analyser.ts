@@ -1,4 +1,5 @@
 import { assertFinitePositive, assertPositiveInteger } from './assertions.ts';
+import { measureRms } from './input-level.ts';
 import { estimatePitch, type PitchEstimateOptions, type PitchEstimateResult } from './pitch.ts';
 import {
 	buildStablePitchState,
@@ -23,6 +24,7 @@ export type LivePitchFrameOptions = {
 
 export type LivePitchFrame = {
 	pitch: PitchEstimateResult;
+	inputRms: number;
 	stable: StablePitchState;
 };
 
@@ -49,10 +51,12 @@ export function readLivePitchFrame({
 }: LivePitchFrameOptions): LivePitchFrame {
 	assertFinitePositive(sampleRate, 'sampleRate');
 
-	const pitch = estimatePitch(readAnalyserSamples(analyser), sampleRate, pitchOptions);
+	const samples = readAnalyserSamples(analyser);
+	const pitch = estimatePitch(samples, sampleRate, pitchOptions);
 
 	return {
 		pitch,
+		inputRms: measureRms(samples),
 		stable: buildStablePitchState(pitch, previousState, stablePitchOptions)
 	};
 }

@@ -92,26 +92,52 @@ function estimatesAgree(
 	);
 }
 
-// Returns the most recent estimate that agrees with at least `minimumStableEstimates`
-// of the window, or undefined if none does. Scanning newest-first is deliberate: when
-// two notes are equally supported, the freshly-played one wins, so a real note change
-// settles promptly instead of being held back by the previous note's votes.
+type StablePitchCandidate = {
+	estimate: AcceptedPitchEstimate;
+	agreeingEstimateCount: number;
+	confidenceTotal: number;
+	index: number;
+};
+
+// Returns the dominant estimate in the recent window, or undefined if none has
+// enough support. A guitar string can wake up nearby strings, so newest-first
+// selection is too twitchy here; the winner needs the strongest local vote.
 function findStablePitch(
 	estimates: AcceptedPitchEstimate[],
 	{ minimumStableEstimates, centsTolerance }: StablePitchOptions
 ) {
+	let best: StablePitchCandidate | undefined;
+
 	for (let index = estimates.length - 1; index >= 0; index -= 1) {
 		const candidate = estimates[index];
-		const agreeingEstimateCount = estimates.filter((estimate) =>
+		const agreeingEstimates = estimates.filter((estimate) =>
 			estimatesAgree(candidate, estimate, centsTolerance)
-		).length;
+		);
+		const contender = {
+			estimate: candidate,
+			agreeingEstimateCount: agreeingEstimates.length,
+			confidenceTotal: agreeingEstimates.reduce(
+				(total, estimate) => total + estimate.confidence,
+				0
+			),
+			index
+		};
 
-		if (agreeingEstimateCount >= minimumStableEstimates) {
-			return candidate;
+		if (
+			contender.agreeingEstimateCount >= minimumStableEstimates &&
+			(!best ||
+				contender.agreeingEstimateCount > best.agreeingEstimateCount ||
+				(contender.agreeingEstimateCount === best.agreeingEstimateCount &&
+					contender.confidenceTotal > best.confidenceTotal) ||
+				(contender.agreeingEstimateCount === best.agreeingEstimateCount &&
+					contender.confidenceTotal === best.confidenceTotal &&
+					contender.index > best.index))
+		) {
+			best = contender;
 		}
 	}
 
-	return undefined;
+	return best?.estimate;
 }
 
 // Hysteresis: while a stable note is held, tolerate up to `maxUnstableEstimates`

@@ -28,8 +28,16 @@ const TUNER_CENTS_RESPONSE = 0.35;
 // zone (±~7°), so changing either of these requires re-checking the SVG arc.
 const TUNER_NEEDLE_MAX_CENTS = 50;
 const TUNER_NEEDLE_MAX_DEGREES = 58;
+// While a string is the active target, a reading within this many cents of it is
+// labelled as that note, with the needle and cents carrying the offset. A heavy
+// low string vibrates up to ~a semitone sharp during the loud pluck attack, so
+// without this the big letter flips to the neighbour ("E" → "F") before settling.
+// Past this the player is closer to a different note (a wrong string), so the
+// detected note is shown instead.
+const TUNER_READOUT_TARGET_BAND_CENTS = 150;
 
-export type TunerGuidance = 'wayFlat' | 'flat' | 'inTune' | 'sharp' | 'waySharp';
+export type TunerTuneAction = 'tuneUp' | 'tuneDown' | 'inTune';
+export type TunerMode = 'auto' | 'manual';
 export type TunerStringStatus = 'untouched' | 'active' | 'done';
 export type TunerFeedback = 'idle' | 'tuned';
 
@@ -43,14 +51,15 @@ export type TunerStringView = {
 
 /**
  * Pitch readout for the gauge and note display. `cents` is the signed offset from
- * the active string after damping; `centsLabel` is empty once the played note rolls
- * past the target; `needleAngleDegrees` is clamped gauge rotation, positive sharp.
+ * the active string after damping; `tuneAction` is the visible instruction for
+ * how the player should move the peg; `needleAngleDegrees` is clamped gauge
+ * rotation, positive sharp.
  */
 export type TunerPitchView = {
 	note: NoteName;
 	cents: number;
 	centsLabel: string;
-	guidance: TunerGuidance;
+	tuneAction: TunerTuneAction;
 	targetString: GuitarStringId;
 	needleAngleDegrees: number;
 };
@@ -63,6 +72,7 @@ declare const tunerStateBrand: unique symbol;
  */
 export type TunerState = {
 	readonly [tunerStateBrand]: true;
+	mode: TunerMode;
 	activeString: GuitarStringId;
 	strings: readonly TunerStringView[];
 	currentPitch?: TunerPitchView;
@@ -160,38 +170,42 @@ function dampenCents(cents: number, targetString: GuitarStringId, previousPitch?
 	return previousPitch.cents + (cents - previousPitch.cents) * TUNER_CENTS_RESPONSE;
 }
 
-/**
- * Classifies a signed cents offset into a tuner guidance band: ≤-25 wayFlat,
- * -24..-6 flat, -5..5 inTune, 6..24 sharp, ≥25 waySharp. Throws on a non-finite
- * input rather than silently bucketing NaN as waySharp.
- */
-export function guidanceBandForCents(cents: number): TunerGuidance {
+// Names the big readout letter. Near the active target it stays the target's
+// note so the player's own string never mislabels mid-pluck; far from it the
+// detected note shows through so a wrong string reads as what it actually is.
+function readoutNoteName(
+	pitch: AcceptedPitchEstimate,
+	activeTarget: GuitarStringTarget,
+	centsFromTarget: number
+): NoteName {
+	if (Math.abs(centsFromTarget) <= TUNER_READOUT_TARGET_BAND_CENTS) {
+		return activeTarget.name;
+	}
+
+	return pitch.note.name;
+}
+
+/** Turns a signed cents offset into the tuning action shown to the player. */
+export function tuneActionForCents(cents: number): TunerTuneAction {
 	if (!Number.isFinite(cents)) {
 		throw new RangeError('cents must be a finite number');
 	}
 
-	if (cents <= -25) {
-		return 'wayFlat';
+	if (cents < -TUNER_IN_TUNE_CENTS) {
+		return 'tuneUp';
 	}
 
-	if (cents < -5) {
-		return 'flat';
+	if (cents > TUNER_IN_TUNE_CENTS) {
+		return 'tuneDown';
 	}
 
-	if (cents <= 5) {
-		return 'inTune';
-	}
-
-	if (cents < 25) {
-		return 'sharp';
-	}
-
-	return 'waySharp';
+	return 'inTune';
 }
 
 /** Fresh tuner state: low E active, no reading, every other string untouched. */
 export function createTunerState(): TunerState {
 	return createTunerMemory({
+		mode: 'auto',
 		activeString: 'E_low',
 		strings: stringViews('E_low', new Set()),
 		feedback: 'idle'
@@ -210,8 +224,24 @@ export function selectTunerString(
 	doneStrings.delete(activeString);
 
 	return createTunerMemory({
+		mode: previousState.mode,
 		activeString,
 		strings: stringViews(activeString, doneStrings),
+		feedback: 'idle'
+	});
+}
+
+/**
+ * Switches between automatic string progression and manual string selection.
+ * The visible pitch stays put, while hidden hold timers reset so changing modes
+ * never completes a string from stale timing.
+ */
+export function toggleTunerMode(previousState: TunerState): TunerState {
+	return createTunerMemory({
+		mode: previousState.mode === 'auto' ? 'manual' : 'auto',
+		activeString: previousState.activeString,
+		strings: previousState.strings,
+		currentPitch: previousState.currentPitch,
 		feedback: 'idle'
 	});
 }
@@ -221,22 +251,17 @@ function pitchViewForEstimate(
 	activeTarget: GuitarStringTarget,
 	previousPitch?: TunerPitchView
 ): TunerPitchView {
-	// The note letter names what the player is actually closest to (so it reads "F#", not a
-	// huge offset from "E"), but the cents, needle, and guidance are all measured against the
-	// string being tuned. That's why playing F# while tuning E reads "way sharp", not a happy
-	// in-tune F# — the gauge always points the way back to the active target.
+	// The cents, needle, and action all measure against the string being tuned;
+	// the letter follows the target while the reading is close (see readoutNoteName).
 	const centsFromTarget = centsBetweenFrequencies(pitch.frequency, activeTarget.frequency);
 	const cents = dampenCents(centsFromTarget, activeTarget.id, previousPitch);
 	const roundedCents = Math.round(cents);
-	// Past half a semitone the nearest note is no longer the target, so a cents number beside the
-	// rolled-over letter would mislead — drop it and let the band ("way sharp") carry the guidance.
-	const onTargetNote = Math.abs(roundedCents) <= TUNER_NEEDLE_MAX_CENTS;
 
 	return {
-		note: pitch.note.name,
+		note: readoutNoteName(pitch, activeTarget, centsFromTarget),
 		cents: roundedCents,
-		centsLabel: onTargetNote ? centsLabel(roundedCents) : '',
-		guidance: guidanceBandForCents(roundedCents),
+		centsLabel: centsLabel(roundedCents),
+		tuneAction: tuneActionForCents(roundedCents),
 		targetString: activeTarget.id,
 		needleAngleDegrees: Math.round(
 			(clamp(cents, -TUNER_NEEDLE_MAX_CENTS, TUNER_NEEDLE_MAX_CENTS) / TUNER_NEEDLE_MAX_CENTS) *
@@ -252,6 +277,7 @@ function withPitch(
 ): TunerState {
 	return createTunerMemory(
 		{
+			mode: previousState.mode,
 			activeString: previousState.activeString,
 			strings: previousState.strings,
 			currentPitch,
@@ -292,6 +318,7 @@ function completeActiveString(
 	if (!nextString) {
 		return createTunerMemory(
 			{
+				mode: previousState.mode,
 				activeString: previousState.activeString,
 				strings: stringViews(previousState.activeString, doneStrings),
 				currentPitch,
@@ -306,12 +333,13 @@ function completeActiveString(
 
 	return createTunerMemory(
 		{
+			mode: previousState.mode,
 			activeString: nextString,
 			strings: stringViews(nextString, doneStrings),
-			currentPitch,
+			currentPitch: undefined,
 			feedback: 'idle'
 		},
-		{ lastPitchSeenAtMs: observedAtMs }
+		{}
 	);
 }
 
@@ -346,8 +374,8 @@ export function buildTunerState(
 	}
 
 	const activeTarget = targetForString(previousState.activeString);
-	const currentPitch = pitchViewForEstimate(pitch, activeTarget, previousState.currentPitch);
 	const centsFromActiveTarget = centsBetweenFrequencies(pitch.frequency, activeTarget.frequency);
+	const currentPitch = pitchViewForEstimate(pitch, activeTarget, previousState.currentPitch);
 
 	if (Math.abs(centsFromActiveTarget) - TUNER_IN_TUNE_CENTS > TUNER_CENTS_EPSILON) {
 		return withPitch(previousState, currentPitch, { lastPitchSeenAtMs: observedAtMs });
@@ -358,6 +386,13 @@ export function buildTunerState(
 	if (observedAtMs - inTuneSinceMs < TUNER_HOLD_MS) {
 		return withPitch(previousState, currentPitch, {
 			inTuneSinceMs,
+			lastPitchSeenAtMs: observedAtMs
+		});
+	}
+
+	if (previousState.mode === 'manual') {
+		return withPitch(previousState, currentPitch, {
+			inTuneSinceMs: observedAtMs,
 			lastPitchSeenAtMs: observedAtMs
 		});
 	}

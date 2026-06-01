@@ -51,6 +51,7 @@ describe('live analyser pitch frames', () => {
 		});
 
 		assert.equal(frame.pitch.ok, true);
+		assert.ok(frame.inputRms > 0.7);
 		assert.equal(frame.stable.output.ok, true);
 		if (frame.pitch.ok && frame.stable.output.ok) {
 			assert.equal(frame.pitch.note.label, 'A4');

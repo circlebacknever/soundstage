@@ -1,11 +1,18 @@
 <script lang="ts">
+	import { dev } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import {
+		LIVE_GUITAR_PITCH_OPTIONS,
+		LIVE_GUITAR_STABLE_PITCH_OPTIONS,
+		type MicrophonePitchDiagnostic
+	} from '$lib/audio';
 	import { createMicrophonePitchSession } from '../../audio/microphone-pitch-session.svelte.ts';
 	import { WORDS } from '$lib/content';
 	import { loadMicConsent, loadScalePreferences, loadSettings, saveMicConsent } from '$lib/state';
 	import Button from '$lib/ui/Button.svelte';
 	import Fretboard from '$lib/ui/Fretboard.svelte';
+	import MicrophoneDebugPanel from '$lib/ui/MicrophoneDebugPanel.svelte';
 	import MicrophoneErrorState from '$lib/ui/MicrophoneErrorState.svelte';
 	import MicrophonePrePrompt from '$lib/ui/MicrophonePrePrompt.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
@@ -25,11 +32,17 @@
 	let practice = $state<ScalePracticeState>(
 		createScalePracticeState(preferences.rootKey, preferences.scaleType)
 	);
+	let micDiagnostic = $state<MicrophonePitchDiagnostic | undefined>();
 
 	const session = createMicrophonePitchSession({
 		microphoneEnabled,
 		initialConsent: loadMicConsent(),
+		pitchOptions: LIVE_GUITAR_PITCH_OPTIONS,
+		stablePitchOptions: LIVE_GUITAR_STABLE_PITCH_OPTIONS,
 		onConsent: saveMicConsent,
+		onDiagnostic: (diagnostic) => {
+			micDiagnostic = diagnostic;
+		},
 		onFrame: (pitch, observedAtMs) => {
 			practice = buildScalePracticeState(pitch, practice, observedAtMs);
 		}
@@ -123,6 +136,13 @@
 			<Button variant="secondary" block onclick={togglePause}>{WORDS.scales.pause}</Button>
 			<Button block onclick={restartPractice}>{WORDS.scales.restart}</Button>
 		</div>
+
+		{#if dev}
+			<MicrophoneDebugPanel
+				diagnostic={micDiagnostic}
+				quietThreshold={LIVE_GUITAR_PITCH_OPTIONS.quietThreshold}
+			/>
+		{/if}
 
 		<div class="sr-only" aria-live="polite" aria-atomic="true">{announcement}</div>
 	</ToolCanvas>

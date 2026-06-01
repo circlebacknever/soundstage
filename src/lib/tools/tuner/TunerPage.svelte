@@ -1,10 +1,16 @@
 <script lang="ts">
+	import { dev } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import type { PitchEstimateOptions, StablePitchOptions } from '$lib/audio';
+	import {
+		LIVE_GUITAR_PITCH_OPTIONS,
+		LIVE_GUITAR_STABLE_PITCH_OPTIONS,
+		type MicrophonePitchDiagnostic
+	} from '$lib/audio';
 	import { createMicrophonePitchSession } from '../../audio/microphone-pitch-session.svelte.ts';
 	import { WORDS } from '$lib/content';
 	import { loadMicConsent, loadSettings, saveMicConsent } from '$lib/state';
+	import MicrophoneDebugPanel from '$lib/ui/MicrophoneDebugPanel.svelte';
 	import MicrophoneErrorState from '$lib/ui/MicrophoneErrorState.svelte';
 	import MicrophonePrePrompt from '$lib/ui/MicrophonePrePrompt.svelte';
 	import ToolCanvas from '$lib/ui/ToolCanvas.svelte';
@@ -14,33 +20,26 @@
 		buildTunerState,
 		createTunerState,
 		selectTunerString,
+		toggleTunerMode,
 		type TunerPitchView,
 		type TunerState,
 		type TunerStringView
 	} from './tuner-state.ts';
 
-	// Tuner-specific detector tuning. A plucked string is quiet and decays, so accept
-	// a lower level than the default; and while a peg turns the pitch slides, so widen
-	// the agreement window and ride out more shaky frames before dropping the lock —
-	// otherwise the readout strobes while the player is actively tuning.
-	const TUNER_PITCH_OPTIONS = { quietThreshold: 0.01 } satisfies PitchEstimateOptions;
-	const TUNER_STABLE_PITCH_OPTIONS = {
-		windowSize: 6,
-		minimumStableEstimates: 3,
-		centsTolerance: 20,
-		maxUnstableEstimates: 6
-	} satisfies StablePitchOptions;
-
 	const microphoneEnabled = loadSettings().microphoneEnabled;
 
 	let tuner = $state<TunerState>(createTunerState());
+	let micDiagnostic = $state<MicrophonePitchDiagnostic | undefined>();
 
 	const session = createMicrophonePitchSession({
 		microphoneEnabled,
 		initialConsent: loadMicConsent(),
-		pitchOptions: TUNER_PITCH_OPTIONS,
-		stablePitchOptions: TUNER_STABLE_PITCH_OPTIONS,
+		pitchOptions: LIVE_GUITAR_PITCH_OPTIONS,
+		stablePitchOptions: LIVE_GUITAR_STABLE_PITCH_OPTIONS,
 		onConsent: saveMicConsent,
+		onDiagnostic: (diagnostic) => {
+			micDiagnostic = diagnostic;
+		},
 		onFrame: (pitch, observedAtMs) => {
 			tuner = buildTunerState(pitch, tuner, observedAtMs);
 		}
@@ -53,6 +52,15 @@
 	const activeString = $derived(tuner.strings.find((string) => string.id === tuner.activeString));
 	const readoutNote = $derived(currentPitch?.note ?? activeString?.note ?? 'E');
 	const needleAngleDegrees = $derived(currentPitch?.needleAngleDegrees ?? 0);
+	const centsReadout = $derived(currentPitch?.centsLabel ?? '');
+	const modeLabel = $derived(WORDS.tuner.mode[tuner.mode]);
+	const tuneActionText = $derived(
+		tuner.feedback === 'tuned'
+			? WORDS.tuner.tuned
+			: currentPitch
+				? WORDS.tuner.tuneAction[currentPitch.tuneAction]
+				: WORDS.tuner.listening
+	);
 
 	// Screen-reader announcement of discrete milestones only. The visible readout
 	// changes every animation frame, so it stays out of any live region; instead
@@ -111,6 +119,10 @@
 		tuner = selectTunerString(tuner, stringId);
 	}
 
+	function toggleMode() {
+		tuner = toggleTunerMode(tuner);
+	}
+
 	onMount(() => session.start());
 
 	onDestroy(() => {
@@ -120,24 +132,35 @@
 
 {#if inputState.status === 'microphone-off'}
 	<ToolCanvas>
-		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
+		<TopBar title={WORDS.tuner.title} rightLabel={modeLabel} rightOnclick={toggleMode} />
 		<MicrophoneErrorState kind="disabled" onPrimary={openSettings} />
 	</ToolCanvas>
 {:else if inputState.status === 'unsupported-browser'}
 	<ToolCanvas>
-		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
+		<TopBar title={WORDS.tuner.title} rightLabel={modeLabel} rightOnclick={toggleMode} />
 		<MicrophoneErrorState kind="unsupported" onPrimary={browseChords} />
 	</ToolCanvas>
 {:else if inputState.status === 'mic-denied'}
 	<ToolCanvas>
-		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
+		<TopBar title={WORDS.tuner.title} rightLabel={modeLabel} rightOnclick={toggleMode} />
 		<MicrophoneErrorState kind="denied" onPrimary={requestMicrophone} onGhost={declineMicrophone} />
 	</ToolCanvas>
 {:else}
 	<ToolCanvas>
-		<TopBar title={WORDS.tuner.title} rightBadge={WORDS.tuner.auto} />
+		<TopBar title={WORDS.tuner.title} rightLabel={modeLabel} rightOnclick={toggleMode} />
 
 		<section class="tuner-card" aria-label={WORDS.tuner.readoutLabel}>
+			<div
+				class="readout-pill readout-pill--cents"
+				aria-label={WORDS.tuner.centsReadoutLabel}
+				aria-hidden={!currentPitch}
+			>
+				{centsReadout}
+			</div>
+			<div class="readout-pill readout-pill--action" aria-label={WORDS.tuner.tuneActionLabel}>
+				{tuneActionText}
+			</div>
+
 			<svg class="arc-svg" viewBox="0 0 260 160" fill="none" aria-hidden="true">
 				<path
 					d="M20 140 A 110 110 0 0 1 240 140"
@@ -186,18 +209,6 @@
 			</svg>
 			<div class="readout">
 				<div class="note-xxl">{readoutNote}</div>
-				<div class="note-sub">
-					{#if tuner.feedback === 'tuned'}
-						<span class="note-sub__line">{WORDS.tuner.tuned}</span>
-					{:else if currentPitch?.centsLabel}
-						<span class="note-sub__cents">{currentPitch.centsLabel}</span>
-						<span class="note-sub__guidance">{WORDS.tuner.guidance[currentPitch.guidance]}</span>
-					{:else if currentPitch}
-						<span class="note-sub__line">{WORDS.tuner.guidance[currentPitch.guidance]}</span>
-					{:else}
-						<span class="note-sub__line">{WORDS.tuner.listening}</span>
-					{/if}
-				</div>
 			</div>
 		</section>
 
@@ -225,6 +236,13 @@
 			</div>
 		</section>
 
+		{#if dev}
+			<MicrophoneDebugPanel
+				diagnostic={micDiagnostic}
+				quietThreshold={LIVE_GUITAR_PITCH_OPTIONS.quietThreshold}
+			/>
+		{/if}
+
 		<div class="sr-only" aria-live="polite" aria-atomic="true">{announcement}</div>
 	</ToolCanvas>
 
@@ -242,8 +260,9 @@
 		flex-direction: column;
 		gap: 20px;
 		justify-content: center;
-		min-height: 420px;
+		min-height: 380px;
 		padding: 32px;
+		position: relative;
 	}
 
 	.arc-svg {
@@ -274,11 +293,41 @@
 	}
 
 	.readout {
-		/* Full width so the note and the guidance line each center independently. Otherwise
-		   the readout shrink-wraps to the guidance text and the big note slides sideways every
-		   time the cents or band changes width. */
 		text-align: center;
 		width: 100%;
+	}
+
+	.readout-pill {
+		align-items: center;
+		background: var(--paper);
+		border-radius: var(--r-sm);
+		box-shadow: inset 0 0 0 1px var(--hairline);
+		color: var(--coral-ink);
+		display: inline-flex;
+		font-family: var(--font-mono);
+		font-size: 13px;
+		font-variant-numeric: tabular-nums;
+		font-weight: 700;
+		height: 32px;
+		justify-content: center;
+		letter-spacing: 0.04em;
+		line-height: 1;
+		padding: 0 10px;
+		position: absolute;
+		white-space: nowrap;
+		z-index: 1;
+	}
+
+	.readout-pill--cents {
+		left: 16px;
+		top: 8px;
+		width: 7rem;
+	}
+
+	.readout-pill--action {
+		bottom: 8px;
+		right: 16px;
+		width: 9.5rem;
 	}
 
 	.note-xxl {
@@ -287,42 +336,6 @@
 		font-weight: 600;
 		letter-spacing: 0;
 		line-height: 0.9;
-	}
-
-	.note-sub {
-		align-content: center;
-		color: var(--coral-ink);
-		column-gap: 0.4em;
-		/* Two equal columns split at the card centre: cents right-aligned up to the centre, the
-		   guidance band left-aligned from it. Tabular figures fix the cents width, so neither a
-		   per-frame digit change nor a band change can reflow the other half — the line holds still. */
-		display: grid;
-		font-family: var(--font-mono);
-		font-size: 13px;
-		font-variant-numeric: tabular-nums;
-		grid-template-columns: 1fr 1fr;
-		letter-spacing: 0.12em;
-		line-height: 1.4;
-		min-height: 1.5em;
-		text-transform: uppercase;
-	}
-
-	.note-sub__cents {
-		text-align: right;
-	}
-
-	.note-sub__guidance {
-		text-align: left;
-	}
-
-	.note-sub__guidance::before {
-		content: '· ';
-	}
-
-	/* "Tuned ✓" and "Play a note" have no cents partner, so they span both columns and centre. */
-	.note-sub__line {
-		grid-column: 1 / -1;
-		text-align: center;
 	}
 
 	.strings-label {
@@ -381,9 +394,17 @@
 		color: var(--mint-ink);
 	}
 
-	@media (max-width: 720px) {
+	@media (min-width: 768px) {
 		.tuner-card {
-			min-height: 380px;
+			min-height: 420px;
+		}
+
+		.readout-pill--cents {
+			left: 24px;
+		}
+
+		.readout-pill--action {
+			right: 24px;
 		}
 	}
 </style>

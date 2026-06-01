@@ -1,5 +1,8 @@
 export { readLivePitchFrame } from './analyser.ts';
 export type { LivePitchFrame, LivePitchFrameOptions, TimeDomainAnalyser } from './analyser.ts';
+export { LIVE_GUITAR_PITCH_OPTIONS, LIVE_GUITAR_STABLE_PITCH_OPTIONS } from './guitar-pitch.ts';
+export { microphonePitchDiagnosticFromFrame } from './microphone-diagnostics.ts';
+export type { MicrophonePitchDiagnostic } from './microphone-diagnostics.ts';
 export { createMicrophonePitchSource } from './microphone-analyser.ts';
 export type {
 	AudioContextLike,
