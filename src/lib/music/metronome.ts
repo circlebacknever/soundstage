@@ -1,4 +1,4 @@
-export type MetronomeTimeSignature = '2/4' | '3/4' | '4/4' | '6/8';
+export type MetronomeTimeSignature = '2/4' | '3/4' | '4/4' | '6/8' | '8/8';
 export type TempoWord =
 	| 'largo'
 	| 'adagio'
@@ -18,7 +18,8 @@ export const METRONOME_TIME_SIGNATURES = [
 	'2/4',
 	'3/4',
 	'4/4',
-	'6/8'
+	'6/8',
+	'8/8'
 ] as const satisfies readonly MetronomeTimeSignature[];
 
 const tempoWords = [

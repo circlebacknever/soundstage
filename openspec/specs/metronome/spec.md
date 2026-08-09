@@ -32,7 +32,7 @@ The system SHALL provide a `/metronome` route with BPM controls, start/stop, vis
 
 #### Scenario: User changes time signature
 - **WHEN** the user opens the time signature picker
-- **THEN** the app offers 2/4, 3/4, 4/4, and 6/8
+- **THEN** the app offers 2/4, 3/4, 4/4, 6/8, and 8/8
 
 ### Requirement: Visual modes
 The metronome SHALL provide Pulse, Beats, and Wave visual modes that can be changed while the tool is open.

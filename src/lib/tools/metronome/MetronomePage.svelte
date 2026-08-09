@@ -428,25 +428,28 @@
 
 	.beats-row {
 		display: flex;
-		gap: 14px;
+		gap: clamp(6px, 2vw, 14px);
 		justify-content: center;
 	}
 
 	.beat {
 		align-items: center;
+		/* Shrinks on narrow screens (8/8 needs eight circles); the aspect
+		   ratio keeps a squeezed beat circular instead of oval. */
+		aspect-ratio: 1 / 1;
 		background: var(--paper);
 		border-radius: 50%;
 		box-shadow: inset 0 0 0 1.5px var(--hairline);
 		color: var(--ink-2);
 		display: grid;
+		flex: 0 1 52px;
 		font-family: var(--font-mono);
 		font-size: 14px;
-		height: 52px;
 		justify-items: center;
+		min-width: 34px;
 		transition:
 			background 120ms ease-out,
 			transform 120ms ease-out;
-		width: 52px;
 	}
 
 	.beat.is-on {

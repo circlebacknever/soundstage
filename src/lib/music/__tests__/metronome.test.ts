@@ -48,7 +48,7 @@ describe('metronome tempo facts', () => {
 	});
 
 	it('provides the offered time signatures and their visible beat counts', () => {
-		assert.deepEqual(METRONOME_TIME_SIGNATURES, ['2/4', '3/4', '4/4', '6/8']);
-		assert.deepEqual(METRONOME_TIME_SIGNATURES.map(beatCountForTimeSignature), [2, 3, 4, 6]);
+		assert.deepEqual(METRONOME_TIME_SIGNATURES, ['2/4', '3/4', '4/4', '6/8', '8/8']);
+		assert.deepEqual(METRONOME_TIME_SIGNATURES.map(beatCountForTimeSignature), [2, 3, 4, 6, 8]);
 	});
 });

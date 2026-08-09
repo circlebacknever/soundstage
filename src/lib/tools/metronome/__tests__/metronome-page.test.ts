@@ -33,7 +33,7 @@ describe('metronome page boundary', () => {
 	it('keeps the required metronome geometry and beat animation styling local to the page', () => {
 		assert.match(page, /height:\s*220px/);
 		assert.match(page, /font-size:\s*64px/);
-		assert.match(page, /height:\s*52px/);
+		assert.match(page, /flex:\s*0 1 52px/);
 		assert.match(page, /class="bpm-slider"/);
 		assert.match(page, /type="range"/);
 		assert.match(page, /min=\{METRONOME_BPM_BOUNDS\.minimum\}/);

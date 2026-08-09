@@ -109,8 +109,7 @@ function createBrowserMetronomeAudioContext(): MetronomeAudioContext {
 	// iOS sends Web Audio through a session the ring/silent switch can mute. Marking
 	// the clicks as playback makes them sound through the silent switch, the way a
 	// running metronome should. Absent on other browsers, so guard the assignment.
-	const audioSession = (navigator as Navigator & { audioSession?: { type: string } })
-		.audioSession;
+	const audioSession = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
 	if (audioSession) {
 		audioSession.type = 'playback';
 	}
